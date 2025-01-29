@@ -1,0 +1,286 @@
+{
+  "address": "0x0Ca04d2dDdd5FF6b9629221B0AdA4F47652d9a24",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nft",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "lockNFT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "lockTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nftLocks",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "releaseTime",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nft",
+          "type": "address"
+        }
+      ],
+      "name": "releaseNFT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "releaseTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "tokenLocks",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xef2211ae85c691f87ffb499b184dcff9938f6ad37e0cc4827f08302e3904f147",
+  "receipt": {
+    "to": null,
+    "from": "0x1F09Ec21d7fd0A21879b919bf0f9C46e6b85CA8b",
+    "contractAddress": "0x0Ca04d2dDdd5FF6b9629221B0AdA4F47652d9a24",
+    "transactionIndex": 171,
+    "gasUsed": "567015",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x84927f7ab7ca755abc59926e52b430113a30a47504b7fba650a305b6a0745ffc",
+    "transactionHash": "0xef2211ae85c691f87ffb499b184dcff9938f6ad37e0cc4827f08302e3904f147",
+    "logs": [],
+    "blockNumber": 25682126,
+    "cumulativeGasUsed": "40727694",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "475d7424673ef20688033235605cef58",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nft\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"lockNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"lockTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"nftLocks\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"releaseTime\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nft\",\"type\":\"address\"}],\"name\":\"releaseNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"releaseTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"tokenLocks\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/Locker.sol\":\"Locker\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-20 standard as defined in the ERC.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xe06a3f08a987af6ad2e1c1e774405d4fe08f1694b67517438b467cecf0da0ef7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC-721 compliant contract.\\n */\\ninterface IERC721 is IERC165 {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC-721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or\\n     *   {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC-721\\n     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\\n     * understand this adds an external call which potentially creates a reentrancy vulnerability.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the address zero.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x5dc63d1c6a12fe1b17793e1745877b2fcbe1964c3edfd0a482fac21ca8f18261\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[ERC].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x79796192ec90263f21b464d5bc90b777a525971d3de8232be80d9c4f9fb353b8\",\"license\":\"MIT\"},\"contracts/Locker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\nimport {IERC20} from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport {IERC721} from \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\nimport {ILocker} from \\\"./interfaces/ILocker.sol\\\";\\n\\ncontract Locker is ILocker {\\n    mapping(address => mapping(address => TokenLock)) public tokenLocks;\\n    mapping(address => mapping(address => NFTLock)) public nftLocks;\\n\\n    function lockTokens(address token, uint256 amount, uint256 duration) external {\\n        require(amount > 0, \\\"Amount must be greater than 0\\\");\\n        require(duration > 0, \\\"Duration must be greater than 0\\\");\\n        require(tokenLocks[msg.sender][token].amount == 0, \\\"lock exists\\\");\\n\\n        IERC20(token).transferFrom(msg.sender, address(this), amount);\\n\\n        tokenLocks[msg.sender][token] = TokenLock({amount: amount, startTime: block.timestamp, duration: duration});\\n    }\\n\\n    function releaseTokens(address token) external {\\n        TokenLock storage lock = tokenLocks[msg.sender][token];\\n        require(lock.amount > 0, \\\"No tokens locked\\\");\\n\\n        uint256 elapsedTime = block.timestamp - lock.startTime;\\n        uint256 releasableAmount = (lock.amount * elapsedTime) / lock.duration;\\n\\n        if (elapsedTime >= lock.duration) {\\n            releasableAmount = lock.amount;\\n        }\\n\\n        require(releasableAmount > 0, \\\"No tokens to release\\\");\\n\\n        lock.amount -= releasableAmount;\\n        IERC20(token).transfer(msg.sender, releasableAmount);\\n\\n        if (lock.amount == 0) {\\n            delete tokenLocks[msg.sender][token];\\n        }\\n    }\\n\\n    function lockNFT(address nft, uint256 tokenId, uint256 duration) external {\\n        require(duration > 0, \\\"Duration must be greater than 0\\\");\\n        require(nftLocks[msg.sender][nft].tokenId == 0, \\\"lock exists\\\");\\n\\n        IERC721(nft).transferFrom(msg.sender, address(this), tokenId);\\n\\n        nftLocks[msg.sender][nft] = NFTLock({tokenId: tokenId, releaseTime: block.timestamp + duration});\\n    }\\n\\n    function releaseNFT(address nft) external {\\n        NFTLock storage lock = nftLocks[msg.sender][nft];\\n        require(lock.tokenId != 0, \\\"No NFT locked\\\");\\n        require(block.timestamp >= lock.releaseTime, \\\"NFT is still locked\\\");\\n\\n        uint256 tokenId = lock.tokenId;\\n        delete nftLocks[msg.sender][nft];\\n\\n        IERC721(nft).transferFrom(address(this), msg.sender, tokenId);\\n    }\\n}\\n\",\"keccak256\":\"0x42ea867faf977debe257b24be9047fdc9bf63a76cd3abe7f496ad91f15bb7a4e\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/ILocker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\nimport {IERC20} from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport {IERC721} from \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\n\\ninterface ILocker {\\n    struct TokenLock {\\n        uint256 amount;\\n        uint256 startTime;\\n        uint256 duration;\\n    }\\n\\n    struct NFTLock {\\n        uint256 tokenId;\\n        uint256 releaseTime;\\n    }\\n\\n    function lockTokens(address token, uint256 amount, uint256 duration) external;\\n\\n    function releaseTokens(address token) external;\\n\\n    function lockNFT(address nft, uint256 tokenId, uint256 duration) external;\\n\\n    function releaseNFT(address nft) external;\\n}\\n\",\"keccak256\":\"0x7b887746a23e747d3bb744e824095a8733d0775c77e44b03ccbc455521d03b96\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b506109508061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100725760003560e01c8063a25983e511610050578063a25983e5146100b2578063c463c6d8146100c5578063d2fa29021461011c57600080fd5b80635476e2db1461007757806354c993ac1461008c57806387b0be481461009f575b600080fd5b61008a6100853660046107f5565b610160565b005b61008a61009a366004610817565b6102be565b61008a6100ad3660046107f5565b61042c565b61008a6100c0366004610817565b610614565b6100fc6100d336600461084a565b600060208181529281526040808220909352908152208054600182015460029092015490919083565b604080519384526020840192909252908201526060015b60405180910390f35b61014b61012a36600461084a565b60016020818152600093845260408085209091529183529120805491015482565b60408051928352602083019190915201610113565b3360009081526001602090815260408083206001600160a01b0385168452909152812080549091036101d95760405162461bcd60e51b815260206004820152600d60248201527f4e6f204e4654206c6f636b65640000000000000000000000000000000000000060448201526064015b60405180910390fd5b806001015442101561022d5760405162461bcd60e51b815260206004820152601360248201527f4e4654206973207374696c6c206c6f636b65640000000000000000000000000060448201526064016101d0565b80543360008181526001602081815260408084206001600160a01b038916808652925280842084815590920192909255516323b872dd60e01b8152306004820152602481019290925260448201839052906323b872dd90606401600060405180830381600087803b1580156102a157600080fd5b505af11580156102b5573d6000803e3d6000fd5b50505050505050565b6000811161030e5760405162461bcd60e51b815260206004820152601f60248201527f4475726174696f6e206d7573742062652067726561746572207468616e20300060448201526064016101d0565b3360009081526001602090815260408083206001600160a01b03871684529091529020541561036d5760405162461bcd60e51b815260206004820152600b60248201526a6c6f636b2065786973747360a81b60448201526064016101d0565b6040516323b872dd60e01b8152336004820152306024820152604481018390526001600160a01b038416906323b872dd90606401600060405180830381600087803b1580156103bb57600080fd5b505af11580156103cf573d6000803e3d6000fd5b50505050604051806040016040528083815260200182426103f09190610893565b90523360009081526001602081815260408084206001600160a01b03989098168452968152959091208251815591909401519301929092555050565b336000908152602081815260408083206001600160a01b03851684529091529020805461049b5760405162461bcd60e51b815260206004820152601060248201527f4e6f20746f6b656e73206c6f636b65640000000000000000000000000000000060448201526064016101d0565b60008160010154426104ad91906108ac565b9050600082600201548284600001546104c691906108bf565b6104d091906108d6565b9050826002015482106104e1575081545b600081116105315760405162461bcd60e51b815260206004820152601460248201527f4e6f20746f6b656e7320746f2072656c6561736500000000000000000000000060448201526064016101d0565b8083600001600082825461054591906108ac565b90915550506040517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018290526001600160a01b0385169063a9059cbb906044016020604051808303816000875af11580156105b0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105d491906108f8565b50825460000361060e57336000908152602081815260408083206001600160a01b0388168452909152812081815560018101829055600201555b50505050565b600082116106645760405162461bcd60e51b815260206004820152601d60248201527f416d6f756e74206d7573742062652067726561746572207468616e203000000060448201526064016101d0565b600081116106b45760405162461bcd60e51b815260206004820152601f60248201527f4475726174696f6e206d7573742062652067726561746572207468616e20300060448201526064016101d0565b336000908152602081815260408083206001600160a01b0387168452909152902054156107115760405162461bcd60e51b815260206004820152600b60248201526a6c6f636b2065786973747360a81b60448201526064016101d0565b6040516323b872dd60e01b8152336004820152306024820152604481018390526001600160a01b038416906323b872dd906064016020604051808303816000875af1158015610764573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061078891906108f8565b50604080516060810182529283524260208085019182528483019384523360009081528082528381206001600160a01b03979097168152959052932091518255915160018201559051600290910155565b80356001600160a01b03811681146107f057600080fd5b919050565b60006020828403121561080757600080fd5b610810826107d9565b9392505050565b60008060006060848603121561082c57600080fd5b610835846107d9565b95602085013595506040909401359392505050565b6000806040838503121561085d57600080fd5b610866836107d9565b9150610874602084016107d9565b90509250929050565b634e487b7160e01b600052601160045260246000fd5b808201808211156108a6576108a661087d565b92915050565b818103818111156108a6576108a661087d565b80820281158282048414176108a6576108a661087d565b6000826108f357634e487b7160e01b600052601260045260246000fd5b500490565b60006020828403121561090a57600080fd5b8151801515811461081057600080fdfea2646970667358221220a578caa5c6f27c3d5d1249726850db2ef56fda1a68a9115e84cb1a36dc52721864736f6c634300081c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100725760003560e01c8063a25983e511610050578063a25983e5146100b2578063c463c6d8146100c5578063d2fa29021461011c57600080fd5b80635476e2db1461007757806354c993ac1461008c57806387b0be481461009f575b600080fd5b61008a6100853660046107f5565b610160565b005b61008a61009a366004610817565b6102be565b61008a6100ad3660046107f5565b61042c565b61008a6100c0366004610817565b610614565b6100fc6100d336600461084a565b600060208181529281526040808220909352908152208054600182015460029092015490919083565b604080519384526020840192909252908201526060015b60405180910390f35b61014b61012a36600461084a565b60016020818152600093845260408085209091529183529120805491015482565b60408051928352602083019190915201610113565b3360009081526001602090815260408083206001600160a01b0385168452909152812080549091036101d95760405162461bcd60e51b815260206004820152600d60248201527f4e6f204e4654206c6f636b65640000000000000000000000000000000000000060448201526064015b60405180910390fd5b806001015442101561022d5760405162461bcd60e51b815260206004820152601360248201527f4e4654206973207374696c6c206c6f636b65640000000000000000000000000060448201526064016101d0565b80543360008181526001602081815260408084206001600160a01b038916808652925280842084815590920192909255516323b872dd60e01b8152306004820152602481019290925260448201839052906323b872dd90606401600060405180830381600087803b1580156102a157600080fd5b505af11580156102b5573d6000803e3d6000fd5b50505050505050565b6000811161030e5760405162461bcd60e51b815260206004820152601f60248201527f4475726174696f6e206d7573742062652067726561746572207468616e20300060448201526064016101d0565b3360009081526001602090815260408083206001600160a01b03871684529091529020541561036d5760405162461bcd60e51b815260206004820152600b60248201526a6c6f636b2065786973747360a81b60448201526064016101d0565b6040516323b872dd60e01b8152336004820152306024820152604481018390526001600160a01b038416906323b872dd90606401600060405180830381600087803b1580156103bb57600080fd5b505af11580156103cf573d6000803e3d6000fd5b50505050604051806040016040528083815260200182426103f09190610893565b90523360009081526001602081815260408084206001600160a01b03989098168452968152959091208251815591909401519301929092555050565b336000908152602081815260408083206001600160a01b03851684529091529020805461049b5760405162461bcd60e51b815260206004820152601060248201527f4e6f20746f6b656e73206c6f636b65640000000000000000000000000000000060448201526064016101d0565b60008160010154426104ad91906108ac565b9050600082600201548284600001546104c691906108bf565b6104d091906108d6565b9050826002015482106104e1575081545b600081116105315760405162461bcd60e51b815260206004820152601460248201527f4e6f20746f6b656e7320746f2072656c6561736500000000000000000000000060448201526064016101d0565b8083600001600082825461054591906108ac565b90915550506040517fa9059cbb000000000000000000000000000000000000000000000000000000008152336004820152602481018290526001600160a01b0385169063a9059cbb906044016020604051808303816000875af11580156105b0573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105d491906108f8565b50825460000361060e57336000908152602081815260408083206001600160a01b0388168452909152812081815560018101829055600201555b50505050565b600082116106645760405162461bcd60e51b815260206004820152601d60248201527f416d6f756e74206d7573742062652067726561746572207468616e203000000060448201526064016101d0565b600081116106b45760405162461bcd60e51b815260206004820152601f60248201527f4475726174696f6e206d7573742062652067726561746572207468616e20300060448201526064016101d0565b336000908152602081815260408083206001600160a01b0387168452909152902054156107115760405162461bcd60e51b815260206004820152600b60248201526a6c6f636b2065786973747360a81b60448201526064016101d0565b6040516323b872dd60e01b8152336004820152306024820152604481018390526001600160a01b038416906323b872dd906064016020604051808303816000875af1158015610764573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061078891906108f8565b50604080516060810182529283524260208085019182528483019384523360009081528082528381206001600160a01b03979097168152959052932091518255915160018201559051600290910155565b80356001600160a01b03811681146107f057600080fd5b919050565b60006020828403121561080757600080fd5b610810826107d9565b9392505050565b60008060006060848603121561082c57600080fd5b610835846107d9565b95602085013595506040909401359392505050565b6000806040838503121561085d57600080fd5b610866836107d9565b9150610874602084016107d9565b90509250929050565b634e487b7160e01b600052601160045260246000fd5b808201808211156108a6576108a661087d565b92915050565b818103818111156108a6576108a661087d565b80820281158282048414176108a6576108a661087d565b6000826108f357634e487b7160e01b600052601260045260246000fd5b500490565b60006020828403121561090a57600080fd5b8151801515811461081057600080fdfea2646970667358221220a578caa5c6f27c3d5d1249726850db2ef56fda1a68a9115e84cb1a36dc52721864736f6c634300081c0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 9818,
+        "contract": "contracts/Locker.sol:Locker",
+        "label": "tokenLocks",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_mapping(t_address,t_struct(TokenLock)10798_storage))"
+      },
+      {
+        "astId": 9825,
+        "contract": "contracts/Locker.sol:Locker",
+        "label": "nftLocks",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_mapping(t_address,t_struct(NFTLock)10803_storage))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_mapping(t_address,t_struct(NFTLock)10803_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(address => struct ILocker.NFTLock))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_address,t_struct(NFTLock)10803_storage)"
+      },
+      "t_mapping(t_address,t_mapping(t_address,t_struct(TokenLock)10798_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(address => struct ILocker.TokenLock))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_address,t_struct(TokenLock)10798_storage)"
+      },
+      "t_mapping(t_address,t_struct(NFTLock)10803_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct ILocker.NFTLock)",
+        "numberOfBytes": "32",
+        "value": "t_struct(NFTLock)10803_storage"
+      },
+      "t_mapping(t_address,t_struct(TokenLock)10798_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct ILocker.TokenLock)",
+        "numberOfBytes": "32",
+        "value": "t_struct(TokenLock)10798_storage"
+      },
+      "t_struct(NFTLock)10803_storage": {
+        "encoding": "inplace",
+        "label": "struct ILocker.NFTLock",
+        "members": [
+          {
+            "astId": 10800,
+            "contract": "contracts/Locker.sol:Locker",
+            "label": "tokenId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10802,
+            "contract": "contracts/Locker.sol:Locker",
+            "label": "releaseTime",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(TokenLock)10798_storage": {
+        "encoding": "inplace",
+        "label": "struct ILocker.TokenLock",
+        "members": [
+          {
+            "astId": 10793,
+            "contract": "contracts/Locker.sol:Locker",
+            "label": "amount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10795,
+            "contract": "contracts/Locker.sol:Locker",
+            "label": "startTime",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10797,
+            "contract": "contracts/Locker.sol:Locker",
+            "label": "duration",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

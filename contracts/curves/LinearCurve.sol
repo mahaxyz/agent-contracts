@@ -17,7 +17,7 @@ contract LinearCurve {
     uint256 public constant slope = 1; // Slope of the linear curve
     uint256 public constant intercept = 0; // Intercept of the linear curve
 
-    function calculateOut(uint256 quantityIn, uint256, uint256)
+    function calculateBuy(uint256 quantityIn, uint256, uint256)
         public
         pure
         returns (uint256 _amountOut, uint256 _amountIn)
@@ -25,7 +25,7 @@ contract LinearCurve {
         return (0, slope * quantityIn + intercept);
     }
 
-    function calculateIn(uint256 quantityOut, uint256, uint256)
+    function calculateSell(uint256 quantityOut, uint256, uint256)
         public
         pure
         returns (uint256 _amountOut, uint256 _amountIn)

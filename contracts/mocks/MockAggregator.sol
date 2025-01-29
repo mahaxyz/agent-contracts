@@ -13,14 +13,20 @@
 
 pragma solidity ^0.8.0;
 
-interface IBondingCurve {
-    function calculateBuy(uint256 quantityIn, uint256 raisedAmount, uint256 totalRaise)
-        external
-        view
-        returns (uint256 _amountOut, uint256 _amountIn);
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-    function calculateSell(uint256 quantityOut, uint256 raisedAmount, uint256 totalRaise)
-        external
-        view
-        returns (uint256 _amountOut, uint256 _amountIn);
+contract MockAggregator is Ownable {
+    int256 public latestAnswer;
+
+    constructor(int256 _answer) Ownable(msg.sender) {
+        latestAnswer = _answer;
+    }
+
+    function setAnswer(int256 _answer) external onlyOwner {
+        latestAnswer = _answer;
+    }
+
+    function decimals() external pure returns (uint8) {
+        return 8;
+    }
 }

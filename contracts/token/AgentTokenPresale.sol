@@ -21,15 +21,15 @@ abstract contract AgentTokenPresale is AgentTokenTreasury {
         require(!unlocked, "presale is over");
 
         if (buy) {
-            (uint256 amountGiven, uint256 amountTaken) = curve.calculateOut(amountIn, fundingProgress, fundingGoal);
+            (uint256 amountGiven, uint256 amountTaken) = curve.calculateBuy(amountIn, fundingProgress, fundingGoal);
             fundingProgress += amountTaken;
-            raiseToken.transferFrom(msg.sender, address(this), amountTaken);
+            fundingToken.transferFrom(msg.sender, address(this), amountTaken);
             _transfer(address(this), msg.sender, amountGiven);
             require(amountGiven >= minAmountOut, "!minAmountOut");
         } else {
-            (uint256 amountGiven, uint256 amountTaken) = curve.calculateIn(amountIn, fundingProgress, fundingGoal);
+            (uint256 amountGiven, uint256 amountTaken) = curve.calculateSell(amountIn, fundingProgress, fundingGoal);
             fundingProgress -= amountGiven;
-            raiseToken.transfer(msg.sender, address(this), amountGiven);
+            fundingToken.transfer(msg.sender, amountGiven);
             _transfer(msg.sender, address(this), amountTaken);
             require(amountGiven >= minAmountOut, "!minAmountOut");
         }

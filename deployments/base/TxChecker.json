@@ -1,0 +1,75 @@
+{
+  "address": "0xB31D112eD8956641830F9C3E802DFD8039429F31",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_caller",
+          "type": "address"
+        }
+      ],
+      "name": "checkTransaction",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x3d207900c12f24d466d43949ae1d9b6f0d9ec3191d622895a75329ad699bbf81",
+  "receipt": {
+    "to": null,
+    "from": "0x1F09Ec21d7fd0A21879b919bf0f9C46e6b85CA8b",
+    "contractAddress": "0xB31D112eD8956641830F9C3E802DFD8039429F31",
+    "transactionIndex": 235,
+    "gasUsed": "203809",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xb3d8af337a3fd2bcee92d4894452b4499b34883bd100682c8a20d9fd2109b1c0",
+    "transactionHash": "0x3d207900c12f24d466d43949ae1d9b6f0d9ec3191d622895a75329ad699bbf81",
+    "logs": [],
+    "blockNumber": 25682131,
+    "cumulativeGasUsed": "52641732",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "475d7424673ef20688033235605cef58",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"_data\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"_caller\",\"type\":\"address\"}],\"name\":\"checkTransaction\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/TxChecker.sol\":\"TxChecker\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"contracts/TxChecker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\nimport {ITxChecker} from \\\"./interfaces/ITxChecker.sol\\\";\\n\\ncontract TxChecker is ITxChecker {\\n    function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller)\\n        external\\n        view\\n        returns (bool)\\n    {\\n        require(_caller != address(this), \\\"!txChecker\\\");\\n        require(_to != address(this), \\\"!txChecker\\\");\\n        require(_value == 0, \\\"!txChecker\\\");\\n        require(_data.length >= 0, \\\"!txChecker\\\");\\n        return true;\\n    }\\n}\\n\",\"keccak256\":\"0x5a12b52a786e3f894348f94eecbd34a807c73b183e01ff4b168e03477eaee26c\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/ITxChecker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\ninterface ITxChecker {\\n    function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller)\\n        external\\n        returns (bool);\\n}\\n\",\"keccak256\":\"0xb577f88a8bb02efda128c89ce39ad866eeae17b5d9f27ac4aa58ac25810f29ea\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b506102ba8061001f6000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c80631d52dab514610030575b600080fd5b61004361003e3660046101a0565b610057565b604051901515815260200160405180910390f35b60003073ffffffffffffffffffffffffffffffffffffffff8316036100b05760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064015b60405180910390fd5b3073ffffffffffffffffffffffffffffffffffffffff8616036101025760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064016100a7565b831561013d5760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064016100a7565b506001949350505050565b803573ffffffffffffffffffffffffffffffffffffffff8116811461016c57600080fd5b919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b600080600080608085870312156101b657600080fd5b6101bf85610148565b935060208501359250604085013567ffffffffffffffff8111156101e257600080fd5b8501601f810187136101f357600080fd5b803567ffffffffffffffff81111561020d5761020d610171565b604051601f8201601f19908116603f0116810167ffffffffffffffff8111828210171561023c5761023c610171565b60405281815282820160200189101561025457600080fd5b8160208401602083013760006020838301015280945050505061027960608601610148565b90509295919450925056fea264697066735822122006f61e71d87b1b6dcafe56155f7633a35638338beb6628e528aebf3262c39f9064736f6c634300081c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c80631d52dab514610030575b600080fd5b61004361003e3660046101a0565b610057565b604051901515815260200160405180910390f35b60003073ffffffffffffffffffffffffffffffffffffffff8316036100b05760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064015b60405180910390fd5b3073ffffffffffffffffffffffffffffffffffffffff8616036101025760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064016100a7565b831561013d5760405162461bcd60e51b815260206004820152600a60248201526910ba3c21b432b1b5b2b960b11b60448201526064016100a7565b506001949350505050565b803573ffffffffffffffffffffffffffffffffffffffff8116811461016c57600080fd5b919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b600080600080608085870312156101b657600080fd5b6101bf85610148565b935060208501359250604085013567ffffffffffffffff8111156101e257600080fd5b8501601f810187136101f357600080fd5b803567ffffffffffffffff81111561020d5761020d610171565b604051601f8201601f19908116603f0116810167ffffffffffffffff8111828210171561023c5761023c610171565b60405281815282820160200189101561025457600080fd5b8160208401602083013760006020838301015280945050505061027960608601610148565b90509295919450925056fea264697066735822122006f61e71d87b1b6dcafe56155f7633a35638338beb6628e528aebf3262c39f9064736f6c634300081c0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

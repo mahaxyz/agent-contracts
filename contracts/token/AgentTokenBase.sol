@@ -22,8 +22,9 @@ import {ICLFactory} from "../interfaces/ICLFactory.sol";
 import {ITxChecker} from "../interfaces/ITxChecker.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {ILocker} from "../interfaces/ILocker.sol";
+import {IAgentToken} from "../interfaces/IAgentToken.sol";
 
-abstract contract AgentTokenBase is ERC20Burnable, ERC20Permit, AccessControlEnumerable {
+abstract contract AgentTokenBase is IAgentToken, ERC20Burnable, ERC20Permit, AccessControlEnumerable {
     // basic info
     string public metadata;
     bool public unlocked;

@@ -42,17 +42,17 @@ interface IAgentLaunchpad {
         bytes32 salt;
     }
 
-    function initialize(
-        IERC20 _raiseToken,
+    function initialize(IERC20 _raiseToken, address _owner) external;
+
+    function setSettings(
         uint256 _creationFee,
         uint256 _minFundingGoal,
         uint256 _minDuration,
         uint256 _maxDuration,
-        address _owner
+        address _locker,
+        address _checker,
+        address _governor
     ) external;
-
-    function setSettings(uint256 _creationFee, uint256 _minFundingGoal, uint256 _minDuration, uint256 _maxDuration)
-        external;
 
     function whitelist(address _address, bool _what) external;
 

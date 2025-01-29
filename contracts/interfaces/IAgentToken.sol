@@ -9,18 +9,25 @@
 
 // Website: https://maha.xyz
 // Discord: https://discord.gg/mahadao
-// Twitter: https://twitter.com/mahaxyz_
+// Twitter: https://twitter.com/mahaxyz
 
 pragma solidity ^0.8.0;
 
-interface IBondingCurve {
-    function calculateBuy(uint256 quantityIn, uint256 raisedAmount, uint256 totalRaise)
-        external
-        view
-        returns (uint256 _amountOut, uint256 _amountIn);
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-    function calculateSell(uint256 quantityOut, uint256 raisedAmount, uint256 totalRaise)
-        external
-        view
-        returns (uint256 _amountOut, uint256 _amountIn);
+interface IAgentToken {
+    struct InitParams {
+        string name;
+        string symbol;
+        string metadata;
+        address[] fundManagers;
+        uint256 limitPerWallet;
+        uint256 fundingGoal;
+        address fundingToken;
+        address governance;
+        address locker;
+        address bondingCurve;
+        address txChecker;
+        uint256 expiry;
+    }
 }
