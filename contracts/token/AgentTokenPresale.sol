@@ -26,12 +26,16 @@ abstract contract AgentTokenPresale is AgentTokenTreasury {
             fundingToken.transferFrom(msg.sender, address(this), amountTaken);
             _transfer(address(this), msg.sender, amountGiven);
             require(amountGiven >= minAmountOut, "!minAmountOut");
+
+            emit TokensPurchased(msg.sender, amountTaken, amountGiven);
         } else {
             (uint256 amountGiven, uint256 amountTaken) = curve.calculateSell(amountIn, fundingProgress, fundingGoal);
             fundingProgress -= amountGiven;
             fundingToken.transfer(msg.sender, amountGiven);
             _transfer(msg.sender, address(this), amountTaken);
             require(amountGiven >= minAmountOut, "!minAmountOut");
+
+            emit TokensSold(msg.sender, amountTaken, amountGiven);
         }
 
         // if funding goal has been met, automatically graduate the token

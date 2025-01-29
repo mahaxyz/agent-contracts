@@ -16,10 +16,6 @@ pragma solidity ^0.8.0;
 import {ITxChecker, AgentTokenBase} from "./AgentTokenBase.sol";
 
 abstract contract AgentTokenTimelock is AgentTokenBase {
-    event TransactionVetoed(bytes32 indexed txHash, address indexed by);
-    event TransactionScheduled(bytes32 indexed txHash, address indexed to, uint256 value, bytes data, uint256 delay);
-    event TransactionExecuted(bytes32 indexed txHash, address caller, address to, uint256 value, bytes data);
-
     /// @notice Schedule a transaction to be executed after a delay
     /// @param _to The address to send the transaction to
     /// @param _value The amount of ETH to send with the transaction

@@ -30,4 +30,11 @@ interface IAgentToken {
         address txChecker;
         uint256 expiry;
     }
+
+    event TokensPurchased(address indexed buyer, uint256 amountToken, uint256 amountETH);
+    event TokensSold(address indexed seller, uint256 amountToken, uint256 amountETH);
+
+    event TransactionVetoed(bytes32 indexed txHash, address indexed by);
+    event TransactionScheduled(bytes32 indexed txHash, address indexed to, uint256 value, bytes data, uint256 delay);
+    event TransactionExecuted(bytes32 indexed txHash, address caller, address to, uint256 value, bytes data);
 }

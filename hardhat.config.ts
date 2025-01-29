@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
 import "@typechain/hardhat";
+import "hardhat-abi-exporter";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -31,6 +32,13 @@ const config: HardhatUserConfig = {
         runs: 1000,
       },
     },
+  },
+  abiExporter: {
+    path: "./abi",
+    runOnCompile: true,
+    clear: true,
+    spacing: 2,
+    // format: "minimal",
   },
   typechain: {
     outDir: "types",
