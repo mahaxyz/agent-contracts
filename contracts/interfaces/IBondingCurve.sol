@@ -13,18 +13,14 @@
 
 pragma solidity ^0.8.0;
 
-import {ITxChecker} from "./interfaces/ITxChecker.sol";
-
-contract TxChecker is ITxChecker {
-    function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller)
+interface IBondingCurve {
+    function calculateOut(uint256 quantityIn, uint256 raisedAmount, uint256 totalRaise)
         external
         view
-        returns (bool)
-    {
-        require(_caller != address(this), "!txChecker");
-        require(_to != address(this), "!txChecker");
-        require(_value == 0, "!txChecker");
-        require(_data.length >= 0, "!txChecker");
-        return true;
-    }
+        returns (uint256 _amountOut, uint256 _amountIn);
+
+    function calculateIn(uint256 quantityOut, uint256 raisedAmount, uint256 totalRaise)
+        external
+        view
+        returns (uint256 _amountOut, uint256 _amountIn);
 }

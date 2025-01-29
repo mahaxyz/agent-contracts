@@ -21,6 +21,7 @@ interface IAgentLaunchpad {
         address indexed creator,
         string name,
         string symbol,
+        uint256 limitPerWallet,
         uint256 goal,
         uint256 duration,
         string metadata,
@@ -32,8 +33,11 @@ interface IAgentLaunchpad {
         string name;
         string symbol;
         uint256 duration;
+        uint256 limitPerWallet;
         uint256 goal;
         string metadata;
+        address locker;
+        address txChecker;
         address bondingCurve;
         bytes32 salt;
     }

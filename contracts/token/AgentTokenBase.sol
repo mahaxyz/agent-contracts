@@ -17,14 +17,11 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ICLFactory} from "../interfaces/ICLFactory.sol";
+import {ITxChecker} from "../interfaces/ITxChecker.sol";
+import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {ILocker} from "../interfaces/ILocker.sol";
-
-interface ITxChecker {
-    function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller)
-        external
-        returns (bool);
-}
 
 abstract contract AgentTokenBase is ERC20Burnable, ERC20Permit, AccessControlEnumerable {
     // basic info
@@ -36,6 +33,9 @@ abstract contract AgentTokenBase is ERC20Burnable, ERC20Permit, AccessControlEnu
     // sale info
     IERC20 public fundingToken;
     uint256 public fundingGoal;
+    uint256 public fundingProgress;
+    uint256 public limitPerWallet;
+    IBondingCurve public curve;
 
     // roles
     bytes32 public FUND_MANAGER = keccak256("FUND_MANAGER");
@@ -43,8 +43,7 @@ abstract contract AgentTokenBase is ERC20Burnable, ERC20Permit, AccessControlEnu
 
     // treasury variables
     uint256 public expiry;
-    address[] public assets;
-    mapping(address => bool) public approvedAssets;
+    EnumerableSet.AddressSet internal assets;
 
     // timelock variables
     struct Transaction {

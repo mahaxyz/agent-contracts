@@ -22,10 +22,13 @@ contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
     IERC20 public raiseToken;
     IERC20[] public tokens;
     mapping(address => bool) public whitelisted;
-    uint256 creationFee;
-    uint256 maxDuration;
-    uint256 minDuration;
+    uint256 public creationFee;
+    uint256 public maxDuration;
+    uint256 public minDuration;
     uint256 public minFundingGoal;
+
+    address public locker;
+    address public governor;
 
     function initialize(
         IERC20 _raiseToken,
@@ -33,6 +36,8 @@ contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
         uint256 _minFundingGoal,
         uint256 _minDuration,
         uint256 _maxDuration,
+        address _locker,
+        address _governor,
         address _owner
     ) external initializer {
         raiseToken = _raiseToken;
@@ -40,17 +45,25 @@ contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
         minFundingGoal = _minFundingGoal;
         minDuration = _minDuration;
         maxDuration = _maxDuration;
+        locker = _locker;
+        governor = _governor;
         __Ownable_init(_owner);
     }
 
-    function setSettings(uint256 _creationFee, uint256 _minFundingGoal, uint256 _minDuration, uint256 _maxDuration)
-        external
-        onlyOwner
-    {
+    function setSettings(
+        uint256 _creationFee,
+        uint256 _minFundingGoal,
+        uint256 _minDuration,
+        uint256 _maxDuration,
+        address _locker,
+        address _governor
+    ) external onlyOwner {
         creationFee = _creationFee;
         minFundingGoal = _minFundingGoal;
         minDuration = _minDuration;
         maxDuration = _maxDuration;
+        locker = _locker;
+        governor = _governor;
     }
 
     function whitelist(address _address, bool _what) external onlyOwner {
@@ -62,6 +75,8 @@ contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
         require(p.duration <= maxDuration, "!duration");
         require(p.goal >= minFundingGoal, "!minFundingGoal");
         require(whitelisted[p.bondingCurve], "!bondingCurve");
+        require(whitelisted[p.txChecker], "!txChecker");
+        require(whitelisted[p.locker], "!locker");
 
         address[] memory fundManagers = new address[](0);
 
@@ -72,11 +87,13 @@ contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
             p.symbol,
             p.metadata,
             fundManagers,
+            p.limitPerWallet,
             p.goal,
             address(raiseToken),
-            msg.sender,
-            address(0),
-            address(0),
+            governor,
+            locker,
+            address(p.bondingCurve),
+            address(p.txChecker),
             block.timestamp + p.duration
         );
 
