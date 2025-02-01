@@ -17,18 +17,22 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface ILocker {
-    struct TokenLock {
-        uint256 amount;
-        uint256 startTime;
-        uint256 duration;
-    }
+  struct TokenLock {
+    uint256 amount;
+    uint256 startTime;
+    uint256 duration;
+  }
 
-    struct NFTLock {
-        uint256 tokenId;
-        uint256 releaseTime;
-    }
+  struct NFTLock {
+    uint256 tokenId;
+    uint256 releaseTime;
+  }
 
-    function releaseTokens(address token) external;
+  function releaseTokens(
+    address token
+  ) external;
 
-    function releaseNFT(address nft) external;
+  function releaseNFT(
+    address nft
+  ) external;
 }

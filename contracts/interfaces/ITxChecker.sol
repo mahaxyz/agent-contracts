@@ -14,7 +14,5 @@
 pragma solidity ^0.8.0;
 
 interface ITxChecker {
-    function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller)
-        external
-        returns (bool);
+  function checkTransaction(address _to, uint256 _value, bytes memory _data, address _caller) external returns (bool);
 }

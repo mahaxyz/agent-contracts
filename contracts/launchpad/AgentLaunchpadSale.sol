@@ -19,81 +19,85 @@ import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
 
 abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
-    function presaleSwap(IAgentToken token, uint256 amountIn, uint256 minAmountOut, bool buy) external {
-        require(!token.unlocked(), "presale is over");
+  function presaleSwap(IAgentToken token, uint256 amountIn, uint256 minAmountOut, bool buy) external {
+    require(!token.unlocked(), "presale is over");
 
-        if (buy) {
-            // take fees
-            uint256 amountInAfterFee = amountIn * (9970) / 10000;
-            uint256 fee = amountIn - amountInAfterFee;
-            fundingToken.transferFrom(msg.sender, feeDestination, fee);
+    if (buy) {
+      // take fees
+      uint256 amountInAfterFee = amountIn * (9970) / 10_000;
+      uint256 fee = amountIn - amountInAfterFee;
+      fundingToken.transferFrom(msg.sender, feeDestination, fee);
 
-            // calculate the amount of tokens to give
-            (uint256 amountGiven, uint256 amountTaken) =
-                curves[token].calculateBuy(amountInAfterFee, fundingProgress[token], fundingGoals[token]);
-            fundingProgress[token] += amountTaken;
+      // calculate the amount of tokens to give
+      (uint256 amountGiven, uint256 amountTaken) =
+        curves[token].calculateBuy(amountInAfterFee, fundingProgress[token], fundingGoals[token]);
+      fundingProgress[token] += amountTaken;
 
-            // settle the trade
-            fundingToken.transferFrom(msg.sender, address(this), amountTaken);
-            token.transfer(msg.sender, amountGiven);
-            require(amountGiven >= minAmountOut, "!minAmountOut");
+      // settle the trade
+      fundingToken.transferFrom(msg.sender, address(this), amountTaken);
+      token.transfer(msg.sender, amountGiven);
+      require(amountGiven >= minAmountOut, "!minAmountOut");
 
-            emit TokensPurchased(token, msg.sender, amountTaken, amountGiven);
-        } else {
-            // calculate the amount of tokens to take
-            (uint256 amountGiven, uint256 amountTaken) =
-                curves[token].calculateSell(amountIn, fundingProgress[token], fundingGoals[token]);
-            fundingProgress[token] -= amountGiven;
+      emit TokensPurchased(token, msg.sender, amountTaken, amountGiven);
+    } else {
+      // calculate the amount of tokens to take
+      (uint256 amountGiven, uint256 amountTaken) =
+        curves[token].calculateSell(amountIn, fundingProgress[token], fundingGoals[token]);
+      fundingProgress[token] -= amountGiven;
 
-            // take fees
-            uint256 amountGivenAfterFee = amountIn * (9970) / 10000;
-            uint256 fee = amountGiven - amountGivenAfterFee;
-            fundingToken.transfer(feeDestination, fee);
+      // take fees
+      uint256 amountGivenAfterFee = amountIn * (9970) / 10_000;
+      uint256 fee = amountGiven - amountGivenAfterFee;
+      fundingToken.transfer(feeDestination, fee);
 
-            // settle the trade
-            fundingToken.transfer(msg.sender, amountGivenAfterFee);
-            token.transferFrom(msg.sender, address(this), amountTaken);
-            require(amountGiven >= minAmountOut, "!minAmountOut");
+      // settle the trade
+      fundingToken.transfer(msg.sender, amountGivenAfterFee);
+      token.transferFrom(msg.sender, address(this), amountTaken);
+      require(amountGiven >= minAmountOut, "!minAmountOut");
 
-            emit TokensSold(token, msg.sender, amountTaken, amountGiven);
-        }
-
-        // if funding goal has been met, automatically graduate the token
-        if (checkFundingGoalMet(token)) graduate(token);
+      emit TokensSold(token, msg.sender, amountTaken, amountGiven);
     }
 
-    function graduate(IAgentToken token) public {
-        uint256 raised = fundingToken.balanceOf(address(this));
-        require(!token.unlocked(), "presale is over");
-        require(checkFundingGoalMet(token), "!fundingGoal");
+    // if funding goal has been met, automatically graduate the token
+    if (checkFundingGoalMet(token)) graduate(token);
+  }
 
-        // unlock the token for trading
-        token.unlock();
+  function graduate(
+    IAgentToken token
+  ) public {
+    uint256 raised = fundingToken.balanceOf(address(this));
+    require(!token.unlocked(), "presale is over");
+    require(checkFundingGoalMet(token), "!fundingGoal");
 
-        // 25% of the TOKEN is already sold in the bonding curve and in the hands of users
+    // unlock the token for trading
+    token.unlock();
 
-        // send 15% of the TOKEN and 20% of the raised amount to LP
-        _addLiquidity(token, 3 * token.totalSupply() / 20, raised / 5);
+    // 25% of the TOKEN is already sold in the bonding curve and in the hands of users
 
-        // keep 80% of the raise and lock 60% of the TOKEN to the treasury
-        fundingToken.transfer(address(token), 4 * raised / 5);
-        _lockTokens(token, 3 * token.totalSupply() / 5);
+    // send 15% of the TOKEN and 20% of the raised amount to LP
+    _addLiquidity(token, 3 * token.totalSupply() / 20, raised / 5);
+
+    // keep 80% of the raise and lock 60% of the TOKEN to the treasury
+    fundingToken.transfer(address(token), 4 * raised / 5);
+    _lockTokens(token, 3 * token.totalSupply() / 5);
+  }
+
+  function checkFundingGoalMet(
+    IAgentToken token
+  ) public view returns (bool) {
+    return fundingProgress[token] >= fundingGoals[token];
+  }
+
+  function _addLiquidity(IAgentToken token, uint256 amountToken, uint256 amountETH) internal {
+    address pool = aeroFactory.getPool(address(token), address(fundingToken), false);
+    if (pool == address(0)) {
+      aeroFactory.createPool(address(fundingToken), address(fundingToken), false);
     }
 
-    function checkFundingGoalMet(IAgentToken token) public view returns (bool) {
-        return fundingProgress[token] >= fundingGoals[token];
-    }
+    token.transfer(pool, amountToken);
+    fundingToken.transfer(pool, amountETH);
 
-    function _addLiquidity(IAgentToken token, uint256 amountToken, uint256 amountETH) internal {
-        address pool = aeroFactory.getPool(address(token), address(fundingToken), false);
-        if (pool == address(0)) {
-            aeroFactory.createPool(address(fundingToken), address(fundingToken), false);
-        }
-
-        token.transfer(pool, amountToken);
-        fundingToken.transfer(pool, amountETH);
-
-        IAeroPool(pool).mint(address(this));
-        _lockLiquidity(token, pool);
-    }
+    IAeroPool(pool).mint(address(this));
+    _lockLiquidity(token, pool);
+  }
 }
