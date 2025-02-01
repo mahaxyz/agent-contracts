@@ -28,11 +28,7 @@ interface ILocker {
         uint256 releaseTime;
     }
 
-    function lockTokens(address token, uint256 amount, uint256 duration) external;
-
     function releaseTokens(address token) external;
-
-    function lockNFT(address nft, uint256 tokenId, uint256 duration) external;
 
     function releaseNFT(address nft) external;
 }

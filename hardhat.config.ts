@@ -56,6 +56,64 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: 0,
   },
+  etherscan: {
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_KEY || "",
+      sepolia: process.env.ETHERSCAN_KEY || "",
+      base: process.env.BASESCAN_KEY || "",
+      blast: process.env.BLASTSCAN_KEY || "",
+      bsc: process.env.BSCSCAN_KEY || "",
+      linea: process.env.LINEASCAN_KEY || "",
+      optimisticEthereum: process.env.OP_ETHERSCAN_KEY || "",
+      scroll: process.env.SCROLLSCAN_KEY || "",
+      sonic: process.env.SONICSCAN_KEY || "",
+      arbitrumOne: process.env.ARBISCAN_KEY || "",
+      xlayer: "test",
+    },
+    customChains: [
+      {
+        network: "xlayer",
+        chainId: 196,
+        urls: {
+          apiURL:
+            "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
+          browserURL: "https://www.oklink.com/xlayer",
+        },
+      },
+      {
+        network: "sonic",
+        chainId: 146,
+        urls: {
+          apiURL: "https://api.sonicscan.org/api",
+          browserURL: "https://sonicscan.org",
+        },
+      },
+      {
+        network: "linea",
+        chainId: 59144,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build",
+        },
+      },
+      {
+        network: "blast",
+        chainId: 81457,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io",
+        },
+      },
+      {
+        network: "scroll",
+        chainId: 534352,
+        urls: {
+          apiURL: "https://api.scrollscan.com/api",
+          browserURL: "https://scrollscan.com",
+        },
+      },
+    ],
+  },
 };
 
 export default config;

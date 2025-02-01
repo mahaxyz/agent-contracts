@@ -5,7 +5,7 @@
 // ██╔████╔██║███████║███████║███████║
 // ██║╚██╔╝██║██╔══██║██╔══██║██╔══██║
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
-// ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+// ╚═╝    ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
 // Website: https://maha.xyz
 // Discord: https://discord.gg/mahadao
@@ -14,45 +14,39 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {AgentToken} from "./token/AgentToken.sol";
-import {IAgentToken} from "./interfaces/IAgentToken.sol";
-import {IAgentLaunchpad} from "./interfaces/IAgentLaunchpad.sol";
+import {AgentToken} from "../token/AgentToken.sol";
+import {IAgentToken} from "../interfaces/IAgentToken.sol";
+import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 
-contract AgentLaunchpad is IAgentLaunchpad, OwnableUpgradeable {
-    IERC20 public raiseToken;
-    IERC20[] public tokens;
-    mapping(address => bool) public whitelisted;
-    uint256 public creationFee;
-    uint256 public maxDuration;
-    uint256 public minDuration;
-    uint256 public minFundingGoal;
-
-    address public locker;
-    address public governor;
-    address public checker;
-
-    function initialize(IERC20 _raiseToken, address _owner) external initializer {
-        raiseToken = _raiseToken;
+contract AgentLaunchpad is AgentLaunchpadSale {
+    function initialize(address _fundingToken, address _aeroFactory, address _owner) external initializer {
+        fundingToken = IERC20(_fundingToken);
+        aeroFactory = IAeroPoolFactory(_aeroFactory);
         __Ownable_init(_owner);
     }
 
     function setSettings(
         uint256 _creationFee,
-        uint256 _minFundingGoal,
-        uint256 _minDuration,
         uint256 _maxDuration,
-        address _locker,
+        uint256 _minDuration,
+        uint256 _minFundingGoal,
+        address _governor,
         address _checker,
-        address _governor
+        address _feeDestination,
+        uint256 _feeCutE18
     ) external onlyOwner {
         creationFee = _creationFee;
-        minFundingGoal = _minFundingGoal;
-        minDuration = _minDuration;
         maxDuration = _maxDuration;
-        locker = _locker;
+        minDuration = _minDuration;
+        minFundingGoal = _minFundingGoal;
         governor = _governor;
         checker = _checker;
+        feeDestination = _feeDestination;
+        feeCutE18 = _feeCutE18;
+
+        emit SettingsUpdated(
+            _creationFee, _maxDuration, _minDuration, _minFundingGoal, _governor, _checker, _feeDestination, _feeCutE18
+        );
     }
 
     function whitelist(address _address, bool _what) external onlyOwner {

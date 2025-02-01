@@ -28,15 +28,8 @@ abstract contract AgentTokenBase is IAgentToken, ERC20Burnable, ERC20Permit, Acc
     // basic info
     string public metadata;
     bool public unlocked;
-    ILocker public locker;
-    ICLFactory public aeroFactory;
-
-    // sale info
-    IERC20 public fundingToken;
-    uint256 public fundingGoal;
-    uint256 public fundingProgress;
+    address public launchpad;
     uint256 public limitPerWallet;
-    IBondingCurve public curve;
 
     // roles
     bytes32 public FUND_MANAGER = keccak256("FUND_MANAGER");
