@@ -23,19 +23,35 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
         require(!token.unlocked(), "presale is over");
 
         if (buy) {
+            // take fees
+            uint256 amountInAfterFee = amountIn * (9970) / 10000;
+            uint256 fee = amountIn - amountInAfterFee;
+            fundingToken.transferFrom(msg.sender, feeDestination, fee);
+
+            // calculate the amount of tokens to give
             (uint256 amountGiven, uint256 amountTaken) =
-                curves[token].calculateBuy(amountIn, fundingProgress[token], fundingGoals[token]);
+                curves[token].calculateBuy(amountInAfterFee, fundingProgress[token], fundingGoals[token]);
             fundingProgress[token] += amountTaken;
+
+            // settle the trade
             fundingToken.transferFrom(msg.sender, address(this), amountTaken);
             token.transfer(msg.sender, amountGiven);
             require(amountGiven >= minAmountOut, "!minAmountOut");
 
             emit TokensPurchased(token, msg.sender, amountTaken, amountGiven);
         } else {
+            // calculate the amount of tokens to take
             (uint256 amountGiven, uint256 amountTaken) =
                 curves[token].calculateSell(amountIn, fundingProgress[token], fundingGoals[token]);
             fundingProgress[token] -= amountGiven;
-            fundingToken.transfer(msg.sender, amountGiven);
+
+            // take fees
+            uint256 amountGivenAfterFee = amountIn * (9970) / 10000;
+            uint256 fee = amountGiven - amountGivenAfterFee;
+            fundingToken.transfer(feeDestination, fee);
+
+            // settle the trade
+            fundingToken.transfer(msg.sender, amountGivenAfterFee);
             token.transferFrom(msg.sender, address(this), amountTaken);
             require(amountGiven >= minAmountOut, "!minAmountOut");
 
