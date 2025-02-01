@@ -18,14 +18,13 @@ import {IERC20, ERC20, ITxChecker, ILocker, IBondingCurve, ERC20Permit} from "./
 
 contract AgentToken is AgentTokenPresale {
     constructor(InitParams memory p) ERC20(p.name, p.symbol) ERC20Permit(p.symbol) {
-        _mint(msg.sender, 1000000000 * 1e18); // 1 bn supply
-
         launchpad = msg.sender;
         expiry = p.expiry;
         limitPerWallet = p.limitPerWallet;
         metadata = p.metadata;
         unlocked = false;
 
+        _mint(msg.sender, 1000000000 * 1e18); // 1 bn supply
         _grantRole(DEFAULT_ADMIN_ROLE, address(this)); // contract can only manage roles
         _grantRole(GOVERNANCE, p.governance); // governance can schedule and veto txs
 

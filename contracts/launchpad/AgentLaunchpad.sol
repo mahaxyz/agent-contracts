@@ -16,6 +16,7 @@ pragma solidity ^0.8.0;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AgentToken} from "../token/AgentToken.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
+import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
@@ -59,21 +60,15 @@ contract AgentLaunchpad is AgentLaunchpadSale {
         require(p.goal >= minFundingGoal, "!minFundingGoal");
         require(whitelisted[p.bondingCurve], "!bondingCurve");
 
-        address[] memory fundManagers = new address[](0);
-
-        if (creationFee > 0) raiseToken.transferFrom(msg.sender, address(0xdead), creationFee);
+        if (creationFee > 0) fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
 
         IAgentToken.InitParams memory params = IAgentToken.InitParams({
             name: p.name,
             symbol: p.symbol,
             metadata: p.metadata,
-            fundManagers: fundManagers,
+            fundManagers: p.fundManagers,
             limitPerWallet: p.limitPerWallet,
-            fundingGoal: p.goal,
-            fundingToken: address(raiseToken),
             governance: governor,
-            locker: locker,
-            bondingCurve: p.bondingCurve,
             txChecker: checker,
             expiry: block.timestamp + p.duration
         });

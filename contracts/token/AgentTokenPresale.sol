@@ -26,10 +26,10 @@ abstract contract AgentTokenPresale is AgentTokenTreasury {
     function _update(address _from, address _to, uint256 _value) internal override {
         super._update(_from, _to, _value);
         if (!unlocked) {
-            if (_from == address(this)) {
-                // buy tokens; limit to 3% of the supply per wallet
+            if (_from == address(launchpad)) {
+                // buy tokens; limit to `limitPerWallet` per wallet
                 require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet");
-            } else if (_to == address(this)) {
+            } else if (_to == address(launchpad)) {
                 // sell tokens; allow without limits
             } else {
                 // disallow transfers between users until the presale is over

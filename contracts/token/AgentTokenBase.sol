@@ -18,7 +18,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {ICLFactory} from "../interfaces/ICLFactory.sol";
 import {ITxChecker} from "../interfaces/ITxChecker.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {ILocker} from "../interfaces/ILocker.sol";
