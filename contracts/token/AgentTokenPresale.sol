@@ -23,6 +23,14 @@ abstract contract AgentTokenPresale is AgentTokenTreasury {
     emit Unlocked();
   }
 
+  function extendExpiry(
+    uint256 _expiry
+  ) external onlyRole(GOVERNANCE) {
+    require(_expiry > expiry, "!_expiry");
+    expiry = _expiry;
+    emit ExpiryExtended(_expiry);
+  }
+
   function _update(address _from, address _to, uint256 _value) internal override {
     super._update(_from, _to, _value);
     if (!unlocked) {

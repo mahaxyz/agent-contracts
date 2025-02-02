@@ -31,6 +31,7 @@ interface IAgentToken is IERC20 {
   event TransactionVetoed(bytes32 indexed txHash, address indexed by);
   event TransactionScheduled(bytes32 indexed txHash, address indexed to, uint256 value, bytes data, uint256 delay);
   event TransactionExecuted(bytes32 indexed txHash, address caller, address to, uint256 value, bytes data);
+  event ExpiryExtended(uint256 expiry);
 
   function unlock() external;
   function unlocked() external view returns (bool);
