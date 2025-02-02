@@ -34,17 +34,15 @@ interface IAgentLaunchpad {
   );
 
   struct CreateParams {
+    address bondingCurve;
+    address[] fundManagers;
+    bytes32 salt;
+    string metadata;
     string name;
     string symbol;
     uint256 duration;
-    uint256 limitPerWallet;
     uint256 goal;
-    string metadata;
-    address locker;
-    address txChecker;
-    address bondingCurve;
-    bytes32 salt;
-    address[] fundManagers;
+    uint256 limitPerWallet;
   }
 
   struct TokenLock {
@@ -214,7 +212,7 @@ interface IAgentLaunchpad {
   /// @param p The parameters for creation
   function create(
     CreateParams memory p
-  ) external;
+  ) external returns (address);
 
   /// @notice Returns the total number of tokens
   /// @return total The total number of tokens

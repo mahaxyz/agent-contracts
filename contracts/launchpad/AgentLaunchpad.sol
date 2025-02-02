@@ -57,7 +57,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
 
   function create(
     CreateParams memory p
-  ) external {
+  ) external returns (address) {
     require(p.duration >= minDuration, "!duration");
     require(p.duration <= maxDuration, "!duration");
     require(p.goal >= minFundingGoal, "!minFundingGoal");
@@ -91,6 +91,8 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       p.salt
     );
     tokens.push(_token);
+
+    return address(_token);
   }
 
   function getTotalTokens() external view returns (uint256) {
