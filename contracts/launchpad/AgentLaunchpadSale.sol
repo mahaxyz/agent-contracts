@@ -14,13 +14,14 @@
 pragma solidity ^0.8.0;
 
 import {IAeroPool} from "../interfaces/IAeroPool.sol";
-import {IAgentToken} from "../interfaces/IAgentToken.sol";
+import {IAgentToken, IERC20} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
 
 abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
   function presaleSwap(IAgentToken token, uint256 amountIn, uint256 minAmountOut, bool buy) external {
     require(!token.unlocked(), "presale is over");
+    IERC20 fundingToken = IERC20(fundingTokens[token]);
 
     if (buy) {
       // take fees
@@ -65,6 +66,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
   function graduate(
     IAgentToken token
   ) public {
+    IERC20 fundingToken = IERC20(fundingTokens[token]);
     uint256 raised = fundingToken.balanceOf(address(this));
     require(!token.unlocked(), "presale is over");
     require(checkFundingGoalMet(token), "!fundingGoal");
@@ -75,7 +77,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     // 25% of the TOKEN is already sold in the bonding curve and in the hands of users
 
     // send 15% of the TOKEN and 20% of the raised amount to LP
-    _addLiquidity(token, 3 * token.totalSupply() / 20, raised / 5);
+    _addLiquidity(token, fundingToken, 3 * token.totalSupply() / 20, raised / 5);
 
     // keep 80% of the raise and lock 60% of the TOKEN to the treasury
     fundingToken.transfer(address(token), 4 * raised / 5);
@@ -88,7 +90,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     return fundingProgress[token] >= fundingGoals[token];
   }
 
-  function _addLiquidity(IAgentToken token, uint256 amountToken, uint256 amountETH) internal {
+  function _addLiquidity(IAgentToken token, IERC20 fundingToken, uint256 amountToken, uint256 amountETH) internal {
     address pool = aeroFactory.getPool(address(token), address(fundingToken), false);
     if (pool == address(0)) {
       aeroFactory.createPool(address(fundingToken), address(fundingToken), false);

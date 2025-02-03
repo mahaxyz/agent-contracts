@@ -44,6 +44,7 @@ contract AgentLaunchpadTest is Test {
     launchpad.setSettings(100e18, 100 days, 1 days, 1000 ether, governor, address(txChecker), feeDestination, 0.1e18);
     launchpad.whitelist(address(txChecker), true);
     launchpad.whitelist(address(curve), true);
+    launchpad.whitelist(address(maha), true);
     vm.stopPrank();
   }
 
@@ -53,13 +54,14 @@ contract AgentLaunchpadTest is Test {
     vm.startPrank(creator);
     maha.approve(address(launchpad), 1000 ether);
 
-    IAgentToken _token = IAgentToken(
+    IAgentToken token = IAgentToken(
       launchpad.create(
         IAgentLaunchpad.CreateParams({
           bondingCurve: address(curve),
+          fundingToken: maha,
           fundManagers: new address[](0),
           duration: 2 days,
-          goal: 1000 ether,
+          goal: 100_000 ether,
           limitPerWallet: 100_000_000 ether,
           metadata: "{}",
           name: "testing",
@@ -71,9 +73,10 @@ contract AgentLaunchpadTest is Test {
     vm.stopPrank();
 
     vm.startPrank(investor);
-    maha.approve(address(launchpad), 1000 ether);
-    launchpad.presaleSwap(_token, 10_000 ether, 10_000 ether, true);
-    launchpad.presaleSwap(_token, 1000 ether, 1000 ether, false);
+    maha.approve(address(launchpad), 10_000 ether);
+    token.approve(address(launchpad), 10_000 ether);
+    launchpad.presaleSwap(token, 10_000 ether, 0, true);
+    launchpad.presaleSwap(token, 1000 ether, 0, false);
     vm.stopPrank();
   }
 }

@@ -13,13 +13,14 @@
 
 pragma solidity ^0.8.0;
 
-import {ERC20, ERC20Permit, IBondingCurve, IERC20, ILocker, ITxChecker} from "./AgentTokenBase.sol";
+import {ERC20, IBondingCurve, IERC20, ILocker, ITxChecker} from "./AgentTokenBase.sol";
 import {AgentTokenPresale} from "./AgentTokenPresale.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract AgentToken is AgentTokenPresale {
   constructor(
     InitParams memory p
-  ) ERC20(p.name, p.symbol) ERC20Permit(p.symbol) {
+  ) ERC20(p.name, p.symbol) EIP712(p.symbol, "1") {
     launchpad = msg.sender;
     expiry = p.expiry;
     limitPerWallet = p.limitPerWallet;

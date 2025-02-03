@@ -43,6 +43,7 @@ interface IAgentLaunchpad {
     uint256 duration;
     uint256 goal;
     uint256 limitPerWallet;
+    IERC20 fundingToken;
   }
 
   struct TokenLock {
@@ -120,9 +121,9 @@ interface IAgentLaunchpad {
   /// @return factory The AeroPoolFactory instance
   function aeroFactory() external view returns (IAeroPoolFactory factory);
 
-  /// @notice Returns the funding token
-  /// @return token The funding token
-  function fundingToken() external view returns (IERC20 token);
+  /// @notice Returns the core token
+  /// @return token The core token
+  function coreToken() external view returns (IERC20 token);
 
   /// @notice Returns the bonding curve for a given token
   /// @param token The token to get the bonding curve for

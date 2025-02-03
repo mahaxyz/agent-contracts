@@ -18,9 +18,12 @@ import {IAgentLaunchpad} from "../interfaces/IAgentLaunchpad.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import {ERC721EnumerableUpgradeable} from
+  "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable {
+abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   IERC20[] public tokens;
   mapping(address => bool) public whitelisted;
   uint256 public creationFee;
@@ -37,10 +40,12 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable {
 
   // funding details
   IAeroPoolFactory public aeroFactory;
-  IERC20 public fundingToken;
+  IERC20 public coreToken;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
   mapping(address token => IAgentLaunchpad.TokenLock) public tokenLocks;
   mapping(IAgentToken token => IBondingCurve) public curves;
   mapping(IAgentToken token => uint256) public fundingGoals;
   mapping(IAgentToken token => uint256) public fundingProgress;
+  mapping(IAgentToken token => IERC20) public fundingTokens;
+  mapping(IAgentToken token => uint256) public tokenToNftId;
 }

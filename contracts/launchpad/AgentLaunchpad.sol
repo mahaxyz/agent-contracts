@@ -15,16 +15,19 @@ pragma solidity ^0.8.0;
 
 import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
+import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentToken} from "../token/AgentToken.sol";
 
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
+
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
-  function initialize(address _fundingToken, address _aeroFactory, address _owner) external initializer {
-    fundingToken = IERC20(_fundingToken);
+  function initialize(address _coreToken, address _aeroFactory, address _owner) external initializer {
+    coreToken = IERC20(_coreToken);
     aeroFactory = IAeroPoolFactory(_aeroFactory);
     __Ownable_init(_owner);
+    __ERC721_init("AI Agent Launchpad", "AGENTS");
   }
 
   function setSettings(
@@ -62,8 +65,9 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     require(p.duration <= maxDuration, "!duration");
     require(p.goal >= minFundingGoal, "!minFundingGoal");
     require(whitelisted[p.bondingCurve], "!bondingCurve");
+    require(whitelisted[address(p.fundingToken)], "!bondingCurve");
 
-    if (creationFee > 0) fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
+    if (creationFee > 0) p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
       name: p.name,
@@ -91,6 +95,12 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       p.salt
     );
     tokens.push(_token);
+    fundingTokens[_token] = p.fundingToken;
+    fundingGoals[_token] = p.goal;
+
+    tokenToNftId[_token] = tokens.length - 1;
+    curves[_token] = IBondingCurve(p.bondingCurve);
+    _mint(msg.sender, tokenToNftId[_token]);
 
     return address(_token);
   }

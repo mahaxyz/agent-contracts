@@ -70,17 +70,22 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
   function claimFees(
     address token
   ) external {
+    IERC20 fundingToken = IERC20(fundingTokens[IAgentToken(token)]);
+    uint256 _feeCutE18 = fundingToken == coreToken ? 1e18 : feeCutE18;
+
     LiquidityLock storage lock = liquidityLocks[token];
     require(lock.amount != 0, "No lock locked");
+
+    address dest = ownerOf(tokenToNftId[IAgentToken(token)]);
 
     IAeroPool pool = lock.liquidityToken;
     (uint256 fee0, uint256 fee1) = pool.claimFees();
 
-    uint256 govFee0 = fee0 * feeCutE18 / 1e18;
-    uint256 govFee1 = fee1 * feeCutE18 / 1e18;
+    uint256 govFee0 = fee0 * _feeCutE18 / 1e18;
+    uint256 govFee1 = fee1 * _feeCutE18 / 1e18;
 
-    IERC20(pool.token0()).transfer(token, fee0 - govFee0);
-    IERC20(pool.token1()).transfer(token, fee1 - govFee1);
+    IERC20(pool.token0()).transfer(dest, fee0 - govFee0);
+    IERC20(pool.token1()).transfer(dest, fee1 - govFee1);
 
     IERC20(pool.token0()).transfer(feeDestination, fee0 - govFee0);
     IERC20(pool.token1()).transfer(feeDestination, fee1 - govFee1);
