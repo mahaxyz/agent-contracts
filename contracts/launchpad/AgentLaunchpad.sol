@@ -15,7 +15,9 @@ pragma solidity ^0.8.0;
 
 import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
+
 import {AgentToken} from "../token/AgentToken.sol";
+import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
 
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -77,6 +79,8 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     });
 
     AgentToken _token = new AgentToken{salt: p.salt}(params);
+    curves[_token] = IBondingCurve(p.bondingCurve);
+    fundingGoals[_token] = p.goal;
 
     emit TokenCreated(
       address(_token),
