@@ -60,6 +60,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
 
   function whitelist(address _address, bool _what) external onlyOwner {
     whitelisted[_address] = _what;
+    // todo add event
   }
 
   function create(CreateParams memory p) external returns (address) {

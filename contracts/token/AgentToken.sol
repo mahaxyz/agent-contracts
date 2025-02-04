@@ -36,5 +36,7 @@ contract AgentToken is AgentTokenPresale {
     for (uint256 index = 0; index < p.fundManagers.length; index++) {
       _grantRole(FUND_MANAGER, p.fundManagers[index]);
     }
+
+    // todo add event
   }
 }

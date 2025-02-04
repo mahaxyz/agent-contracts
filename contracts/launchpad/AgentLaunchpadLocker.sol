@@ -28,6 +28,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     require(tokenLocks[address(token)].amount == 0, "lock exists");
 
     tokenLocks[address(token)] = TokenLock({amount: amount, startTime: block.timestamp, duration: duration});
+    // todo add event
   }
 
   function _lockLiquidity(IAgentToken token, address pool) internal {
@@ -37,6 +38,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
       amount: IERC20(pool).balanceOf(address(this)),
       releaseTime: token.expiry()
     });
+    // todo add event
   }
 
   function releaseTokens() external {
@@ -54,6 +56,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC20(msg.sender).transfer(msg.sender, releasableAmount);
 
     if (lock.amount == 0) delete tokenLocks[msg.sender];
+    // todo add event
   }
 
   function releaseLiquidityLock() external {
@@ -89,5 +92,6 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
 
     IERC20(pool.token0()).transfer(feeDestination, govFee0);
     IERC20(pool.token1()).transfer(feeDestination, govFee1);
+    // todo add event
   }
 }
