@@ -23,11 +23,13 @@ abstract contract AgentTokenTreasury is AgentTokenTimelock {
   function addAsset(address asset) external {
     require(msg.sender == address(this), "!timelock");
     assets.add(asset);
+    // todo add event
   }
 
   function removeAsset(address asset) external {
     require(msg.sender == address(this), "!timelock");
     assets.remove(asset);
+    // todo add event
   }
 
   function claim(uint256 amount) external {
@@ -41,6 +43,7 @@ abstract contract AgentTokenTreasury is AgentTokenTimelock {
       uint256 total = asset.balanceOf(address(this));
       uint256 toSend = total * shares18 / 1 ether;
       asset.transfer(msg.sender, toSend);
+      // todo add event
     }
   }
 }

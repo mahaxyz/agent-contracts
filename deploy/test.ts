@@ -17,16 +17,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
 
   const tokenD = await deployContract(hre, "AgentToken", [], "AgentTokenImpl");
-  const launchpadD = await deployProxy(
+  const launchpadD = await deployContract(
     hre,
     "AgentLaunchpad",
-    [
-      mahaD.address,
-      "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
-      tokenD.address,
-      deployer.address,
-    ],
-    "0x7202136d70026DA33628dD3f3eFccb43F62a2469",
+    [],
     "AgentLaunchpad"
   );
 
@@ -51,6 +45,14 @@ async function main(hre: HardhatRuntimeEnvironment) {
       txChecker: ZeroAddress, // address txChecker;
       duration: 999999999, // uint256 duration;
     })
+  );
+  await waitForTx(
+    await launchpad.initialize(
+      mahaD.address,
+      "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
+      tokenD.address,
+      deployer.address
+    )
   );
 
   await waitForTx(

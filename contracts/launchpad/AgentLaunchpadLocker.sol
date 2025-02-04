@@ -74,7 +74,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC20 fundingToken = IERC20(fundingTokens[IAgentToken(token)]);
 
     // if funding token is the core token; then no fees get charged. else the feeCutE18 is applied
-    uint256 _feeCutE18 = fundingToken == coreToken ? 1e18 : feeCutE18;
+    uint256 _feeCutE18 = fundingToken == coreToken ? 0 : feeCutE18;
 
     LiquidityLock storage lock = liquidityLocks[token];
     require(lock.amount != 0, "No lock locked");
