@@ -16,16 +16,20 @@ pragma solidity ^0.8.0;
 import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
-import {AgentToken} from "../token/AgentToken.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
-  function initialize(address _coreToken, address _aeroFactory, address _owner) external initializer {
+  function initialize(address _coreToken, address _aeroFactory, address _tokenImplementation, address _owner)
+    external
+    initializer
+  {
     coreToken = IERC20(_coreToken);
     aeroFactory = IAeroPoolFactory(_aeroFactory);
+    tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
     __ERC721_init("AI Agent Launchpad", "AGENTS");
   }
@@ -75,13 +79,15 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       limitPerWallet: p.limitPerWallet,
       governance: governor,
       txChecker: checker,
-      expiry: block.timestamp + p.duration
+      duration: p.duration
     });
 
-    AgentToken _token = new AgentToken{salt: p.salt}(params);
+    IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
+
+    token.initialize(params);
 
     emit TokenCreated(
-      address(_token),
+      address(token),
       msg.sender,
       p.name,
       p.symbol,
@@ -92,15 +98,15 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       p.bondingCurve,
       p.salt
     );
-    tokens.push(_token);
-    fundingTokens[_token] = p.fundingToken;
-    fundingGoals[_token] = p.goal;
+    tokens.push(token);
+    fundingTokens[token] = p.fundingToken;
+    fundingGoals[token] = p.goal;
 
-    tokenToNftId[_token] = tokens.length - 1;
-    curves[_token] = IBondingCurve(p.bondingCurve);
-    _mint(msg.sender, tokenToNftId[_token]);
+    tokenToNftId[token] = tokens.length - 1;
+    curves[token] = IBondingCurve(p.bondingCurve);
+    _mint(msg.sender, tokenToNftId[token]);
 
-    return address(_token);
+    return address(token);
   }
 
   function getTotalTokens() external view returns (uint256) {
