@@ -39,7 +39,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
       token.transfer(msg.sender, _tokensOut);
       require(_tokensOut >= minAmountOut, "!minAmountOut");
 
-      emit TokensPurchased(token, msg.sender, _assetsIn, _tokensOut);
+      emit TokensPurchased(address(token), msg.sender, _assetsIn, _tokensOut);
     } else {
       // calculate the amount of tokens to take
       (uint256 _assetsOut, uint256 _tokensIn) =
@@ -56,7 +56,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
       token.transferFrom(msg.sender, address(this), _tokensIn);
       require(assetsOutAfterFee >= minAmountOut, "!minAmountOut");
 
-      emit TokensSold(token, msg.sender, _assetsOut, _tokensIn);
+      emit TokensSold(address(token), msg.sender, _assetsOut, _tokensIn);
     }
 
     // if funding goal has been met, automatically graduate the token
@@ -81,7 +81,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     fundingToken.transfer(address(token), 4 * raised / 5);
     _lockTokens(token, 3 * token.totalSupply() / 5);
 
-    emit TokenGraduated(token, raised);
+    emit TokenGraduated(address(token), raised);
   }
 
   function checkFundingGoalMet(IAgentToken token) public view returns (bool) {
