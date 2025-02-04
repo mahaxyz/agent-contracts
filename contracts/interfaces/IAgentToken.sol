@@ -24,7 +24,7 @@ interface IAgentToken is IERC20 {
     uint256 limitPerWallet;
     address governance;
     address txChecker;
-    uint256 expiry;
+    uint256 duration;
   }
 
   event Unlocked();
@@ -33,6 +33,7 @@ interface IAgentToken is IERC20 {
   event TransactionExecuted(bytes32 indexed txHash, address caller, address to, uint256 value, bytes data);
   event ExpiryExtended(uint256 expiry);
 
+  function initialize(InitParams memory p) external;
   function unlock() external;
   function unlocked() external view returns (bool);
   function expiry() external view returns (uint256);
