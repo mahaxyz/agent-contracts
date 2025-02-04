@@ -89,7 +89,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
   function _addLiquidity(IAgentToken token, IERC20 fundingToken, uint256 amountToken, uint256 amountETH) internal {
     address pool = aeroFactory.getPool(address(token), address(fundingToken), false);
     if (pool == address(0)) {
-      aeroFactory.createPool(address(fundingToken), address(fundingToken), false);
+      pool = aeroFactory.createPool(address(token), address(fundingToken), false);
     }
 
     token.transfer(pool, amountToken);
