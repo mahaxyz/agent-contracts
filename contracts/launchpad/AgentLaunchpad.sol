@@ -58,9 +58,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     whitelisted[_address] = _what;
   }
 
-  function create(
-    CreateParams memory p
-  ) external returns (address) {
+  function create(CreateParams memory p) external returns (address) {
     require(p.duration >= minDuration, "!duration");
     require(p.duration <= maxDuration, "!duration");
     require(p.goal >= minFundingGoal, "!minFundingGoal");

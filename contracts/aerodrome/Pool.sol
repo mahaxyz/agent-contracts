@@ -99,17 +99,13 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @inheritdoc IPool
-  function setName(
-    string calldata __name
-  ) external {
+  function setName(string calldata __name) external {
     // if (msg.sender != IVoter(_voter).emergencyCouncil()) revert NotEmergencyCouncil();
     _name = __name;
   }
 
   /// @inheritdoc IPool
-  function setSymbol(
-    string calldata __symbol
-  ) external {
+  function setSymbol(string calldata __symbol) external {
     // if (msg.sender != IVoter(_voter).emergencyCouncil()) revert NotEmergencyCouncil();
     _symbol = __symbol;
   }
@@ -162,9 +158,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @dev Accrue fees on token0
-  function _update0(
-    uint256 amount
-  ) internal {
+  function _update0(uint256 amount) internal {
     // Only update on this pool if there is a fee
     if (amount == 0) return;
     IERC20(token0).safeTransfer(poolFees, amount); // transfer the fees out to PoolFees
@@ -176,9 +170,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @dev Accrue fees on token1
-  function _update1(
-    uint256 amount
-  ) internal {
+  function _update1(uint256 amount) internal {
     // Only update on this pool if there is a fee
     if (amount == 0) return;
     IERC20(token1).safeTransfer(poolFees, amount);
@@ -191,9 +183,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
 
   /// @dev This function MUST be called on any balance changes, otherwise can be used to infinitely claim fees
   ///      Fees are segregated from core funds, so fees can never put liquidity at risk.
-  function _updateFor(
-    address recipient
-  ) internal {
+  function _updateFor(address recipient) internal {
     uint256 _supplied = balanceOf(recipient); // get LP balance of `recipient`
     if (_supplied > 0) {
       uint256 _supplyIndex0 = supplyIndex0[recipient]; // get last adjusted index0 for recipient
@@ -283,12 +273,11 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @inheritdoc IPool
-  function sample(
-    address tokenIn,
-    uint256 amountIn,
-    uint256 points,
-    uint256 window
-  ) public view returns (uint256[] memory) {
+  function sample(address tokenIn, uint256 amountIn, uint256 points, uint256 window)
+    public
+    view
+    returns (uint256[] memory)
+  {
     uint256[] memory _prices = new uint256[](points);
 
     uint256 length = observations.length - 1;
@@ -313,9 +302,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @inheritdoc IPool
-  function mint(
-    address to
-  ) external nonReentrant returns (uint256 liquidity) {
+  function mint(address to) external nonReentrant returns (uint256 liquidity) {
     (uint256 _reserve0, uint256 _reserve1) = (reserve0, reserve1);
     uint256 _balance0 = IERC20(token0).balanceOf(address(this));
     uint256 _balance1 = IERC20(token1).balanceOf(address(this));
@@ -342,9 +329,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @inheritdoc IPool
-  function burn(
-    address to
-  ) external nonReentrant returns (uint256 amount0, uint256 amount1) {
+  function burn(address to) external nonReentrant returns (uint256 amount0, uint256 amount1) {
     (uint256 _reserve0, uint256 _reserve1) = (reserve0, reserve1);
     (address _token0, address _token1) = (token0, token1);
     uint256 _balance0 = IERC20(_token0).balanceOf(address(this));
@@ -407,9 +392,7 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
   }
 
   /// @inheritdoc IPool
-  function skim(
-    address to
-  ) external nonReentrant {
+  function skim(address to) external nonReentrant {
     (address _token0, address _token1) = (token0, token1);
     IERC20(_token0).safeTransfer(to, IERC20(_token0).balanceOf(address(this)) - (reserve0));
     IERC20(_token1).safeTransfer(to, IERC20(_token1).balanceOf(address(this)) - (reserve1));
@@ -480,12 +463,11 @@ contract Pool is IPool, ERC20Permit, ReentrancyGuard {
     return _getAmountOut(amountIn, tokenIn, _reserve0, _reserve1);
   }
 
-  function _getAmountOut(
-    uint256 amountIn,
-    address tokenIn,
-    uint256 _reserve0,
-    uint256 _reserve1
-  ) internal view returns (uint256) {
+  function _getAmountOut(uint256 amountIn, address tokenIn, uint256 _reserve0, uint256 _reserve1)
+    internal
+    view
+    returns (uint256)
+  {
     if (stable) {
       uint256 xy = _k(_reserve0, _reserve1);
       _reserve0 = (_reserve0 * 1e18) / decimals0;

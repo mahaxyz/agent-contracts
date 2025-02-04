@@ -67,10 +67,10 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC721(address(aeroFactory)).transferFrom(address(this), msg.sender, tokenId);
   }
 
-  function claimFees(
-    address token
-  ) external {
+  function claimFees(address token) external {
     IERC20 fundingToken = IERC20(fundingTokens[IAgentToken(token)]);
+
+    // if funding token is the core token; then no fees get charged. else the feeCutE18 is applied
     uint256 _feeCutE18 = fundingToken == coreToken ? 1e18 : feeCutE18;
 
     LiquidityLock storage lock = liquidityLocks[token];

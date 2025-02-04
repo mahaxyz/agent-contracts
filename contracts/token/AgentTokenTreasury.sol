@@ -20,23 +20,17 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 abstract contract AgentTokenTreasury is AgentTokenTimelock {
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  function addAsset(
-    address asset
-  ) external {
+  function addAsset(address asset) external {
     require(msg.sender == address(this), "!timelock");
     assets.add(asset);
   }
 
-  function removeAsset(
-    address asset
-  ) external {
+  function removeAsset(address asset) external {
     require(msg.sender == address(this), "!timelock");
     assets.remove(asset);
   }
 
-  function claim(
-    uint256 amount
-  ) external {
+  function claim(uint256 amount) external {
     require(block.timestamp > expiry, "!expiry");
     _burn(msg.sender, amount);
     uint256 shares18 = 1 ether * amount / totalSupply();

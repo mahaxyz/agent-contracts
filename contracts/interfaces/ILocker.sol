@@ -28,11 +28,7 @@ interface ILocker {
     uint256 releaseTime;
   }
 
-  function releaseTokens(
-    address token
-  ) external;
+  function releaseTokens(address token) external;
 
-  function releaseNFT(
-    address nft
-  ) external;
+  function releaseNFT(address nft) external;
 }

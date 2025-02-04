@@ -18,15 +18,11 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract MockAggregator is Ownable {
   int256 public latestAnswer;
 
-  constructor(
-    int256 _answer
-  ) Ownable(msg.sender) {
+  constructor(int256 _answer) Ownable(msg.sender) {
     latestAnswer = _answer;
   }
 
-  function setAnswer(
-    int256 _answer
-  ) external onlyOwner {
+  function setAnswer(int256 _answer) external onlyOwner {
     latestAnswer = _answer;
   }
 

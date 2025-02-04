@@ -54,9 +54,7 @@ abstract contract AgentTokenTimelock is AgentTokenBase {
   /// @dev Only transactions that have not been executed, are not cancelled, and have passed their executeAt time can be
   /// executed
   /// @dev Anyone can execute a scheduled transaction
-  function executeTx(
-    bytes32 txHash
-  ) external {
+  function executeTx(bytes32 txHash) external {
     Transaction storage t = hashToTransactions[txHash];
     require(t.executeAt < block.timestamp, "!executeAt");
     require(!t.cancelled, "!cancelled");
@@ -78,18 +76,14 @@ abstract contract AgentTokenTimelock is AgentTokenBase {
   /// @param txHash The hash of the transaction to veto
   /// @dev Only transactions that have not been executed can be vetoed
   /// @dev Only governance can veto transactions
-  function vetoTx(
-    bytes32 txHash
-  ) external onlyRole(GOVERNANCE) {
+  function vetoTx(bytes32 txHash) external onlyRole(GOVERNANCE) {
     Transaction storage t = hashToTransactions[txHash];
     require(!t.executed, "!executed");
     t.cancelled = true;
     emit TransactionVetoed(txHash, msg.sender);
   }
 
-  function hashTx(
-    Transaction memory t
-  ) public pure returns (bytes32) {
+  function hashTx(Transaction memory t) public pure returns (bytes32) {
     return keccak256(abi.encode(t.to, t.value, t.executeAt, t.data));
   }
 }

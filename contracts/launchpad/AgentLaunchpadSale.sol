@@ -63,9 +63,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     if (checkFundingGoalMet(token)) graduate(token);
   }
 
-  function graduate(
-    IAgentToken token
-  ) public {
+  function graduate(IAgentToken token) public {
     IERC20 fundingToken = IERC20(fundingTokens[token]);
     uint256 raised = fundingToken.balanceOf(address(this));
     require(!token.unlocked(), "presale is over");
@@ -84,9 +82,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     _lockTokens(token, 3 * token.totalSupply() / 5);
   }
 
-  function checkFundingGoalMet(
-    IAgentToken token
-  ) public view returns (bool) {
+  function checkFundingGoalMet(IAgentToken token) public view returns (bool) {
     return fundingProgress[token] >= fundingGoals[token];
   }
 

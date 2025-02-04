@@ -18,9 +18,7 @@ import {AgentTokenPresale} from "./AgentTokenPresale.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract AgentToken is AgentTokenPresale {
-  constructor(
-    InitParams memory p
-  ) ERC20(p.name, p.symbol) EIP712(p.symbol, "1") {
+  constructor(InitParams memory p) ERC20(p.name, p.symbol) EIP712(p.symbol, "1") {
     launchpad = msg.sender;
     expiry = p.expiry;
     limitPerWallet = p.limitPerWallet;

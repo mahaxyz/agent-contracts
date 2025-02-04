@@ -74,16 +74,12 @@ interface IAgentLaunchpad {
   /// @notice Returns the token at the specified index
   /// @param index The index of the token
   /// @return token The token at the specified index
-  function tokens(
-    uint256 index
-  ) external view returns (IERC20 token);
+  function tokens(uint256 index) external view returns (IERC20 token);
 
   /// @notice Checks if an account is whitelisted
   /// @param account The account to check
   /// @return whitelisted True if the account is whitelisted, false otherwise
-  function whitelisted(
-    address account
-  ) external view returns (bool whitelisted);
+  function whitelisted(address account) external view returns (bool whitelisted);
 
   /// @notice Returns the creation fee
   /// @return fee The creation fee
@@ -128,23 +124,17 @@ interface IAgentLaunchpad {
   /// @notice Returns the bonding curve for a given token
   /// @param token The token to get the bonding curve for
   /// @return curve The bonding curve for the given token
-  function curves(
-    IAgentToken token
-  ) external view returns (IBondingCurve curve);
+  function curves(IAgentToken token) external view returns (IBondingCurve curve);
 
   /// @notice Returns the funding goal for a given token
   /// @param token The token to get the funding goal for
   /// @return goal The funding goal for the given token
-  function fundingGoals(
-    IAgentToken token
-  ) external view returns (uint256 goal);
+  function fundingGoals(IAgentToken token) external view returns (uint256 goal);
 
   /// @notice Returns the funding progress for a given token
   /// @param token The token to get the funding progress for
   /// @return progress The funding progress for the given token
-  function fundingProgress(
-    IAgentToken token
-  ) external view returns (uint256 progress);
+  function fundingProgress(IAgentToken token) external view returns (uint256 progress);
 
   /// @notice Releases the tokens
   function releaseTokens() external;
@@ -154,9 +144,7 @@ interface IAgentLaunchpad {
 
   /// @notice Claims the fees for a given token
   /// @param token The token to claim the fees for
-  function claimFees(
-    address token
-  ) external;
+  function claimFees(address token) external;
 
   /// @notice Performs a presale swap
   /// @param token The token to swap
@@ -167,16 +155,12 @@ interface IAgentLaunchpad {
 
   /// @notice Graduates a given token
   /// @param token The token to graduate
-  function graduate(
-    IAgentToken token
-  ) external;
+  function graduate(IAgentToken token) external;
 
   /// @notice Checks if the funding goal is met for a given token
   /// @param token The token to check the funding goal for
   /// @return True if the funding goal is met, false otherwise
-  function checkFundingGoalMet(
-    IAgentToken token
-  ) external view returns (bool);
+  function checkFundingGoalMet(IAgentToken token) external view returns (bool);
 
   /// @notice Initializes the contract with the given parameters
   /// @param _fundingToken The funding token
@@ -211,9 +195,7 @@ interface IAgentLaunchpad {
 
   /// @notice Creates a new entity with the given parameters
   /// @param p The parameters for creation
-  function create(
-    CreateParams memory p
-  ) external returns (address);
+  function create(CreateParams memory p) external returns (address);
 
   /// @notice Returns the total number of tokens
   /// @return total The total number of tokens

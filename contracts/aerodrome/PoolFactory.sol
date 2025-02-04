@@ -32,9 +32,7 @@ contract PoolFactory is IPoolFactory {
   address internal _temp1;
   bool internal _temp;
 
-  constructor(
-    address _implementation
-  ) {
+  constructor(address _implementation) {
     implementation = _implementation;
     voter = msg.sender;
     pauser = msg.sender;
@@ -60,41 +58,31 @@ contract PoolFactory is IPoolFactory {
   }
 
   /// @inheritdoc IPoolFactory
-  function isPool(
-    address pool
-  ) external view returns (bool) {
+  function isPool(address pool) external view returns (bool) {
     return _isPool[pool];
   }
 
   /// @inheritdoc IPoolFactory
-  function setVoter(
-    address _voter
-  ) external {
+  function setVoter(address _voter) external {
     if (msg.sender != voter) revert NotVoter();
     voter = _voter;
     emit SetVoter(_voter);
   }
 
-  function setPauser(
-    address _pauser
-  ) external {
+  function setPauser(address _pauser) external {
     if (msg.sender != pauser) revert NotPauser();
     if (_pauser == address(0)) revert ZeroAddress();
     pauser = _pauser;
     emit SetPauser(_pauser);
   }
 
-  function setPauseState(
-    bool _state
-  ) external {
+  function setPauseState(bool _state) external {
     if (msg.sender != pauser) revert NotPauser();
     isPaused = _state;
     emit SetPauseState(_state);
   }
 
-  function setFeeManager(
-    address _feeManager
-  ) external {
+  function setFeeManager(address _feeManager) external {
     if (msg.sender != feeManager) revert NotFeeManager();
     if (_feeManager == address(0)) revert ZeroAddress();
     feeManager = _feeManager;
