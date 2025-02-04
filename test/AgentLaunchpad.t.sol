@@ -41,7 +41,16 @@ contract AgentLaunchpadTest is Test {
     launchpad.initialize(address(maha), address(aerodromeFactory), owner);
 
     vm.startPrank(owner);
-    launchpad.setSettings(100e18, 100 days, 1 days, 1000 ether, governor, address(txChecker), feeDestination, 0.1e18);
+    launchpad.setSettings(
+      100e18,
+      100 days,
+      1 days,
+      1000 ether,
+      governor,
+      address(txChecker),
+      feeDestination,
+      0.1e18
+    );
     launchpad.whitelist(address(txChecker), true);
     launchpad.whitelist(address(curve), true);
     vm.stopPrank();
@@ -71,8 +80,8 @@ contract AgentLaunchpadTest is Test {
     vm.stopPrank();
 
     vm.startPrank(investor);
-    maha.approve(address(launchpad), 1000 ether);
-    launchpad.presaleSwap(_token, 10_000 ether, 10_000 ether, true);
+    maha.approve(address(launchpad), 10000 ether);
+    launchpad.presaleSwap(_token, 10_000 ether, 1000 ether, true);
     launchpad.presaleSwap(_token, 1000 ether, 1000 ether, false);
     vm.stopPrank();
   }
@@ -84,20 +93,18 @@ contract AgentLaunchpadTest is Test {
     vm.startPrank(creator);
     maha.approve(address(launchpad), 1000 ether);
 
-    IAgentToken _token = IAgentToken(
-      launchpad.create(
-        IAgentLaunchpad.CreateParams({
-          bondingCurve: address(curve),
-          fundManagers: new address[](0),
-          duration: 2 days,
-          goal: 1000 ether,
-          limitPerWallet: 100_000_000 ether,
-          metadata: "{}",
-          name: "testing",
-          salt: keccak256("test"),
-          symbol: "test"
-        })
-      )
+    launchpad.create(
+      IAgentLaunchpad.CreateParams({
+        bondingCurve: address(curve),
+        fundManagers: new address[](0),
+        duration: 2 days,
+        goal: 1000 ether,
+        limitPerWallet: 100_000_000 ether,
+        metadata: "{}",
+        name: "testing",
+        salt: keccak256("test"),
+        symbol: "test"
+      })
     );
     vm.stopPrank();
     vm.assertEq(launchpad.getTotalTokens(), 1);
