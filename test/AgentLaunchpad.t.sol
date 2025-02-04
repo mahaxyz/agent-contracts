@@ -9,14 +9,14 @@ import {IAgentLaunchpad} from "../contracts/interfaces/IAgentLaunchpad.sol";
 import {IAgentToken} from "../contracts/interfaces/IAgentToken.sol";
 import {AgentLaunchpad} from "../contracts/launchpad/AgentLaunchpad.sol";
 
-import {MockAerodromePool} from "../contracts/mocks/MockAerodromePool.sol";
-import {MockERC20} from "../contracts/mocks/MockERC20.sol";
+import {MockAerodromeFactory} from "contracts/mocks/MockAerodromeFactory.sol";
+import {MockERC20, IERC20} from "../contracts/mocks/MockERC20.sol";
 import "forge-std/Test.sol";
 
 contract AgentLaunchpadTest is Test {
   AgentLaunchpad public launchpad;
   MockERC20 public maha;
-  MockAerodromePool public aerodromeFactory;
+  MockAerodromeFactory public aerodromeFactory;
   TxChecker public txChecker;
   FixedCurve public curve;
 
@@ -29,7 +29,7 @@ contract AgentLaunchpadTest is Test {
   function setUp() public {
     launchpad = new AgentLaunchpad();
     maha = new MockERC20("Mock MAHA", "MAHA", 18);
-    aerodromeFactory = new MockAerodromePool();
+    aerodromeFactory = new MockAerodromeFactory();
     txChecker = new TxChecker();
     curve = new FixedCurve();
 
@@ -58,7 +58,6 @@ contract AgentLaunchpadTest is Test {
       launchpad.create(
         IAgentLaunchpad.CreateParams({
           bondingCurve: address(curve),
-          fundingToken: maha,
           fundManagers: new address[](0),
           duration: 2 days,
           goal: 100_000 ether,
@@ -66,7 +65,8 @@ contract AgentLaunchpadTest is Test {
           metadata: "{}",
           name: "testing",
           salt: keccak256("test"),
-          symbol: "test"
+          symbol: "test",
+          fundingToken: IERC20(maha)
         })
       )
     );
@@ -77,6 +77,135 @@ contract AgentLaunchpadTest is Test {
     token.approve(address(launchpad), 10_000 ether);
     launchpad.presaleSwap(token, 10_000 ether, 0, true);
     launchpad.presaleSwap(token, 1000 ether, 0, false);
+    vm.stopPrank();
+  }
+
+  function test_ShouldReturnCorrectLength() public {
+    _initLaunchpad();
+    vm.assertEq(launchpad.getTotalTokens(), 0);
+
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    launchpad.create(
+      IAgentLaunchpad.CreateParams({
+        bondingCurve: address(curve),
+        fundManagers: new address[](0),
+        salt: keccak256("test"),
+        metadata: "{}",
+        name: "testing",
+        symbol: "test",
+        duration: 2 days,
+        goal: 1000 ether,
+        limitPerWallet: 100_000_000 ether,
+        fundingToken: IERC20(maha)
+      })
+    );
+    vm.stopPrank();
+    vm.assertEq(launchpad.getTotalTokens(), 1);
+  }
+
+  function test_ShouldRevertIfInvalidInitParams() public {
+    _initLaunchpad();
+
+    IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
+      bondingCurve: address(curve),
+      fundManagers: new address[](0),
+      duration: 0 seconds,
+      goal: 1000 ether,
+      limitPerWallet: 100_000_000 ether,
+      metadata: "{}",
+      name: "testing",
+      salt: keccak256("test"),
+      symbol: "test",
+      fundingToken: IERC20(maha)
+    });
+
+    // Test invalid duration (too short)
+    params.duration = 10 seconds;
+    vm.expectRevert("!duration");
+    launchpad.create(params);
+
+    // Test invalid duration (too long)
+    params.duration = launchpad.maxDuration() + 1;
+    vm.expectRevert("!duration");
+    launchpad.create(params);
+
+    // Test invalid funding goal (too low)
+    params.duration = launchpad.minDuration(); // Reset to valid duration
+    params.goal = launchpad.minFundingGoal() - 1;
+    vm.expectRevert("!minFundingGoal");
+    launchpad.create(params);
+
+    // Test invalid bonding curve (not whitelisted)
+    params.goal = launchpad.minFundingGoal(); // Reset to valid goal
+    params.bondingCurve = address(0); // Invalid bonding curve
+    vm.expectRevert("!bondingCurve");
+    launchpad.create(params);
+  }
+
+  function test_ShouldRevertIfPresaleNotOver() public {
+    _initLaunchpad();
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    IAgentToken token = IAgentToken(
+      launchpad.create(
+        IAgentLaunchpad.CreateParams({
+          bondingCurve: address(curve),
+          fundManagers: new address[](0),
+          salt: keccak256("test"),
+          metadata: "{}",
+          name: "testing",
+          symbol: "test",
+          duration: 2 days,
+          goal: 1000 ether,
+          limitPerWallet: 100_000_000 ether,
+          fundingToken: IERC20(maha)
+        })
+      )
+    );
+    vm.stopPrank();
+
+    vm.startPrank(address(launchpad));
+    // Force unlock before test
+    token.unlock();
+    vm.stopPrank();
+
+    vm.expectRevert("presale is over");
+    launchpad.graduate(IAgentToken(address(token)));
+  }
+
+  function test_ShouldRevertIfFundingGoalNotMet() public {
+    _initLaunchpad();
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    IAgentToken token = IAgentToken(
+      launchpad.create(
+        IAgentLaunchpad.CreateParams({
+          bondingCurve: address(curve),
+          fundManagers: new address[](0),
+          salt: keccak256("test"),
+          metadata: "{}",
+          name: "testing",
+          symbol: "test",
+          duration: 2 days,
+          goal: 1000 ether,
+          limitPerWallet: 100_000_000 ether,
+          fundingToken: IERC20(maha)
+        })
+      )
+    );
+    vm.stopPrank();
+    vm.expectRevert("!fundingGoal");
+    launchpad.graduate(IAgentToken(address(token)));
+  }
+
+  function test_ShouldRevertIfNonOwner() public {
+    vm.expectRevert();
+    vm.startPrank(investor);
+    launchpad.whitelist(address(txChecker), true);
     vm.stopPrank();
   }
 }
