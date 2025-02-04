@@ -106,7 +106,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     // check if the address starts with 0xda0
     // require(startsWithDA0(address(token)), "!startsWithDA0");
 
-    tokenToNftId[token] = tokens.length - 1;
+    tokenToNftId[token] = tokens.length;
     curves[token] = IBondingCurve(p.bondingCurve);
     _mint(msg.sender, tokenToNftId[token]);
 
