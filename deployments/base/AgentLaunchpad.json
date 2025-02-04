@@ -1,5 +1,5 @@
 {
-  "address": "0xc4ad6f0e57Fd84980463E044bC490B38E463583B",
+  "address": "0x33d8074bd78637c911BD0b6de255d7Ca667D3711",
   "abi": [
     {
       "inputs": [],
@@ -394,7 +394,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "raised",
+          "name": "assetsRaised",
           "type": "uint256"
         }
       ],
@@ -427,6 +427,12 @@
           "internalType": "uint256",
           "name": "tokensOut",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
         }
       ],
       "name": "TokensPurchased",
@@ -450,13 +456,19 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "_assetsOut",
+          "name": "assetsOut",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "_tokensIn",
+          "name": "tokensIn",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
           "type": "uint256"
         }
       ],
@@ -1435,7 +1447,7 @@
   "args": [
     "0xF3b8B9D4BEE85C773d670eAA1f4d548d6A4445c7",
     "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
-    "0x2c05592970A622ae6be1fEcBCE367d42bf1FD829",
+    "0x50610a3cfaAB0cA2C08389A3c817e69F14DA5AAB",
     "0x8ccf462f969F0aa790d556614f165a605716763e"
   ],
   "numDeployments": 1
