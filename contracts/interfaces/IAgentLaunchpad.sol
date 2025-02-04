@@ -58,8 +58,10 @@ interface IAgentLaunchpad {
     uint256 releaseTime;
   }
 
-  event TokensPurchased(address indexed token, address indexed buyer, uint256 assetsIn, uint256 tokensOut);
-  event TokensSold(address indexed token, address indexed seller, uint256 _assetsOut, uint256 _tokensIn);
+  event TokensPurchased(
+    address indexed token, address indexed buyer, uint256 assetsIn, uint256 tokensOut, uint256 price
+  );
+  event TokensSold(address indexed token, address indexed seller, uint256 assetsOut, uint256 tokensIn, uint256 price);
   event SettingsUpdated(
     uint256 creationFee,
     uint256 maxDuration,
@@ -70,7 +72,7 @@ interface IAgentLaunchpad {
     address feeDestination,
     uint256 feeCutE18
   );
-  event TokenGraduated(address indexed token, uint256 raised);
+  event TokenGraduated(address indexed token, uint256 assetsRaised);
 
   /// @notice Returns the token at the specified index
   /// @param index The index of the token

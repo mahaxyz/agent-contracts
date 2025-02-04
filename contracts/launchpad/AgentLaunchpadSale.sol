@@ -30,7 +30,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
       fundingToken.transferFrom(msg.sender, feeDestination, fee);
 
       // calculate the amount of tokens to give
-      (uint256 _tokensOut, uint256 _assetsIn) =
+      (uint256 _tokensOut, uint256 _assetsIn, uint256 price) =
         curves[token].calculateBuy(tokensToBuyAfterFees, fundingProgress[token], fundingGoals[token]);
       fundingProgress[token] += _assetsIn;
 
@@ -39,10 +39,10 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
       token.transfer(msg.sender, _tokensOut);
       require(_tokensOut >= minAmountOut, "!minAmountOut");
 
-      emit TokensPurchased(address(token), msg.sender, _assetsIn, _tokensOut);
+      emit TokensPurchased(address(token), msg.sender, _assetsIn, _tokensOut, price);
     } else {
       // calculate the amount of tokens to take
-      (uint256 _assetsOut, uint256 _tokensIn) =
+      (uint256 _assetsOut, uint256 _tokensIn, uint256 price) =
         curves[token].calculateSell(tokensToBuyOrSell, fundingProgress[token], fundingGoals[token]);
       fundingProgress[token] -= _assetsOut;
 
@@ -56,7 +56,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
       token.transferFrom(msg.sender, address(this), _tokensIn);
       require(assetsOutAfterFee >= minAmountOut, "!minAmountOut");
 
-      emit TokensSold(address(token), msg.sender, _assetsOut, _tokensIn);
+      emit TokensSold(address(token), msg.sender, _assetsOut, _tokensIn, price);
     }
 
     // if funding goal has been met, automatically graduate the token
