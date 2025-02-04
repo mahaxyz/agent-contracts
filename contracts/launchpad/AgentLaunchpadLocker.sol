@@ -87,7 +87,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC20(pool.token0()).transfer(dest, fee0 - govFee0);
     IERC20(pool.token1()).transfer(dest, fee1 - govFee1);
 
-    IERC20(pool.token0()).transfer(feeDestination, fee0 - govFee0);
-    IERC20(pool.token1()).transfer(feeDestination, fee1 - govFee1);
+    IERC20(pool.token0()).transfer(feeDestination, govFee0);
+    IERC20(pool.token1()).transfer(feeDestination, govFee1);
   }
 }
