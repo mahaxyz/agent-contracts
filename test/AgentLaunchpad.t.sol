@@ -76,4 +76,75 @@ contract AgentLaunchpadTest is Test {
     launchpad.presaleSwap(_token, 1000 ether, 1000 ether, false);
     vm.stopPrank();
   }
+
+  function test_ShouldReturnCorrectLength() public {
+    _initLaunchpad();
+    vm.assertEq(launchpad.getTotalTokens(), 0);
+
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    IAgentToken _token = IAgentToken(
+      launchpad.create(
+        IAgentLaunchpad.CreateParams({
+          bondingCurve: address(curve),
+          fundManagers: new address[](0),
+          duration: 2 days,
+          goal: 1000 ether,
+          limitPerWallet: 100_000_000 ether,
+          metadata: "{}",
+          name: "testing",
+          salt: keccak256("test"),
+          symbol: "test"
+        })
+      )
+    );
+    vm.stopPrank();
+    vm.assertEq(launchpad.getTotalTokens(), 1);
+  }
+
+  function test_ShouldRevertIfInvalidInitParams() public {
+    _initLaunchpad();
+
+    IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
+      bondingCurve: address(curve),
+      fundManagers: new address[](0),
+      duration: 0 seconds,
+      goal: 1000 ether,
+      limitPerWallet: 100_000_000 ether,
+      metadata: "{}",
+      name: "testing",
+      salt: keccak256("test"),
+      symbol: "test"
+    });
+
+    // Test invalid duration (too short)
+    params.duration = 10 seconds;
+    vm.expectRevert("!duration");
+    launchpad.create(params);
+
+    // Test invalid duration (too long)
+    params.duration = launchpad.maxDuration() + 1;
+    vm.expectRevert("!duration");
+    launchpad.create(params);
+
+    // Test invalid funding goal (too low)
+    params.duration = launchpad.minDuration(); // Reset to valid duration
+    params.goal = launchpad.minFundingGoal() - 1;
+    vm.expectRevert("!minFundingGoal");
+    launchpad.create(params);
+
+    // Test invalid bonding curve (not whitelisted)
+    params.goal = launchpad.minFundingGoal(); // Reset to valid goal
+    params.bondingCurve = address(0); // Invalid bonding curve
+    vm.expectRevert("!bondingCurve");
+    launchpad.create(params);
+  }
+
+  function test_ShouldRevertIfNonOwner() public {
+    vm.expectRevert();
+    vm.startPrank(investor);
+    launchpad.whitelist(address(txChecker), true);
+    vm.stopPrank();
+  }
 }
