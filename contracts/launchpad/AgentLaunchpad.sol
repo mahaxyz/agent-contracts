@@ -103,6 +103,9 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     fundingTokens[token] = p.fundingToken;
     fundingGoals[token] = p.goal;
 
+    // check if the address starts with 0xda0
+    // require(startsWithDA0(address(token)), "!startsWithDA0");
+
     tokenToNftId[token] = tokens.length - 1;
     curves[token] = IBondingCurve(p.bondingCurve);
     _mint(msg.sender, tokenToNftId[token]);
@@ -112,5 +115,10 @@ contract AgentLaunchpad is AgentLaunchpadSale {
 
   function getTotalTokens() external view returns (uint256) {
     return tokens.length;
+  }
+
+  function startsWithDA0(address _addr) public pure returns (bool) {
+    bytes20 addrBytes = bytes20(_addr);
+    return (uint8(addrBytes[0]) == 0xda && uint8(addrBytes[1]) == 0x0);
   }
 }

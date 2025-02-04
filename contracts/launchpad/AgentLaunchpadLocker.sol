@@ -17,7 +17,6 @@ import {IAeroPool} from "../interfaces/IAeroPool.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {AgentLaunchpadBase} from "./AgentLaunchpadBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
@@ -68,6 +67,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     delete liquidityLocks[msg.sender];
 
     IERC721(address(aeroFactory)).transferFrom(address(this), msg.sender, tokenId);
+    // todo add event
   }
 
   function claimFees(address token) external {
