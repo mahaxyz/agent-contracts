@@ -51,6 +51,15 @@ contract AgentLaunchpadTest is Test {
     vm.stopPrank();
   }
 
+  function test_ShouldInitAgentLaunchpadCorrectly() public {
+    _initLaunchpad();
+    assertEq(address(launchpad.owner()), owner);
+    assertEq(address(launchpad.coreToken()), address(maha));
+    assertEq(address(launchpad.aeroFactory()), address(aerodromeFactory));
+    assertEq(launchpad.name(), "AI Agent Launchpad");
+    assertEq(launchpad.symbol(), "AGENTS");
+  }
+
   function test_fullLaunch() public {
     _initLaunchpad();
 
@@ -87,29 +96,85 @@ contract AgentLaunchpadTest is Test {
     vm.stopPrank();
   }
 
-  function test_ShouldReturnCorrectLength() public {
+  function test_ShouldBeAbleToCreateTokens() public {
     _initLaunchpad();
-    vm.assertEq(launchpad.getTotalTokens(), 0);
 
     vm.startPrank(creator);
-    maha.approve(address(launchpad), 1000 ether);
+    // Give approval as creation fee is deducted
+    maha.approve(address(launchpad), 100 ether);
 
-    launchpad.create(
-      IAgentLaunchpad.CreateParams({
-        bondingCurve: address(curve),
-        fundManagers: new address[](0),
-        salt: keccak256("test"),
-        metadata: "{}",
-        name: "testing",
-        symbol: "test",
-        duration: 2 days,
-        goal: 1000 ether,
-        limitPerWallet: 100_000_000 ether,
-        fundingToken: IERC20(maha)
-      })
+    IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
+      bondingCurve: address(curve),
+      fundManagers: new address[](0),
+      duration: 2 days,
+      goal: 20_000 ether,
+      limitPerWallet: 100_000_000 ether,
+      metadata: "{}",
+      name: "Launchpad Token Test ",
+      salt: keccak256("launchpad test"),
+      symbol: "LTT",
+      fundingToken: IERC20(maha)
+    });
+
+    address token = launchpad.create(params);
+    vm.stopPrank();
+    // Should update the take properly after creation of token
+    assertEq(maha.balanceOf(address(0xdead)), 100 ether);
+    assertEq(
+      address(launchpad.fundingTokens(IAgentToken(token))),
+      address(maha)
+    );
+    assertEq(launchpad.fundingGoals(IAgentToken(token)), params.goal);
+    assertEq(address(launchpad.tokens(0)), token);
+    assertEq(launchpad.balanceOf(creator), 1);
+    assertEq(launchpad.tokenToNftId(IAgentToken(token)), 1);
+    assertEq(launchpad.getTotalTokens(), 1);
+  }
+
+  function test_ShouldAbleToGraduateTokens() public {
+    _initLaunchpad();
+
+    vm.startPrank(owner);
+    launchpad.setSettings(
+      100e18,
+      100 days,
+      1 days,
+      0,
+      governor,
+      address(txChecker),
+      feeDestination,
+      0.1e18
     );
     vm.stopPrank();
-    vm.assertEq(launchpad.getTotalTokens(), 1);
+    // Create the Tokens from creator
+    vm.startPrank(creator);
+    // Give approval as creation fee is deducted
+    maha.approve(address(launchpad), 100 ether);
+
+    IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
+      bondingCurve: address(curve),
+      fundManagers: new address[](0),
+      duration: 2 days,
+      goal: 1000 ether, // Funding goal is 1000 ether
+      limitPerWallet: 10000000000 ether,
+      metadata: "{}",
+      name: "AI Agent Launch Token ",
+      salt: keccak256("AI agent launch token"),
+      symbol: "AALT",
+      fundingToken: IERC20(maha)
+    });
+
+    address agentToken = launchpad.create(params);
+    vm.stopPrank();
+    // Invertor buys the tokens
+    vm.startPrank(investor);
+    maha.approve(address(launchpad), type(uint256).max);
+    launchpad.presaleSwap(IAgentToken(agentToken), 257_500_000 ether, 0, true);
+    (uint256 amount,uint256 startTime,uint256 duration) = launchpad.tokenLocks(agentToken);
+    console.log(" ~ test_ShouldAbleToGraduateTokens ~ duration:", duration);
+    console.log("~ test_ShouldAbleToGraduateTokens ~ startTime:", startTime);
+    console.log("~ test_ShouldAbleToGraduateTokens ~ amount:", amount);  
+    vm.stopPrank();
   }
 
   function test_ShouldRevertIfInvalidInitParams() public {
@@ -214,5 +279,17 @@ contract AgentLaunchpadTest is Test {
     vm.startPrank(investor);
     launchpad.whitelist(address(txChecker), true);
     vm.stopPrank();
+  }
+
+  function test_ShouldReturnTrueIfStartsWithDA0() public view {
+    address da00AddrBytes = 0xDA00000000000000000000000000000000000000;
+    bool result = launchpad.startsWithDA0(da00AddrBytes);
+    assertTrue(result);
+  }
+
+  function test_ShouldReturnFalseIfStartsWithDA0() public {
+    address alice = makeAddr("alice");
+    bool result = launchpad.startsWithDA0(alice);
+    assertFalse(result);
   }
 }
