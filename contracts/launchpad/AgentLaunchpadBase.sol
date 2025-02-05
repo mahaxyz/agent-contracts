@@ -24,6 +24,7 @@ import {ERC721EnumerableUpgradeable} from
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
+  address public tokenImplementation;
   IERC20[] public tokens;
   mapping(address => bool) public whitelisted;
   uint256 public creationFee;

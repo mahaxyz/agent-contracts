@@ -19,44 +19,44 @@ import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
 
 abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
-  function presaleSwap(IAgentToken token, uint256 amountIn, uint256 minAmountOut, bool buy) external {
+  function presaleSwap(IAgentToken token, uint256 tokensToBuyOrSell, uint256 minAmountOut, bool buy) external {
     require(!token.unlocked(), "presale is over");
     IERC20 fundingToken = IERC20(fundingTokens[token]);
 
     if (buy) {
       // take fees
-      uint256 amountInAfterFee = amountIn * (9970) / 10_000;
-      uint256 fee = amountIn - amountInAfterFee;
+      uint256 tokensToBuyAfterFees = tokensToBuyOrSell * (9970) / 10_000;
+      uint256 fee = tokensToBuyOrSell - tokensToBuyAfterFees;
       fundingToken.transferFrom(msg.sender, feeDestination, fee);
 
       // calculate the amount of tokens to give
-      (uint256 amountGiven, uint256 amountTaken) =
-        curves[token].calculateBuy(amountInAfterFee, fundingProgress[token], fundingGoals[token]);
-      fundingProgress[token] += amountTaken;
+      (uint256 _tokensOut, uint256 _assetsIn, uint256 price) =
+        curves[token].calculateBuy(tokensToBuyAfterFees, fundingProgress[token], fundingGoals[token]);
+      fundingProgress[token] += _assetsIn;
 
       // settle the trade
-      fundingToken.transferFrom(msg.sender, address(this), amountTaken);
-      token.transfer(msg.sender, amountGiven);
-      require(amountGiven >= minAmountOut, "!minAmountOut");
+      fundingToken.transferFrom(msg.sender, address(this), _assetsIn);
+      token.transfer(msg.sender, _tokensOut);
+      require(_tokensOut >= minAmountOut, "!minAmountOut");
 
-      emit TokensPurchased(token, msg.sender, amountTaken, amountGiven);
+      emit TokensPurchased(address(token), msg.sender, _assetsIn, _tokensOut, price);
     } else {
       // calculate the amount of tokens to take
-      (uint256 amountGiven, uint256 amountTaken) =
-        curves[token].calculateSell(amountIn, fundingProgress[token], fundingGoals[token]);
-      fundingProgress[token] -= amountGiven;
+      (uint256 _assetsOut, uint256 _tokensIn, uint256 price) =
+        curves[token].calculateSell(tokensToBuyOrSell, fundingProgress[token], fundingGoals[token]);
+      fundingProgress[token] -= _assetsOut;
 
       // take fees
-      uint256 amountGivenAfterFee = amountIn * (9970) / 10_000;
-      uint256 fee = amountGiven - amountGivenAfterFee;
+      uint256 assetsOutAfterFee = _assetsOut * (9970) / 10_000;
+      uint256 fee = _assetsOut - assetsOutAfterFee;
       fundingToken.transfer(feeDestination, fee);
 
       // settle the trade
-      fundingToken.transfer(msg.sender, amountGivenAfterFee);
-      token.transferFrom(msg.sender, address(this), amountTaken);
-      require(amountGiven >= minAmountOut, "!minAmountOut");
+      fundingToken.transfer(msg.sender, assetsOutAfterFee);
+      token.transferFrom(msg.sender, address(this), _tokensIn);
+      require(assetsOutAfterFee >= minAmountOut, "!minAmountOut");
 
-      emit TokensSold(token, msg.sender, amountTaken, amountGiven);
+      emit TokensSold(address(token), msg.sender, _assetsOut, _tokensIn, price);
     }
 
     // if funding goal has been met, automatically graduate the token
@@ -80,6 +80,8 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     // keep 80% of the raise and lock 60% of the TOKEN to the treasury
     fundingToken.transfer(address(token), 4 * raised / 5);
     _lockTokens(token, 3 * token.totalSupply() / 5);
+
+    emit TokenGraduated(address(token), raised);
   }
 
   function checkFundingGoalMet(IAgentToken token) public view returns (bool) {
@@ -97,5 +99,6 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
 
     IAeroPool(pool).mint(address(this));
     _lockLiquidity(token, pool);
+    // todo add event
   }
 }

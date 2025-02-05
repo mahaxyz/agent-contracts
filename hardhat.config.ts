@@ -16,6 +16,7 @@ const defaultAccount = {
   count: 20,
   passphrase: "",
 };
+
 const _network = (url: string, gasPrice: number | "auto" = "auto") => ({
   url,
   accounts: defaultAccount,
@@ -46,9 +47,10 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      // forking: {
-      //   url: `https://rpc.ankr.com/eth`,
-      // },
+      allowUnlimitedContractSize: true,
+      forking: {
+        url: `https://mainnet.base.org`,
+      },
     },
     base: _network("https://mainnet.base.org"),
     bsc: _network("https://bsc-dataseed1.bnbchain.org"),

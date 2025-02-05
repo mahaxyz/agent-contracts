@@ -17,7 +17,6 @@ import {IAeroPool} from "../interfaces/IAeroPool.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {AgentLaunchpadBase} from "./AgentLaunchpadBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
@@ -28,6 +27,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     require(tokenLocks[address(token)].amount == 0, "lock exists");
 
     tokenLocks[address(token)] = TokenLock({amount: amount, startTime: block.timestamp, duration: duration});
+    // todo add event
   }
 
   function _lockLiquidity(IAgentToken token, address pool) internal {
@@ -37,6 +37,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
       amount: IERC20(pool).balanceOf(address(this)),
       releaseTime: token.expiry()
     });
+    // todo add event
   }
 
   function releaseTokens() external {
@@ -54,6 +55,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC20(msg.sender).transfer(msg.sender, releasableAmount);
 
     if (lock.amount == 0) delete tokenLocks[msg.sender];
+    // todo add event
   }
 
   function releaseLiquidityLock() external {
@@ -65,13 +67,14 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     delete liquidityLocks[msg.sender];
 
     IERC721(address(aeroFactory)).transferFrom(address(this), msg.sender, tokenId);
+    // todo add event
   }
 
   function claimFees(address token) external {
     IERC20 fundingToken = IERC20(fundingTokens[IAgentToken(token)]);
 
     // if funding token is the core token; then no fees get charged. else the feeCutE18 is applied
-    uint256 _feeCutE18 = fundingToken == coreToken ? 1e18 : feeCutE18;
+    uint256 _feeCutE18 = fundingToken == coreToken ? 0 : feeCutE18;
 
     LiquidityLock storage lock = liquidityLocks[token];
     require(lock.amount != 0, "No lock locked");
@@ -87,7 +90,8 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     IERC20(pool.token0()).transfer(dest, fee0 - govFee0);
     IERC20(pool.token1()).transfer(dest, fee1 - govFee1);
 
-    IERC20(pool.token0()).transfer(feeDestination, fee0 - govFee0);
-    IERC20(pool.token1()).transfer(feeDestination, fee1 - govFee1);
+    IERC20(pool.token0()).transfer(feeDestination, govFee0);
+    IERC20(pool.token1()).transfer(feeDestination, govFee1);
+    // todo add event
   }
 }

@@ -13,17 +13,20 @@
 
 pragma solidity ^0.8.0;
 
-import {ERC20, IBondingCurve, IERC20, ILocker, ITxChecker} from "./AgentTokenBase.sol";
+import {IBondingCurve, IERC20, ILocker, ITxChecker} from "./AgentTokenBase.sol";
 import {AgentTokenPresale} from "./AgentTokenPresale.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract AgentToken is AgentTokenPresale {
-  constructor(InitParams memory p) ERC20(p.name, p.symbol) EIP712(p.symbol, "1") {
+  function initialize(InitParams memory p) public initializer {
     launchpad = msg.sender;
-    expiry = p.expiry;
+    expiry = block.timestamp + p.duration;
     limitPerWallet = p.limitPerWallet;
     metadata = p.metadata;
     unlocked = false;
+
+    __ERC20_init(p.name, p.symbol);
+    __EIP712_init(p.name, "1");
 
     _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
     _grantRole(DEFAULT_ADMIN_ROLE, address(this)); // contract can only manage roles
@@ -33,5 +36,7 @@ contract AgentToken is AgentTokenPresale {
     for (uint256 index = 0; index < p.fundManagers.length; index++) {
       _grantRole(FUND_MANAGER, p.fundManagers[index]);
     }
+
+    // todo add event
   }
 }

@@ -58,8 +58,10 @@ interface IAgentLaunchpad {
     uint256 releaseTime;
   }
 
-  event TokensPurchased(IAgentToken indexed token, address indexed buyer, uint256 amountToken, uint256 amountETH);
-  event TokensSold(IAgentToken indexed token, address indexed seller, uint256 amountToken, uint256 amountETH);
+  event TokensPurchased(
+    address indexed token, address indexed buyer, uint256 assetsIn, uint256 tokensOut, uint256 price
+  );
+  event TokensSold(address indexed token, address indexed seller, uint256 assetsOut, uint256 tokensIn, uint256 price);
   event SettingsUpdated(
     uint256 creationFee,
     uint256 maxDuration,
@@ -70,6 +72,7 @@ interface IAgentLaunchpad {
     address feeDestination,
     uint256 feeCutE18
   );
+  event TokenGraduated(address indexed token, uint256 assetsRaised);
 
   /// @notice Returns the token at the specified index
   /// @param index The index of the token
@@ -166,7 +169,8 @@ interface IAgentLaunchpad {
   /// @param _fundingToken The funding token
   /// @param _aeroFactory The AeroPoolFactory instance
   /// @param _owner The owner of the contract
-  function initialize(address _fundingToken, address _aeroFactory, address _owner) external;
+  function initialize(address _fundingToken, address _aeroFactory, address _tokenImplementation, address _owner)
+    external;
 
   /// @notice Sets the settings for the contract
   /// @param _creationFee The creation fee
