@@ -41,10 +41,24 @@ contract AgentLaunchpadTest is Test {
 
   function _initLaunchpad() internal {
     IAgentToken tokenImpl = IAgentToken(new AgentToken());
-    launchpad.initialize(address(maha), address(aerodromeFactory), address(tokenImpl), owner);
+    launchpad.initialize(
+      address(maha),
+      address(aerodromeFactory),
+      address(tokenImpl),
+      owner
+    );
 
     vm.startPrank(owner);
-    launchpad.setSettings(100e18, 100 days, 1 days, 1000 ether, governor, address(txChecker), feeDestination, 0.1e18);
+    launchpad.setSettings(
+      100e18,
+      100 days,
+      1 days,
+      1000 ether,
+      governor,
+      address(txChecker),
+      feeDestination,
+      0.1e18
+    );
     launchpad.whitelist(address(txChecker), true);
     launchpad.whitelist(address(curve), true);
     launchpad.whitelist(address(maha), true);
@@ -170,11 +184,12 @@ contract AgentLaunchpadTest is Test {
     vm.startPrank(investor);
     maha.approve(address(launchpad), type(uint256).max);
     launchpad.presaleSwap(IAgentToken(agentToken), 257_500_000 ether, 0, true);
-    (uint256 amount,uint256 startTime,uint256 duration) = launchpad.tokenLocks(agentToken);
-    console.log(" ~ test_ShouldAbleToGraduateTokens ~ duration:", duration);
-    console.log("~ test_ShouldAbleToGraduateTokens ~ startTime:", startTime);
-    console.log("~ test_ShouldAbleToGraduateTokens ~ amount:", amount);  
     vm.stopPrank();
+    address pool = aerodromeFactory.getPool(agentToken, address(maha), false);
+    assertEq(launchpad.checkFundingGoalMet(IAgentToken(agentToken)), true);
+    assertEq(aerodromeFactory.isPool_(pool), true); // Goal Reached Pool Created for Agent/Maha
+    assertGt(IERC20(maha).balanceOf(pool), 0);
+    assertGt(IERC20(agentToken).balanceOf(pool), 0);
   }
 
   function test_ShouldRevertIfInvalidInitParams() public {
@@ -272,6 +287,47 @@ contract AgentLaunchpadTest is Test {
     vm.stopPrank();
     vm.expectRevert("!fundingGoal");
     launchpad.graduate(IAgentToken(address(token)));
+  }
+
+  function test_ShouldRevertIfMinTokenOutGreaterThanTokenOut() public {
+    _initLaunchpad();
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    IAgentToken token = IAgentToken(
+      launchpad.create(
+        IAgentLaunchpad.CreateParams({
+          bondingCurve: address(curve),
+          fundManagers: new address[](0),
+          duration: 2 days,
+          goal: 10_000 ether,
+          limitPerWallet: 100_000_000 ether,
+          metadata: "{}",
+          name: "testing",
+          salt: keccak256("test"),
+          symbol: "test",
+          fundingToken: IERC20(maha)
+        })
+      )
+    );
+    vm.stopPrank();
+
+    vm.label(address(token), "token");
+
+    vm.startPrank(investor);
+    maha.approve(address(launchpad), type(uint256).max);
+    token.approve(address(launchpad), type(uint256).max);
+    vm.expectRevert("!minAmountOut");
+    launchpad.presaleSwap(token, 25_000_000 ether, 25_000_001 ether, true); // maha in, token out
+    vm.stopPrank();
+
+    vm.startPrank(investor);
+    maha.approve(address(launchpad), type(uint256).max);
+    token.approve(address(launchpad), type(uint256).max);
+    launchpad.presaleSwap(token, 25_000_000 ether, 0 ether, true); // maha in, token out
+    vm.expectRevert("!minAmountOut");
+    launchpad.presaleSwap(token, 24_000_000 ether, 24_000_001 ether, false); // maha in, token out
+    vm.stopPrank();
   }
 
   function test_ShouldRevertIfNonOwner() public {
