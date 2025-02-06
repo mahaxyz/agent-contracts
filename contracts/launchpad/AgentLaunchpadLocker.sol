@@ -17,7 +17,6 @@ import {IAeroPool} from "../interfaces/IAeroPool.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {AgentLaunchpadBase} from "./AgentLaunchpadBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
   function _lockTokens(IAgentToken token, uint256 amount) internal {
@@ -43,8 +42,9 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
   function releaseTokens() external {
     TokenLock storage lock = tokenLocks[msg.sender];
     require(lock.amount > 0, "No tokens locked");
+    uint256 elapsedTime =  lock.startTime - block.timestamp; 
+    
 
-    uint256 elapsedTime = block.timestamp - lock.startTime;
     uint256 releasableAmount = (lock.amount * elapsedTime) / lock.duration;
 
     if (elapsedTime >= lock.duration) releasableAmount = lock.amount;
@@ -63,10 +63,12 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     require(lock.amount != 0, "No lock locked");
     require(block.timestamp >= lock.releaseTime, "Liquidity is still locked");
 
-    uint256 tokenId = lock.amount;
+    uint256 amount = lock.amount;
+    address pool = address(lock.liquidityToken);
+
     delete liquidityLocks[msg.sender];
 
-    IERC721(address(aeroFactory)).transferFrom(address(this), msg.sender, tokenId);
+    IERC20(pool).transfer(msg.sender, amount);
     // todo add event
   }
 
