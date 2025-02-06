@@ -192,6 +192,51 @@ contract AgentLaunchpadTest is Test {
     assertGt(IERC20(agentToken).balanceOf(pool), 0);
   }
 
+  function test_ShouldReleaseTokens() public {
+    _initLaunchpad();
+    vm.startPrank(creator);
+    maha.approve(address(launchpad), 1000 ether);
+
+    IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
+      bondingCurve: address(curve),
+      fundManagers: new address[](0),
+      duration: 2 days,
+      goal: 1000 ether, // Funding goal is 1000 ether
+      limitPerWallet: 10000000000 ether,
+      metadata: "{}",
+      name: "AI Agent Launch Token ",
+      salt: keccak256("AI agent launch token"),
+      symbol: "AALT",
+      fundingToken: IERC20(maha)
+    });
+    address agentToken = launchpad.create(params);
+    vm.stopPrank();
+
+    vm.startPrank(investor);
+    maha.approve(address(launchpad), type(uint256).max);
+    launchpad.presaleSwap(IAgentToken(agentToken), 257_500_000 ether, 0, true); // maha in, token out
+    vm.stopPrank();
+    assertEq(launchpad.ownerOf(1), address(creator));
+
+    vm.warp(3 days);
+    vm.startPrank(agentToken);
+    launchpad.releaseTokens();
+    vm.stopPrank();
+
+    address pool = aerodromeFactory.getPool(agentToken, address(maha), false);
+    vm.startPrank(address(launchpad));
+
+    IERC20(pool).approve(agentToken, type(uint256).max);
+    vm.stopPrank();
+    launchpad.claimFees(agentToken);
+    vm.warp(IAgentToken(agentToken).expiry() + 1 seconds);
+    vm.startPrank(agentToken);
+    launchpad.releaseLiquidityLock();
+    vm.stopPrank();
+
+    
+  }
+
   function test_ShouldRevertIfInvalidInitParams() public {
     _initLaunchpad();
 
@@ -327,6 +372,17 @@ contract AgentLaunchpadTest is Test {
     launchpad.presaleSwap(token, 25_000_000 ether, 0 ether, true); // maha in, token out
     vm.expectRevert("!minAmountOut");
     launchpad.presaleSwap(token, 24_000_000 ether, 24_000_001 ether, false); // maha in, token out
+    vm.stopPrank();
+  }
+
+  function test_ShouldRevertIfInvalidLockAmount() public {
+    vm.startPrank(investor);
+    vm.expectRevert("No tokens locked");
+    launchpad.releaseTokens();
+    vm.expectRevert("No lock locked");
+    launchpad.releaseLiquidityLock();
+    vm.expectRevert("No lock locked");
+    launchpad.claimFees(address(maha));
     vm.stopPrank();
   }
 
