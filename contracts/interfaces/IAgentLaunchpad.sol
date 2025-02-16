@@ -35,33 +35,40 @@ interface IAgentLaunchpad {
 
   struct CreateParams {
     address bondingCurve;
-    address[] fundManagers;
     bytes32 salt;
     string metadata;
     string name;
     string symbol;
-    uint256 duration;
     uint256 goal;
+    uint256 tokensToSell;
     uint256 limitPerWallet;
     IERC20 fundingToken;
-  }
-
-  struct TokenLock {
-    uint256 amount;
-    uint256 startTime;
-    uint256 duration;
   }
 
   struct LiquidityLock {
     IAeroPool liquidityToken;
     uint256 amount;
-    uint256 releaseTime;
   }
 
+  event LiquidityLocked(address indexed token, address indexed pool, uint256 amount);
   event TokensPurchased(
-    address indexed token, address indexed buyer, uint256 assetsIn, uint256 tokensOut, uint256 price
+    address indexed token,
+    address indexed quoteToken,
+    address indexed buyer,
+    address destination,
+    uint256 assetsIn,
+    uint256 tokensOut,
+    uint256 price
   );
-  event TokensSold(address indexed token, address indexed seller, uint256 assetsOut, uint256 tokensIn, uint256 price);
+  event TokensSold(
+    address indexed token,
+    address indexed quoteToken,
+    address indexed seller,
+    address destination,
+    uint256 assetsOut,
+    uint256 tokensIn,
+    uint256 price
+  );
   event SettingsUpdated(
     uint256 creationFee,
     uint256 maxDuration,
@@ -139,12 +146,6 @@ interface IAgentLaunchpad {
   /// @return progress The funding progress for the given token
   function fundingProgress(IAgentToken token) external view returns (uint256 progress);
 
-  /// @notice Releases the tokens
-  function releaseTokens() external;
-
-  /// @notice Releases the liquidity lock
-  function releaseLiquidityLock() external;
-
   /// @notice Claims the fees for a given token
   /// @param token The token to claim the fees for
   function claimFees(address token) external;
@@ -154,7 +155,19 @@ interface IAgentLaunchpad {
   /// @param amountIn The amount of tokens to swap in
   /// @param minAmountOut The minimum amount of tokens to receive
   /// @param buy True if buying, false if selling
-  function presaleSwap(IAgentToken token, uint256 amountIn, uint256 minAmountOut, bool buy) external;
+  function presaleSwap(IAgentToken token, address destination, uint256 amountIn, uint256 minAmountOut, bool buy)
+    external;
+
+  function presaleSwapWithOdos(
+    IAgentToken token,
+    address destination,
+    uint256 tokensToBuyOrSell,
+    uint256 minAmountOut,
+    bool buy,
+    IERC20 inputToken,
+    uint256 inputAmount,
+    bytes memory data
+  ) external payable;
 
   /// @notice Graduates a given token
   /// @param token The token to graduate
@@ -169,8 +182,13 @@ interface IAgentLaunchpad {
   /// @param _fundingToken The funding token
   /// @param _aeroFactory The AeroPoolFactory instance
   /// @param _owner The owner of the contract
-  function initialize(address _fundingToken, address _aeroFactory, address _tokenImplementation, address _owner)
-    external;
+  function initialize(
+    address _fundingToken,
+    address _odos,
+    address _aeroFactory,
+    address _tokenImplementation,
+    address _owner
+  ) external;
 
   /// @notice Sets the settings for the contract
   /// @param _creationFee The creation fee

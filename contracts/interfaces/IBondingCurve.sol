@@ -14,12 +14,26 @@
 pragma solidity ^0.8.0;
 
 interface IBondingCurve {
-  function calculateBuy(uint256 quantityIn, uint256 raisedAmount, uint256 totalRaise)
+  struct DataBuy {
+    uint256 tokensToBuyAfterFees;
+    uint256 fundingProgress;
+    uint256 fundingGoals;
+    uint256 tokensToSell;
+  }
+
+  struct DataSell {
+    uint256 quantityOut;
+    uint256 raisedAmount;
+    uint256 totalRaise;
+    uint256 targetTokensToSell;
+  }
+
+  function calculateBuy(DataBuy memory data)
     external
     view
     returns (uint256 _tokensOut, uint256 _assetsIn, uint256 _priceE18);
 
-  function calculateSell(uint256 quantityOut, uint256 raisedAmount, uint256 totalRaise)
+  function calculateSell(DataSell memory data)
     external
     view
     returns (uint256 _amountOut, uint256 _amountIn, uint256 _priceE18);

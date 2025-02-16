@@ -18,30 +18,36 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 
 contract FixedCurve is IBondingCurve {
-  uint256 public totalTokensToSell = 250_000_000 ether; // 25% of the supply to sell
-
-  function calculateBuy(uint256 tokensToBuy, uint256 assetsRaised, uint256 totalAssetRaise)
+  //   uint256 tokensToBuyAfterFees;
+  // uint256 fundingProgress;
+  // uint256 fundingGoals;
+  // uint256 tokensToSell;
+  function calculateBuy(DataBuy memory data)
     public
-    view
+    pure
     returns (uint256 _tokensOut, uint256 _assetsIn, uint256 _priceE18)
   {
-    _priceE18 = totalAssetRaise * 1 ether / totalTokensToSell; // price in terms of 1 TOKEN = ? ASSET
+    _priceE18 = data.fundingGoals * 1 ether / data.tokensToSell; // price in terms of 1 TOKEN = ? ASSET
 
-    uint256 tokensSold = assetsRaised * 1 ether / _priceE18;
-    uint256 remainingToSell = totalTokensToSell - tokensSold;
+    uint256 tokensSold = data.fundingProgress * 1 ether / _priceE18;
+    uint256 remainingToSell = data.tokensToSell - tokensSold;
 
-    _tokensOut = Math.min(tokensToBuy, remainingToSell);
+    _tokensOut = Math.min(data.tokensToBuyAfterFees, remainingToSell);
     _assetsIn = _tokensOut * _priceE18 / 1 ether;
   }
 
-  function calculateSell(uint256 tokensToSell, uint256 assetsRaised, uint256 totalAssetRaise)
+  function calculateSell(DataSell memory data)
     public
-    view
+    pure
     returns (uint256 _assetsOut, uint256 _tokensIn, uint256 _priceE18)
   {
-    _priceE18 = totalAssetRaise * 1 ether / totalTokensToSell; // price in terms of 1 TOKEN = ? ASSET
-    uint256 tokensSold = assetsRaised * 1 ether / _priceE18;
-    _assetsOut = tokensToSell * _priceE18 / 1 ether;
-    _tokensIn = Math.min(tokensToSell, tokensSold);
+    // uint256 tokensToSell,
+    // uint256 assetsRaised,
+    // uint256 totalAssetRaise,
+    // uint256 targetTokensToSell
+    _priceE18 = data.totalRaise * 1 ether / data.targetTokensToSell; // price in terms of 1 TOKEN = ? ASSET
+    uint256 tokensSold = data.raisedAmount * 1 ether / _priceE18;
+    _assetsOut = data.quantityOut * _priceE18 / 1 ether;
+    _tokensIn = Math.min(data.quantityOut, tokensSold);
   }
 }

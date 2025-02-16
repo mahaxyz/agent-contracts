@@ -24,6 +24,8 @@ import {ERC721EnumerableUpgradeable} from
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
+  address public odos;
+
   address public tokenImplementation;
   IERC20[] public tokens;
   mapping(address => bool) public whitelisted;
@@ -43,10 +45,14 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   IAeroPoolFactory public aeroFactory;
   IERC20 public coreToken;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
-  mapping(address token => IAgentLaunchpad.TokenLock) public tokenLocks;
+
   mapping(IAgentToken token => IBondingCurve) public curves;
   mapping(IAgentToken token => uint256) public fundingGoals;
+  mapping(IAgentToken token => uint256) public tokensToSell;
+  mapping(IAgentToken token => uint256) public lastTradedPrice;
   mapping(IAgentToken token => uint256) public fundingProgress;
   mapping(IAgentToken token => IERC20) public fundingTokens;
   mapping(IAgentToken token => uint256) public tokenToNftId;
+
+  receive() external payable {}
 }

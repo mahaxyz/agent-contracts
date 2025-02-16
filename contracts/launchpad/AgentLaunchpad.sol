@@ -23,11 +23,15 @@ import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
-  function initialize(address _coreToken, address _aeroFactory, address _tokenImplementation, address _owner)
-    external
-    initializer
-  {
+  function initialize(
+    address _coreToken,
+    address _odos,
+    address _aeroFactory,
+    address _tokenImplementation,
+    address _owner
+  ) external initializer {
     coreToken = IERC20(_coreToken);
+    odos = _odos;
     aeroFactory = IAeroPoolFactory(_aeroFactory);
     tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
@@ -64,23 +68,22 @@ contract AgentLaunchpad is AgentLaunchpadSale {
   }
 
   function create(CreateParams memory p) external returns (address) {
-    require(p.duration >= minDuration, "!duration");
-    require(p.duration <= maxDuration, "!duration");
     require(p.goal >= minFundingGoal, "!minFundingGoal");
     require(whitelisted[p.bondingCurve], "!bondingCurve");
     require(whitelisted[address(p.fundingToken)], "!bondingCurve");
 
     if (creationFee > 0) p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
 
+    address[] memory whitelisted = new address[](2);
+    whitelisted[0] = odos;
+    whitelisted[1] = address(this);
+
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
       name: p.name,
       symbol: p.symbol,
       metadata: p.metadata,
-      fundManagers: p.fundManagers,
-      limitPerWallet: p.limitPerWallet,
-      governance: governor,
-      txChecker: checker,
-      duration: p.duration
+      whitelisted: whitelisted,
+      limitPerWallet: p.limitPerWallet
     });
 
     IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
@@ -94,7 +97,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       p.symbol,
       p.limitPerWallet,
       p.goal,
-      p.duration,
+      p.tokensToSell,
       p.metadata,
       p.bondingCurve,
       p.salt
@@ -102,6 +105,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     tokens.push(token);
     fundingTokens[token] = p.fundingToken;
     fundingGoals[token] = p.goal;
+    tokensToSell[token] = p.tokensToSell;
 
     // check if the address starts with 0xda0
     // require(startsWithDA0(address(token)), "!startsWithDA0");

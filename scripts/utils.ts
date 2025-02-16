@@ -49,8 +49,6 @@ export async function deployProxy(
     from: deployer,
     contract: implementation,
     skipIfAlreadyDeployed: true,
-    // autoMine: true,
-    // log: true,
   });
 
   const contract = await hre.ethers.getContractAt(

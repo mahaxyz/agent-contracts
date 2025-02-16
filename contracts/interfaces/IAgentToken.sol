@@ -20,11 +20,8 @@ interface IAgentToken is IERC20 {
     string name;
     string symbol;
     string metadata;
-    address[] fundManagers;
     uint256 limitPerWallet;
-    address governance;
-    address txChecker;
-    uint256 duration;
+    address[] whitelisted;
   }
 
   event Unlocked();
@@ -36,5 +33,4 @@ interface IAgentToken is IERC20 {
   function initialize(InitParams memory p) external;
   function unlock() external;
   function unlocked() external view returns (bool);
-  function expiry() external view returns (uint256);
 }
