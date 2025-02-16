@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IAeroPool} from "../interfaces/IAeroPool.sol";
+import {IPool} from "../aerodrome/interfaces/IPool.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {AgentLaunchpadBase} from "./AgentLaunchpadBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -23,7 +23,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
   function _lockLiquidity(IAgentToken token, address pool) internal {
     require(liquidityLocks[address(token)].amount == 0, "lock exists");
     liquidityLocks[address(token)] =
-      LiquidityLock({liquidityToken: IAeroPool(pool), amount: IERC20(pool).balanceOf(address(this))});
+      LiquidityLock({liquidityToken: IPool(pool), amount: IERC20(pool).balanceOf(address(this))});
     emit LiquidityLocked(address(token), pool, IERC20(pool).balanceOf(address(this)));
   }
 
@@ -38,7 +38,7 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
 
     address dest = ownerOf(tokenToNftId[IAgentToken(token)]);
 
-    IAeroPool pool = lock.liquidityToken;
+    IPool pool = lock.liquidityToken;
     (uint256 fee0, uint256 fee1) = pool.claimFees();
 
     uint256 govFee0 = fee0 * _feeCutE18 / 1e18;

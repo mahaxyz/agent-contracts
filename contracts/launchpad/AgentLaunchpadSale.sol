@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IAeroPool} from "../interfaces/IAeroPool.sol";
+import {IPool} from "../aerodrome/interfaces/IPool.sol";
 import {IAgentToken, IERC20} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
@@ -69,10 +69,8 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     // X% of the TOKEN is already sold in the bonding curve and in the hands of users
 
     // send rest of the TOKEN and 100% of the raised amount to LP
-    _addLiquidity(token, fundingToken, token.totalSupply() - 3 * token.totalSupply() / 20, raised);
-
-    // keep 80% of the raise and lock 60% of the TOKEN to the treasury
-    fundingToken.transfer(address(token), 4 * raised / 5);
+    uint256 tokensToAdd = token.balanceOf(address(this));
+    _addLiquidity(token, fundingToken, tokensToAdd, raised);
 
     emit TokenGraduated(address(token), raised);
   }
@@ -115,8 +113,7 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
 
     if (buy) {
       // take fees
-      uint256 tokensToBuyAfterFees = tokensToBuyOrSell * (9970) / 10_000;
-      uint256 fee = tokensToBuyOrSell - tokensToBuyAfterFees;
+      uint256 fee = tokensToBuyOrSell - dataBuy.tokensToBuyAfterFees;
       fundingToken.transferFrom(msg.sender, feeDestination, fee);
 
       // calculate the amount of tokens to give
@@ -166,7 +163,9 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
     token.transfer(pool, amountToken);
     fundingToken.transfer(pool, amountETH);
 
-    IAeroPool(pool).mint(address(this));
+    IPool(pool).mint(address(this));
     _lockLiquidity(token, pool);
+
+    graduatedToPool[token] = pool;
   }
 }

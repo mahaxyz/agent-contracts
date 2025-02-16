@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
+import {IPoolFactory} from "../aerodrome/interfaces/IPoolFactory.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
@@ -32,7 +32,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
   ) external initializer {
     coreToken = IERC20(_coreToken);
     odos = _odos;
-    aeroFactory = IAeroPoolFactory(_aeroFactory);
+    aeroFactory = IPoolFactory(_aeroFactory);
     tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
     __ERC721_init("AI Token Launchpad", "BLONKS");

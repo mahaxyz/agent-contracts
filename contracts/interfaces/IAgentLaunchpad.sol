@@ -13,8 +13,8 @@
 
 pragma solidity ^0.8.0;
 
-import {IAeroPool} from "./IAeroPool.sol";
-import {IAeroPoolFactory} from "./IAeroPoolFactory.sol";
+import {IPool} from "../aerodrome/interfaces/IPool.sol";
+import {IPoolFactory} from "../aerodrome/interfaces/IPoolFactory.sol";
 import {IAgentToken} from "./IAgentToken.sol";
 import {IBondingCurve} from "./IBondingCurve.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -46,7 +46,7 @@ interface IAgentLaunchpad {
   }
 
   struct LiquidityLock {
-    IAeroPool liquidityToken;
+    IPool liquidityToken;
     uint256 amount;
   }
 
@@ -123,7 +123,7 @@ interface IAgentLaunchpad {
 
   /// @notice Returns the AeroPoolFactory instance
   /// @return factory The AeroPoolFactory instance
-  function aeroFactory() external view returns (IAeroPoolFactory factory);
+  function aeroFactory() external view returns (IPoolFactory factory);
 
   /// @notice Returns the core token
   /// @return token The core token

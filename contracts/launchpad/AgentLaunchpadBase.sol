@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IAeroPoolFactory} from "../interfaces/IAeroPoolFactory.sol";
+import {IPoolFactory} from "../aerodrome/interfaces/IPoolFactory.sol";
 import {IAgentLaunchpad} from "../interfaces/IAgentLaunchpad.sol";
 import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
@@ -42,7 +42,7 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   uint256 public feeCutE18;
 
   // funding details
-  IAeroPoolFactory public aeroFactory;
+  IPoolFactory public aeroFactory;
   IERC20 public coreToken;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
 
@@ -53,6 +53,7 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   mapping(IAgentToken token => uint256) public fundingProgress;
   mapping(IAgentToken token => IERC20) public fundingTokens;
   mapping(IAgentToken token => uint256) public tokenToNftId;
+  mapping(IAgentToken token => address) public graduatedToPool;
 
   receive() external payable {}
 }
