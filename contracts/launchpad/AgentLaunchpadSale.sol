@@ -168,6 +168,5 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
 
     IAeroPool(pool).mint(address(this));
     _lockLiquidity(token, pool);
-    // todo add event
   }
 }

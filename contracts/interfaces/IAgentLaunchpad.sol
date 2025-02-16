@@ -74,8 +74,6 @@ interface IAgentLaunchpad {
     uint256 maxDuration,
     uint256 minDuration,
     uint256 minFundingGoal,
-    address governor,
-    address checker,
     address feeDestination,
     uint256 feeCutE18
   );
@@ -195,8 +193,6 @@ interface IAgentLaunchpad {
   /// @param _maxDuration The maximum duration
   /// @param _minDuration The minimum duration
   /// @param _minFundingGoal The minimum funding goal
-  /// @param _governor The address of the governor
-  /// @param _checker The address of the checker
   /// @param _feeDestination The address of the fee destination
   /// @param _feeCutE18 The fee cut in E18 format
   function setSettings(
@@ -204,8 +200,6 @@ interface IAgentLaunchpad {
     uint256 _maxDuration,
     uint256 _minDuration,
     uint256 _minFundingGoal,
-    address _governor,
-    address _checker,
     address _feeDestination,
     uint256 _feeCutE18
   ) external;

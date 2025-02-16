@@ -35,7 +35,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     aeroFactory = IAeroPoolFactory(_aeroFactory);
     tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
-    __ERC721_init("AI Agent Launchpad", "AGENTS");
+    __ERC721_init("AI Token Launchpad", "BLONKS");
   }
 
   function setSettings(
@@ -43,8 +43,6 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     uint256 _maxDuration,
     uint256 _minDuration,
     uint256 _minFundingGoal,
-    address _governor,
-    address _checker,
     address _feeDestination,
     uint256 _feeCutE18
   ) external onlyOwner {
@@ -52,14 +50,11 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     maxDuration = _maxDuration;
     minDuration = _minDuration;
     minFundingGoal = _minFundingGoal;
-    governor = _governor;
-    checker = _checker;
+
     feeDestination = _feeDestination;
     feeCutE18 = _feeCutE18;
 
-    emit SettingsUpdated(
-      _creationFee, _maxDuration, _minDuration, _minFundingGoal, _governor, _checker, _feeDestination, _feeCutE18
-    );
+    emit SettingsUpdated(_creationFee, _maxDuration, _minDuration, _minFundingGoal, _feeDestination, _feeCutE18);
   }
 
   function whitelist(address _address, bool _what) external onlyOwner {

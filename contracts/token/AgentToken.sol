@@ -24,11 +24,11 @@ contract AgentToken is AgentTokenBase {
 
     __ERC20_init(p.name, p.symbol);
 
-    _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
-
     for (uint256 index = 0; index < p.whitelisted.length; index++) {
       whitelisted[p.whitelisted[index]] = true;
     }
+
+    _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
 
     // todo add event
   }

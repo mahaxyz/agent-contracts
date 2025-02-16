@@ -7,7 +7,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   const e18 = 1000000000000000000n;
 
-  const checker = await deployContract(hre, "TxChecker", [], "TxChecker");
   const curve = await deployContract(hre, "FixedCurve", [], "FixedCurve");
   const mahaD = await deployContract(
     hre,
@@ -39,16 +38,14 @@ async function main(hre: HardhatRuntimeEnvironment) {
       name: "", // string name;
       symbol: "", // string symbol;
       metadata: "", // string metadata;
-      fundManagers: [], // address[] fundManagers;
+      whitelisted: [deployer.address], // address[] fundManagers;
       limitPerWallet: 0, // uint256 limitPerWallet;
-      governance: ZeroAddress, // address governance;
-      txChecker: ZeroAddress, // address txChecker;
-      duration: 999999999, // uint256 duration;
     })
   );
   await waitForTx(
     await launchpad.initialize(
       mahaD.address,
+      "0x19ceead7105607cd444f5ad10dd51356436095a1",
       "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
       tokenD.address,
       deployer.address
@@ -61,8 +58,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
       86400 * 365, // uint256 _maxDuration,
       0, // uint256 _minDuration,
       0, // uint256 _minFundingGoal,
-      ZeroAddress, // address _governor,
-      checker.address, // address _checker,
       deployer.address, // address _feeDestination,
       (5n * e18) / 10n // uint256 _feeCutE18
     )
@@ -80,10 +75,9 @@ async function main(hre: HardhatRuntimeEnvironment) {
     await launchpad.create({
       name: "test", // string name;
       symbol: "test", // string symbol;
-      duration: 86400 * 2, // uint256 duration;
-      fundManagers: [deployer.address], // address[] fundManagers;
       limitPerWallet: 10000000000n * e18, // uint256 limitPerWallet;
       goal: 10000n * e18, // uint256 goal; - 10,000 MAHA
+      tokensToSell: 10000000000n * e18, // uint256 tokensToSell;
       metadata: "{}", // string metadata;
       bondingCurve: curve.address, // address bondingCurve;
       fundingToken: maha.target, // address fundingToken;
@@ -101,13 +95,31 @@ async function main(hre: HardhatRuntimeEnvironment) {
   await waitForTx(await maha.approve(launchpad.target, MaxUint256));
   await waitForTx(await lastToken.approve(launchpad.target, MaxUint256));
   await waitForTx(
-    await launchpad.presaleSwap(lastToken.target, 100000000n * e18, "0", true)
+    await launchpad.presaleSwap(
+      lastToken.target,
+      deployer.address,
+      100000000n * e18,
+      "0",
+      true
+    )
   );
   await waitForTx(
-    await launchpad.presaleSwap(lastToken.target, 10000000n * e18, "0", false)
+    await launchpad.presaleSwap(
+      lastToken.target,
+      deployer.address,
+      10000000n * e18,
+      "0",
+      false
+    )
   );
   await waitForTx(
-    await launchpad.presaleSwap(lastToken.target, 10000000000n * e18, "0", true)
+    await launchpad.presaleSwap(
+      lastToken.target,
+      deployer.address,
+      10000000000n * e18,
+      "0",
+      true
+    )
   );
 }
 
