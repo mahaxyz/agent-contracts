@@ -185,7 +185,9 @@ interface IAgentLaunchpad {
     address _odos,
     address _aeroFactory,
     address _tokenImplementation,
-    address _owner
+    address _owner,
+    address _hook,
+    address _poolManager
   ) external;
 
   /// @notice Sets the settings for the contract

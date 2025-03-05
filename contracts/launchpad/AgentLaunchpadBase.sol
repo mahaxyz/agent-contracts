@@ -23,6 +23,10 @@ import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import { IHooks } from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+
+import { IPoolManager } from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+
 abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   address public odos;
 
@@ -44,6 +48,8 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   // funding details
   IPoolFactory public aeroFactory;
   IERC20 public coreToken;
+  IHooks public hook;
+  IPoolManager public poolManager;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
 
   mapping(IAgentToken token => IBondingCurve) public curves;
