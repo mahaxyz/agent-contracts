@@ -4,10 +4,14 @@ import {BaseHook} from "lib/v4-periphery/src/utils/BaseHook.sol";
 import {PoolId, PoolIdLibrary} from "lib/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "lib/v4-core/src/types/PoolKey.sol";
 import {IPoolManager} from "lib/v4-core/src/interfaces/IPoolManager.sol";
+import { IAgentToken } from "contracts/interfaces/IAgentToken.sol";
 import {Launchpad} from "contracts/launchpad/uniswap-v4/Launchpad.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
+import { LPFeeLibrary } from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {Hooks} from "lib/v4-core/src/libraries/Hooks.sol";
+
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 
 struct PoolConfig {
   address token;
@@ -102,6 +106,26 @@ contract Hook is BaseHook {
     }
 
     return (this.afterSwap.selector, int128(0));
+  }
+
+  function _beforeSwap(
+    address sender,
+    PoolKey calldata key,
+    IPoolManager.SwapParams calldata params,
+    bytes calldata hookData
+  ) internal override returns (bytes4, BeforeSwapDelta, uint24) {
+    // Get the token address from the pool configuration
+     PoolId poolId = key.toId();
+     PoolConfig memory config = poolConfigs[poolId];
+
+    // Check for if the sender is whitelist in the Agent Token
+    bool isWhitelisted = IAgentToken(config.token).isWhitelisted(sender);
+    // If sender is whitelist set fee zero for him / her
+    if (isWhitelisted) {
+      return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
+    }
+    uint24 fee = 3000 | LPFeeLibrary.OVERRIDE_FEE_FLAG;
+    return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, fee);
   }
 
   function _graduatePool(PoolId poolId, PoolKey memory key) private {
