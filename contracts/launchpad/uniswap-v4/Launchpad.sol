@@ -74,6 +74,7 @@ contract Launchpad is OwnableUpgradeable {
     whitelisted[1] = address(this);
     // Token Creation
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
+      adapter: address(0),
       name: p.name,
       symbol: p.symbol,
       metadata: p.metadata,

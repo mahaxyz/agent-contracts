@@ -22,7 +22,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {IPoolFactory} from "contracts/aerodrome/interfaces/IPoolFactory.sol";
 import {IAgentLaunchpad} from "contracts/interfaces/IAgentLaunchpad.sol";
 import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
-import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
+import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
 abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   address public odos;
@@ -49,7 +49,6 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   IPoolManager public poolManager;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
 
-  mapping(IAgentToken token => IBondingCurve) public curves;
   mapping(IAgentToken token => uint256) public fundingGoals;
   mapping(IAgentToken token => uint256) public tokensToSell;
   mapping(IAgentToken token => uint256) public lastTradedPrice;

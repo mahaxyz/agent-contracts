@@ -71,7 +71,7 @@ contract AgentLaunchpadTest is Test {
     launchpadHook = LaunchpadHook(flags);
 
     // Deploy the launchpad
-    launchpad = new AgentLaunchpad();
+    // launchpad = new AgentLaunchpad();
 
     // Initialize the launchpad
     launchpad.initialize(

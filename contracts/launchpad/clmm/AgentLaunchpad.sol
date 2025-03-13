@@ -13,16 +13,13 @@
 
 pragma solidity ^0.8.0;
 
-import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
+import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
-contract AgentLaunchpad is AgentLaunchpadSale {
-  using PoolIdLibrary for PoolKey;
-  using CurrencyLibrary for Currency;
-
+abstract contract AgentLaunchpad is AgentLaunchpadLocker {
   function initialize(address _coreToken, address _adapter, address _tokenImplementation, address _owner)
     external
     initializer
@@ -68,7 +65,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     }
 
     address[] memory whitelisted = new address[](2);
-    whitelisted[0] = address(adapter.LAUNCHPAD());
+    // whitelisted[0] = address(adapter.LAUNCHPAD());
     whitelisted[1] = address(this);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
@@ -101,7 +98,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     fundingGoals[token] = p.goal;
     tokensToSell[token] = p.tokensToSell;
 
-    adapter.addSingleSidedLiquidity(address(token), p.tokensToSell, p.goal, 0, 0, 0);
+    adapter.addSingleSidedLiquidity(address(token), address(p.fundingToken), p.tokensToSell, p.goal, 0, 0, 0);
     _mint(msg.sender, tokenToNftId[token]);
 
     return address(token);
@@ -113,6 +110,6 @@ contract AgentLaunchpad is AgentLaunchpadSale {
 
   function endsWithf406(address _addr) public pure returns (bool) {
     bytes20 addrBytes = bytes20(_addr);
-    return (uint8(addrBytes[19]) == 0xf4 && uint8(addrBytes[20]) == 0x06);
+    return (uint8(addrBytes[18]) == 0xf4 && uint8(addrBytes[19]) == 0x06);
   }
 }

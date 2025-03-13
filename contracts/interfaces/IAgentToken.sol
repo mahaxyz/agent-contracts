@@ -32,7 +32,7 @@ interface IAgentToken is IERC20 {
   event ExpiryExtended(uint256 expiry);
 
   function initialize(InitParams memory p) external;
-  function unlock() external;
+
   function unlocked() external view returns (bool);
 
   function isWhitelisted(address _address) external view returns (bool);

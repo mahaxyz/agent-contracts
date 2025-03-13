@@ -41,11 +41,12 @@ abstract contract RamsesAdapter is ICLMMAdapter {
 
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     require(msg.sender == LAUNCHPAD, "!launchpad");
-    IPool pool = IPool(_token);
-    (fee0, fee1) = pool.claimFees();
 
-    IERC20(pool.token0()).transfer(msg.sender, fee0);
-    IERC20(pool.token1()).transfer(msg.sender, fee1);
+    // IPool pool = IPool(_token);
+    // (fee0, fee1) = pool.claimFees();
+
+    // IERC20(pool.token0()).transfer(msg.sender, fee0);
+    // IERC20(pool.token1()).transfer(msg.sender, fee1);
 
     // automatically send fees to the nile gauge contract
     // automatically send fees to the launchpad contract
@@ -55,10 +56,10 @@ abstract contract RamsesAdapter is ICLMMAdapter {
     require(msg.sender == _token, "!token");
     require(launchedTokens[_token], "!launched");
 
-    if (currentTick > middleTick) {
-      // token has graduated
-      // remove liquidity from the graudated tick range and move it to the full range
-      // trigger the launchpad to distribute fees
-    }
+    // if (currentTick > middleTick) {
+    //   // token has graduated
+    //   // remove liquidity from the graudated tick range and move it to the full range
+    //   // trigger the launchpad to distribute fees
+    // }
   }
 }

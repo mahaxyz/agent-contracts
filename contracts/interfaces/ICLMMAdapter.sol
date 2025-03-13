@@ -45,4 +45,9 @@ interface ICLMMAdapter {
   /// @return fee0 The amount of fee0
   /// @return fee1 The amount of fee1
   function claimFees(address _pool) external returns (uint256 fee0, uint256 fee1);
+
+  /// @notice Check if a token has graduated
+  /// @param _token The token address to check
+  /// @return true if the token has graduated, false otherwise
+  function graduated(address _token) external view returns (bool);
 }
