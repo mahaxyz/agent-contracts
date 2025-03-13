@@ -21,19 +21,32 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IHooks} from "lib/v4-core/src/interfaces/IHooks.sol";
+import {Currency, CurrencyLibrary} from "lib/v4-core/src/types/Currency.sol";
+import {LPFeeLibrary} from "lib/v4-core/src/libraries/LPFeeLibrary.sol";
+
+import {PoolKey, PoolIdLibrary} from "lib/v4-core/src/types/PoolKey.sol";
+import {IPoolManager} from "lib/v4-core/src/interfaces/IPoolManager.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
+  using PoolIdLibrary for PoolKey;
+  using CurrencyLibrary for Currency;
+
   function initialize(
     address _coreToken,
     address _odos,
     address _aeroFactory,
     address _tokenImplementation,
-    address _owner
+    address _owner,
+    address _hook,
+    address _poolManager
   ) external initializer {
     coreToken = IERC20(_coreToken);
     odos = _odos;
     aeroFactory = IPoolFactory(_aeroFactory);
     tokenImplementation = _tokenImplementation;
+    hook = IHooks(_hook);
+    poolManager = IPoolManager(_poolManager);
     __Ownable_init(_owner);
     __ERC721_init("AI Token Launchpad", "BLONKS");
   }
@@ -54,7 +67,14 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     feeDestination = _feeDestination;
     feeCutE18 = _feeCutE18;
 
-    emit SettingsUpdated(_creationFee, _maxDuration, _minDuration, _minFundingGoal, _feeDestination, _feeCutE18);
+    emit SettingsUpdated(
+      _creationFee,
+      _maxDuration,
+      _minDuration,
+      _minFundingGoal,
+      _feeDestination,
+      _feeCutE18
+    );
   }
 
   function whitelist(address _address, bool _what) external onlyOwner {
@@ -67,7 +87,8 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     require(whitelisted[p.bondingCurve], "!bondingCurve");
     require(whitelisted[address(p.fundingToken)], "!bondingCurve");
 
-    if (creationFee > 0) p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
+    if (creationFee > 0)
+      p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
 
     address[] memory whitelisted = new address[](2);
     whitelisted[0] = odos;
@@ -81,7 +102,9 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       limitPerWallet: p.limitPerWallet
     });
 
-    IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
+    IAgentToken token = IAgentToken(
+      Clones.cloneDeterministic(tokenImplementation, p.salt)
+    );
 
     token.initialize(params);
 
@@ -101,6 +124,25 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     fundingTokens[token] = p.fundingToken;
     fundingGoals[token] = p.goal;
     tokensToSell[token] = p.tokensToSell;
+
+    // TODO: Create a Uniswap V4 Pool
+    address tokenAddress = address(token);
+    address fundingTokenAddress = address(p.fundingToken);
+
+    (address currency0, address currency1) = tokenAddress < fundingTokenAddress
+      ? (tokenAddress, fundingTokenAddress)
+      : (fundingTokenAddress, tokenAddress);
+
+    // creating Uniswap v4 pool
+    PoolKey memory poolKey = PoolKey({
+      currency0: Currency.wrap(currency0),
+      currency1: Currency.wrap(currency1),
+      fee: LPFeeLibrary.DYNAMIC_FEE_FLAG,
+      tickSpacing: 1, // for tight price range
+      hooks: hook
+    });
+    uint160 sqrtPriceX96 = 79228162514264337593543950336;
+    poolManager.initialize(poolKey, sqrtPriceX96);
 
     // check if the address starts with 0xda0
     // require(startsWithDA0(address(token)), "!startsWithDA0");

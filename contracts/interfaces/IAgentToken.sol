@@ -33,4 +33,6 @@ interface IAgentToken is IERC20 {
   function initialize(InitParams memory p) external;
   function unlock() external;
   function unlocked() external view returns (bool);
+
+  function isWhitelisted(address _address) external view returns (bool);
 }

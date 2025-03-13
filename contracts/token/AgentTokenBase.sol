@@ -53,4 +53,8 @@ abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
     unlocked = true;
     emit Unlocked();
   }
+
+  function isWhitelisted(address _address) external view override returns (bool) {
+    return whitelisted[_address];
+  }
 }
