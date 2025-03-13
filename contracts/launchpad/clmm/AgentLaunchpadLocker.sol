@@ -13,11 +13,11 @@
 
 pragma solidity ^0.8.0;
 
-import {IPool} from "../aerodrome/interfaces/IPool.sol";
-import {IAgentToken} from "../interfaces/IAgentToken.sol";
 import {AgentLaunchpadBase} from "./AgentLaunchpadBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IPool} from "contracts/aerodrome/interfaces/IPool.sol";
+import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 
 abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
   function _lockLiquidity(IAgentToken token, address pool) internal {

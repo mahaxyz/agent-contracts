@@ -13,19 +13,16 @@
 
 pragma solidity ^0.8.0;
 
-import {IPoolFactory} from "../aerodrome/interfaces/IPoolFactory.sol";
-import {IAgentLaunchpad} from "../interfaces/IAgentLaunchpad.sol";
-import {IAgentToken} from "../interfaces/IAgentToken.sol";
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
 import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
-
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {IPoolFactory} from "contracts/aerodrome/interfaces/IPoolFactory.sol";
+import {IAgentLaunchpad} from "contracts/interfaces/IAgentLaunchpad.sol";
+import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
+import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
 
 abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   address public odos;

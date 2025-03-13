@@ -13,11 +13,11 @@
 
 pragma solidity ^0.8.24;
 
-import {AgentLaunchpad} from "../launchpad/AgentLaunchpad.sol";
-import {IPoolManager} from "lib/v4-core/src/interfaces/IPoolManager.sol";
-import {Hooks} from "lib/v4-core/src/libraries/Hooks.sol";
-import {LPFeeLibrary} from "lib/v4-core/src/libraries/LPFeeLibrary.sol";
-import {BalanceDelta} from "lib/v4-core/src/types/BalanceDelta.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
+import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {AgentLaunchpad} from "contracts/launchpad/clmm/AgentLaunchpad.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "lib/v4-core/src/types/BeforeSwapDelta.sol";
 import {PoolId, PoolIdLibrary} from "lib/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "lib/v4-core/src/types/PoolKey.sol";

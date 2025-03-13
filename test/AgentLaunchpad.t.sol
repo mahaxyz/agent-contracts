@@ -14,8 +14,9 @@ import {AgentToken} from "../contracts/token/AgentToken.sol";
 import {PoolManager} from "@uniswap/v4-core/src/PoolManager.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
-import {LaunchpadHook} from "contracts/hooks/LaunchpadHook.sol";
-import {AgentLaunchpad} from "contracts/launchpad/AgentLaunchpad.sol";
+
+import {AgentLaunchpad} from "contracts/launchpad/clmm/AgentLaunchpad.sol";
+import {LaunchpadHook} from "contracts/launchpad/uniswap-v4/LaunchpadHook.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
 

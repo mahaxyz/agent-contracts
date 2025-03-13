@@ -13,10 +13,10 @@
 
 pragma solidity ^0.8.0;
 
-import {IPool} from "../aerodrome/interfaces/IPool.sol";
-import {IAgentToken, IERC20} from "../interfaces/IAgentToken.sol";
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
+import {IPool} from "contracts/aerodrome/interfaces/IPool.sol";
+import {IAgentToken, IERC20} from "contracts/interfaces/IAgentToken.sol";
+import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
 
 abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
   function presaleSwap(
