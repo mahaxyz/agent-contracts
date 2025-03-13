@@ -34,19 +34,19 @@ interface IAgentLaunchpad {
   );
 
   struct CreateParams {
-      string name;
-      string symbol;
-      string metadata;
-      IERC20 fundingToken;
-      uint256 goal;
-      uint256 tokensToSell;
-      bytes32 salt;
-      address bondingCurve;
-      uint256 limitPerWallet;
-      uint160 initialSqrtPrice;
-      int24 lowerTick;
-      int24 upperTick;
-      int24 upperMaxTick;
+    string name;
+    string symbol;
+    string metadata;
+    IERC20 fundingToken;
+    uint256 goal;
+    uint256 tokensToSell;
+    bytes32 salt;
+    address bondingCurve;
+    uint256 limitPerWallet;
+    uint160 initialSqrtPrice;
+    int24 lowerTick;
+    int24 upperTick;
+    int24 upperMaxTick;
   }
 
   struct LiquidityLock {

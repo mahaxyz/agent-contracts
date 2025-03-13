@@ -7,15 +7,17 @@ pragma solidity 0.8.26;
 
 import {IAgentLaunchpad} from "../contracts/interfaces/IAgentLaunchpad.sol";
 import {IAgentToken} from "../contracts/interfaces/IAgentToken.sol";
-import {AgentToken} from "../contracts/token/AgentToken.sol";
+
 import {MockAerodromePool} from "../contracts/mocks/MockAerodromePool.sol";
-import {Test} from "lib/forge-std/src/Test.sol";
-import {AgentLaunchpad} from "contracts/launchpad/AgentLaunchpad.sol";
-import {LaunchpadHook} from "contracts/hooks/LaunchpadHook.sol";
-import {MockERC20} from "contracts/mocks/MockERC20.sol";
-import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {AgentToken} from "../contracts/token/AgentToken.sol";
+
 import {PoolManager} from "@uniswap/v4-core/src/PoolManager.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {LaunchpadHook} from "contracts/hooks/LaunchpadHook.sol";
+import {AgentLaunchpad} from "contracts/launchpad/AgentLaunchpad.sol";
+import {MockERC20} from "contracts/mocks/MockERC20.sol";
+import {Test} from "lib/forge-std/src/Test.sol";
 
 contract AgentLaunchpadTest is Test {
   AgentLaunchpad public launchpad;
@@ -23,7 +25,6 @@ contract AgentLaunchpadTest is Test {
   MockAerodromePool public aerodromeFactory;
   PoolManager public poolManager;
   LaunchpadHook public launchpadHook;
-
 
   address public owner = makeAddr("owner");
 
@@ -57,10 +58,8 @@ contract AgentLaunchpadTest is Test {
     // Deploy the hook to an address with the correct flags
     address flags = address(
       uint160(
-        Hooks.AFTER_INITIALIZE_FLAG |
-          Hooks.BEFORE_SWAP_FLAG |
-          Hooks.AFTER_SWAP_FLAG |
-          Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
+        Hooks.AFTER_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG
+          | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
       ) ^ (0x4444 << 144) // Namespace the hook to avoid collisions
     );
 
@@ -90,7 +89,8 @@ contract AgentLaunchpadTest is Test {
   //     launchpad.initialize(address(maha), address(aerodromeFactory), address(tokenImpl), owner);
 
   //     vm.startPrank(owner);
-  //     launchpad.setSettings(100e18, 100 days, 1 days, 1000 ether, governor, address(txChecker), feeDestination, 0.1e18);
+  //     launchpad.setSettings(100e18, 100 days, 1 days, 1000 ether, governor, address(txChecker), feeDestination,
+  // 0.1e18);
   //     launchpad.whitelist(address(txChecker), true);
   //     launchpad.whitelist(address(curve), true);
   //     launchpad.whitelist(address(maha), true);
@@ -101,17 +101,9 @@ contract AgentLaunchpadTest is Test {
     assertEq(launchpad.owner(), owner, "owner !");
     assertEq(address(launchpad.coreToken()), address(maha), "Core token !");
     assertEq(launchpad.odos(), makeAddr("odosRouter"), "Odos Router !");
-    assertEq(
-      address(launchpad.aeroFactory()),
-      address(aerodromeFactory),
-      "Aerodrome Factory !"
-    );
+    assertEq(address(launchpad.aeroFactory()), address(aerodromeFactory), "Aerodrome Factory !");
     assertEq(address(launchpad.hook()), address(launchpadHook), "Hook !");
-    assertEq(
-      address(launchpad.poolManager()),
-      address(poolManager),
-      "Pool Manager !"
-    );
+    assertEq(address(launchpad.poolManager()), address(poolManager), "Pool Manager !");
   }
 
   //   function test_fullLaunch() public {
