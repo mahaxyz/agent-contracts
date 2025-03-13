@@ -19,44 +19,6 @@ import {IAgentToken, IERC20} from "contracts/interfaces/IAgentToken.sol";
 import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
 
 abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
-  function presaleSwap(
-    IAgentToken token,
-    address destination,
-    uint256 tokensToBuyOrSell,
-    uint256 minAmountOut,
-    bool buy
-  ) external {
-    _presaleSwap(token, destination, tokensToBuyOrSell, minAmountOut, buy);
-  }
-
-  function presaleSwapWithOdos(
-    IAgentToken token,
-    address destination,
-    uint256 tokensToBuyOrSell,
-    uint256 minAmountOut,
-    bool buy,
-    IERC20 inputToken,
-    uint256 inputAmount,
-    bytes memory data
-  ) external payable {
-    if (inputToken != IERC20(address(0))) {
-      inputToken.transferFrom(msg.sender, address(this), inputAmount);
-      inputToken.approve(odos, inputAmount);
-    }
-
-    if (buy) {
-      // swap for QUOTE and then swap for TOKEN
-      (bool success,) = odos.call{value: inputAmount}(data);
-      require(success, "odos call failed");
-      _presaleSwap(token, destination, tokensToBuyOrSell, minAmountOut, true);
-    } else {
-      // swap for TOKEN and then swap for QUOTE
-      _presaleSwap(token, destination, tokensToBuyOrSell, minAmountOut, false);
-      (bool success,) = odos.call(data);
-      require(success, "odos call failed");
-    }
-  }
-
   function graduate(IAgentToken token) public {
     IERC20 fundingToken = IERC20(fundingTokens[token]);
     uint256 raised = fundingToken.balanceOf(address(this));
@@ -77,81 +39,6 @@ abstract contract AgentLaunchpadSale is AgentLaunchpadLocker {
 
   function checkFundingGoalMet(IAgentToken token) public view returns (bool) {
     return fundingProgress[token] >= fundingGoals[token];
-  }
-
-  function _presaleSwap(
-    IAgentToken token,
-    address destination,
-    uint256 tokensToBuyOrSell,
-    uint256 minAmountOut,
-    bool buy
-  ) internal {
-    require(!token.unlocked(), "presale is over");
-    IERC20 fundingToken = IERC20(fundingTokens[token]);
-    uint256 price;
-    uint256 _assetsOrTokensIn;
-    uint256 _tokensOrAssetsOut;
-
-    IBondingCurve.DataBuy memory dataBuy;
-    IBondingCurve.DataSell memory dataSell;
-
-    {
-      dataBuy = IBondingCurve.DataBuy({
-        tokensToBuyAfterFees: tokensToBuyOrSell * (9970) / 10_000,
-        fundingProgress: fundingProgress[token],
-        fundingGoals: fundingGoals[token],
-        tokensToSell: tokensToSell[token]
-      });
-
-      dataSell = IBondingCurve.DataSell({
-        quantityOut: tokensToBuyOrSell,
-        raisedAmount: fundingProgress[token],
-        totalRaise: fundingGoals[token],
-        targetTokensToSell: tokensToSell[token]
-      });
-    }
-
-    if (buy) {
-      // take fees
-      uint256 fee = tokensToBuyOrSell - dataBuy.tokensToBuyAfterFees;
-      fundingToken.transferFrom(msg.sender, feeDestination, fee);
-
-      // calculate the amount of tokens to give
-      (_tokensOrAssetsOut, _assetsOrTokensIn, price) = curves[token].calculateBuy(dataBuy);
-      fundingProgress[token] += _assetsOrTokensIn;
-
-      // settle the trade
-      fundingToken.transferFrom(msg.sender, address(this), _assetsOrTokensIn);
-      token.transfer(destination, _tokensOrAssetsOut);
-      require(_tokensOrAssetsOut >= minAmountOut, "!minAmountOut");
-
-      emit TokensPurchased(
-        address(token), address(fundingToken), msg.sender, destination, _assetsOrTokensIn, _tokensOrAssetsOut, price
-      );
-    } else {
-      // calculate the amount of tokens to take
-      (_tokensOrAssetsOut, _assetsOrTokensIn, price) = curves[token].calculateSell(dataSell);
-      fundingProgress[token] -= _tokensOrAssetsOut;
-
-      // take fees
-      uint256 assetsOutAfterFee = _tokensOrAssetsOut * (9970) / 10_000;
-      uint256 fee = _tokensOrAssetsOut - assetsOutAfterFee;
-      fundingToken.transfer(feeDestination, fee);
-
-      // settle the trade
-      fundingToken.transfer(destination, assetsOutAfterFee);
-      token.transferFrom(msg.sender, address(this), _assetsOrTokensIn);
-      require(assetsOutAfterFee >= minAmountOut, "!minAmountOut");
-
-      emit TokensSold(
-        address(token), address(fundingToken), msg.sender, destination, _tokensOrAssetsOut, _assetsOrTokensIn, price
-      );
-    }
-
-    lastTradedPrice[token] = price;
-
-    // if funding goal has been met, automatically graduate the token
-    if (checkFundingGoalMet(token)) graduate(token);
   }
 
   function _addLiquidity(IAgentToken token, IERC20 fundingToken, uint256 amountToken, uint256 amountETH) internal {

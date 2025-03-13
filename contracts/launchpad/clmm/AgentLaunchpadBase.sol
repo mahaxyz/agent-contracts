@@ -43,7 +43,7 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   uint256 public feeCutE18;
 
   // funding details
-  IPoolFactory public aeroFactory;
+  ICLMMAdapter public adapter;
   IERC20 public coreToken;
   IHooks public hook;
   IPoolManager public poolManager;

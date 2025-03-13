@@ -13,41 +13,23 @@
 
 pragma solidity ^0.8.0;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {IPoolFactory} from "contracts/aerodrome/interfaces/IPoolFactory.sol";
-import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
-import {IBondingCurve} from "contracts/interfaces/IBondingCurve.sol";
-
 import {AgentLaunchpadSale} from "./AgentLaunchpadSale.sol";
-
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
-
-import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
-import {Currency, CurrencyLibrary} from "@uniswap/v4-core/src/types/Currency.sol";
-
-import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
-import {PoolIdLibrary, PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
+import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
 contract AgentLaunchpad is AgentLaunchpadSale {
   using PoolIdLibrary for PoolKey;
   using CurrencyLibrary for Currency;
 
-  function initialize(
-    address _coreToken,
-    address _odos,
-    address _aeroFactory,
-    address _tokenImplementation,
-    address _owner,
-    address _hook,
-    address _poolManager
-  ) external initializer {
+  function initialize(address _coreToken, address _adapter, address _tokenImplementation, address _owner)
+    external
+    initializer
+  {
     coreToken = IERC20(_coreToken);
-    odos = _odos;
-    aeroFactory = IPoolFactory(_aeroFactory);
+    adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
-    hook = IHooks(_hook);
-    poolManager = IPoolManager(_poolManager);
     __Ownable_init(_owner);
     __ERC721_init("AI Token Launchpad", "BLONKS");
   }
@@ -86,7 +68,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     }
 
     address[] memory whitelisted = new address[](2);
-    whitelisted[0] = odos;
+    whitelisted[0] = address(adapter.LAUNCHPAD());
     whitelisted[1] = address(this);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
@@ -94,7 +76,8 @@ contract AgentLaunchpad is AgentLaunchpadSale {
       symbol: p.symbol,
       metadata: p.metadata,
       whitelisted: whitelisted,
-      limitPerWallet: p.limitPerWallet
+      limitPerWallet: p.limitPerWallet,
+      adapter: address(adapter)
     });
 
     IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
@@ -118,29 +101,7 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     fundingGoals[token] = p.goal;
     tokensToSell[token] = p.tokensToSell;
 
-    // TODO: Create a Uniswap V4 Pool
-    address tokenAddress = address(token);
-    address fundingTokenAddress = address(p.fundingToken);
-
-    (address currency0, address currency1) =
-      tokenAddress < fundingTokenAddress ? (tokenAddress, fundingTokenAddress) : (fundingTokenAddress, tokenAddress);
-
-    // creating Uniswap v4 pool
-    PoolKey memory poolKey = PoolKey({
-      currency0: Currency.wrap(currency0),
-      currency1: Currency.wrap(currency1),
-      fee: LPFeeLibrary.DYNAMIC_FEE_FLAG,
-      tickSpacing: 1, // for tight price range
-      hooks: hook
-    });
-    uint160 sqrtPriceX96 = 79_228_162_514_264_337_593_543_950_336;
-    poolManager.initialize(poolKey, sqrtPriceX96);
-
-    // check if the address starts with 0xda0
-    // require(startsWithDA0(address(token)), "!startsWithDA0");
-
-    tokenToNftId[token] = tokens.length;
-    curves[token] = IBondingCurve(p.bondingCurve);
+    adapter.addSingleSidedLiquidity(address(token), p.tokensToSell, p.goal, 0, 0, 0);
     _mint(msg.sender, tokenToNftId[token]);
 
     return address(token);
@@ -150,8 +111,8 @@ contract AgentLaunchpad is AgentLaunchpadSale {
     return tokens.length;
   }
 
-  function startsWithDA0(address _addr) public pure returns (bool) {
+  function endsWithf406(address _addr) public pure returns (bool) {
     bytes20 addrBytes = bytes20(_addr);
-    return (uint8(addrBytes[0]) == 0xda && uint8(addrBytes[1]) == 0x0);
+    return (uint8(addrBytes[19]) == 0xf4 && uint8(addrBytes[20]) == 0x06);
   }
 }

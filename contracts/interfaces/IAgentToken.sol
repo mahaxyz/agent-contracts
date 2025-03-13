@@ -22,6 +22,7 @@ interface IAgentToken is IERC20 {
     string metadata;
     uint256 limitPerWallet;
     address[] whitelisted;
+    address adapter;
   }
 
   event Unlocked();
