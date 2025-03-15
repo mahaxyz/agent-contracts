@@ -21,16 +21,44 @@ import {IStakeRewardsStrategy} from "contracts/interfaces/IStakeRewardsStrategy.
 /// @notice Interface for managing token staking with lock periods and rewards distribution
 /// @dev Implements IERC721Receiver for potential NFT-related functionality
 interface IAMMStake is IERC721Receiver {
+  /// @notice Emitted when a lock duration is set for an owner's token stake
+  /// @param owner The address of the owner
+  /// @param token The ERC20 token being locked
+  /// @param lockDuration The duration in seconds that the tokens will be locked
   event LockDurationSet(address indexed owner, IERC20 indexed token, uint256 lockDuration);
+
+  /// @notice Emitted when the locked amount is set for an owner's token stake
+  /// @param owner The address of the owner
+  /// @param token The ERC20 token being locked
+  /// @param amount The amount of tokens being locked
   event LockAmountSet(address indexed owner, IERC20 indexed token, uint256 amount);
+
+  /// @notice Emitted when tokens are staked by an owner
+  /// @param owner The address of the owner staking tokens
+  /// @param token The ERC20 token being staked
+  /// @param amount The amount of tokens being staked
   event Staked(address indexed owner, IERC20 indexed token, uint256 amount);
+
+  /// @notice Emitted when tokens are unstaked by an owner
+  /// @param owner The address of the owner unstaking tokens
+  /// @param token The ERC20 token being unstaked
   event Unstaked(address indexed owner, IERC20 indexed token);
+
+  /// @notice Emitted when a rewards strategy is set for an owner's token stake
+  /// @param owner The address of the owner
+  /// @param token The ERC20 token the strategy is set for
+  /// @param rewardsStrategy The address of the rewards strategy contract
+  /// @param config The configuration data for the rewards strategy
   event RewardsStrategySet(
     address indexed owner,
     IERC20 indexed token,
     IStakeRewardsStrategy rewardsStrategy,
     IStakeRewardsStrategy.RewardsConfigData config
   );
+
+  /// @notice Emitted when rewards are distributed for an owner's token stake
+  /// @param owner The address of the owner receiving rewards
+  /// @param token The ERC20 token rewards are distributed for
   event RewardsDistributed(address indexed owner, IERC20 indexed token);
 
   /// @notice Get the lock duration for a specific owner and token
