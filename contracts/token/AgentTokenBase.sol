@@ -39,7 +39,6 @@ abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
     if (!unlocked) {
       if (adapter.graduated(address(this))) {
         // if the token is graduated, then allow transfers
-        adapter.rebalanceLiquidityAfterGraduation(address(this));
         unlocked = true;
         emit Unlocked();
         return;

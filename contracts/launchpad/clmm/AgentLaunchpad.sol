@@ -56,16 +56,12 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
   }
 
   function create(CreateParams memory p) external returns (address) {
-    require(p.goal >= minFundingGoal, "!minFundingGoal");
-    require(whitelisted[p.bondingCurve], "!bondingCurve");
-    require(whitelisted[address(p.fundingToken)], "!bondingCurve");
-
     if (creationFee > 0) {
       p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
     }
 
     address[] memory whitelisted = new address[](2);
-    // whitelisted[0] = address(adapter.LAUNCHPAD());
+    whitelisted[0] = address(adapter.LAUNCHPAD());
     whitelisted[1] = address(this);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
@@ -80,25 +76,21 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
     IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
 
     token.initialize(params);
-
-    emit TokenCreated(
-      address(token),
-      msg.sender,
-      p.name,
-      p.symbol,
-      p.limitPerWallet,
-      p.goal,
-      p.tokensToSell,
-      p.metadata,
-      p.bondingCurve,
-      p.salt
-    );
     tokens.push(token);
-    fundingTokens[token] = p.fundingToken;
-    fundingGoals[token] = p.goal;
-    tokensToSell[token] = p.tokensToSell;
+    tokenToNftId[token] = tokens.length;
+    launchParams[token] = p;
 
-    adapter.addSingleSidedLiquidity(address(token), address(p.fundingToken), p.tokensToSell, p.goal, 0, 0, 0);
+    adapter.addSingleSidedLiquidity(
+      token, // IERC20 _tokenBase,
+      p.fundingToken, // IERC20 _tokenQuote,
+      p.amountBaseBeforeTick, // uint256 _amountBaseBeforeTick,
+      p.amountBaseAfterTick, // uint256 _amountBaseAfterTick,
+      p.fee, // uint24 _fee,
+      p.initialSqrtPrice, // uint160 _sqrtPriceX96,
+      p.lowerTick, // int24 _tick0,
+      p.upperTick, // int24 _tick1,
+      p.upperMaxTick // int24 _tick2
+    );
     _mint(msg.sender, tokenToNftId[token]);
 
     return address(token);

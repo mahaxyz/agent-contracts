@@ -13,38 +13,32 @@
 
 pragma solidity ^0.8.0;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 /// @title Concentrated Liquidity Market Maker Adapter Interface
 /// @notice Interface for interacting with concentrated liquidity pools
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
-  /// @param _tokenBase The base token address
-  /// @param _tokenQuote The quote token address
-  /// @param _amountBaseBeforeTick The amount of base token to provide before the middle tick
-  /// @param _amountBaseAfterTick The amount of base token to provide after the middle tick
-  /// @param _tick0 The first tick position
-  /// @param _tick1 The second tick position
-  /// @param _tick2 The third tick position
   function addSingleSidedLiquidity(
-    address _tokenBase,
-    address _tokenQuote,
+    IERC20 _tokenBase,
+    IERC20 _tokenQuote,
     uint256 _amountBaseBeforeTick,
     uint256 _amountBaseAfterTick,
-    int128 _tick0,
-    int128 _tick1,
-    int128 _tick2
+    uint24 _fee,
+    uint160 _sqrtPriceX96,
+    int24 _tick0,
+    int24 _tick1,
+    int24 _tick2
   ) external;
 
-  /// @notice Rebalances the liquidity after graduation
-  /// @param _tokenBase The base token address
-  function rebalanceLiquidityAfterGraduation(address _tokenBase) external;
+  function LAUNCHPAD() external view returns (address);
+
+  function launchedTokens(IERC20 _token) external view returns (bool launched);
 
   /// @notice Claim accumulated fees from the pool
-  /// @param _pool The pool address to claim fees for
-  /// @return fee0 The amount of fee0
-  /// @return fee1 The amount of fee1
-  function claimFees(address _pool) external returns (uint256 fee0, uint256 fee1);
+  function claimFees(address _token) external returns (uint256 fee0, uint256 fee1);
 
   /// @notice Check if a token has graduated
   /// @param _token The token address to check

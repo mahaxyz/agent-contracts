@@ -49,13 +49,8 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   IPoolManager public poolManager;
   mapping(address token => IAgentLaunchpad.LiquidityLock) public liquidityLocks;
 
-  mapping(IAgentToken token => uint256) public fundingGoals;
-  mapping(IAgentToken token => uint256) public tokensToSell;
-  mapping(IAgentToken token => uint256) public lastTradedPrice;
-  mapping(IAgentToken token => uint256) public fundingProgress;
-  mapping(IAgentToken token => IERC20) public fundingTokens;
+  mapping(IAgentToken token => CreateParams) public launchParams;
   mapping(IAgentToken token => uint256) public tokenToNftId;
-  mapping(IAgentToken token => address) public graduatedToPool;
 
   receive() external payable {}
 }

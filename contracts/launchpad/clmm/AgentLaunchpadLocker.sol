@@ -29,16 +29,16 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
     emit LiquidityLocked(address(token), pool, IERC20(pool).balanceOf(address(this)));
   }
 
-  function claimFees(address token) external {
-    LiquidityLock storage lock = liquidityLocks[token];
-    require(lock.amount != 0, "No lock locked");
+  function claimFees(IERC20 token) external {
+    // LiquidityLock storage lock = liquidityLocks[token];
+    // require(lock.amount != 0, "No lock locked");
 
-    address dest = ownerOf(tokenToNftId[IAgentToken(token)]);
+    // address dest = ownerOf(tokenToNftId[IAgentToken(token)]);
 
-    IPool pool = lock.liquidityToken;
-    (uint256 fee0, uint256 fee1) = adapter.claimFees(token);
+    // IPool pool = lock.liquidityToken;
+    // (uint256 fee0, uint256 fee1) = adapter.claimFees(token);
 
-    IERC20(pool.token0()).transfer(dest, fee0);
-    IERC20(pool.token1()).transfer(dest, fee1);
+    // IERC20(pool.token0()).transfer(dest, fee0);
+    // IERC20(pool.token1()).transfer(dest, fee1);
   }
 }
