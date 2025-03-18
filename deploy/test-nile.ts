@@ -5,14 +5,8 @@ import { keccak256, MaxUint256, ZeroAddress } from "ethers";
 async function main(hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
 
+  console.log("deployer", deployer.address);
   const e18 = 1000000000000000000n;
-
-  const mahaD = await deployContract(
-    hre,
-    "MockERC20",
-    ["TEST MAHA", "TMAHA", 18],
-    "MAHA"
-  );
 
   const tokenD = await deployContract(hre, "AgentToken", [], "AgentTokenImpl");
   const launchpadD = await deployContract(
@@ -20,6 +14,12 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "AgentLaunchpad",
     [],
     "AgentLaunchpad"
+  );
+  const mahaD = await deployContract(
+    hre,
+    "MockERC20",
+    ["TEST MAHA", "TMAHA", 18],
+    "MAHA"
   );
 
   const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
@@ -32,6 +32,16 @@ async function main(hre: HardhatRuntimeEnvironment) {
     tokenD.address
   );
 
+  const adapter = await deployContract(
+    hre,
+    "RamsesAdapter",
+    [
+      launchpad.target, // address _launchpad,
+      "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42", // address _clPoolFactory
+    ],
+    "RamsesAdapter"
+  );
+
   await waitForTx(
     await tokenImpl.initialize({
       name: "", // string name;
@@ -39,26 +49,15 @@ async function main(hre: HardhatRuntimeEnvironment) {
       metadata: "", // string metadata;
       whitelisted: [deployer.address], // address[] fundManagers;
       limitPerWallet: 0, // uint256 limitPerWallet;
+      adapter: ZeroAddress, // address adapter;
     })
   );
   await waitForTx(
     await launchpad.initialize(
       mahaD.address,
-      "0x19ceead7105607cd444f5ad10dd51356436095a1",
-      "0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
+      adapter.address,
       tokenD.address,
       deployer.address
-    )
-  );
-
-  await waitForTx(
-    await launchpad.setSettings(
-      0, // uint256 _creationFee,
-      86400 * 365, // uint256 _maxDuration,
-      0, // uint256 _minDuration,
-      0, // uint256 _minFundingGoal,
-      deployer.address, // address _feeDestination,
-      (5n * e18) / 10n // uint256 _feeCutE18
     )
   );
 
@@ -71,15 +70,23 @@ async function main(hre: HardhatRuntimeEnvironment) {
   console.log("creating a launchpad token");
   await waitForTx(
     await launchpad.create({
-      name: "test", // string name;
-      symbol: "test", // string symbol;
-      limitPerWallet: 10000000000n * e18, // uint256 limitPerWallet;
-      goal: 10000n * e18, // uint256 goal; - 10,000 MAHA
-      tokensToSell: 10000000000n * e18, // uint256 tokensToSell;
-      metadata: "{}", // string metadata;
-      bondingCurve: curve.address, // address bondingCurve;
-      fundingToken: maha.target, // address fundingToken;
-      salt: keccak256("0x"), // bytes32 salt;
+      base: {
+        name: "Test Token",
+        symbol: "TEST",
+        metadata: "Test metadata",
+        fundingToken: mahaD.address,
+        fee: 3000,
+        limitPerWallet: 1000,
+        salt: keccak256("0x"),
+      },
+      liquidity: {
+        amountBaseBeforeTick: 600_000_000n * e18,
+        amountBaseAfterTick: 400_000_000n * e18,
+        initialSqrtPrice: 79_228_162_514_264_337_593_543_950_336n, // sqrt(1) * 2^96 for 1 ETH per token
+        lowerTick: 6931, // Price of 1 ETH per token
+        upperTick: 6932, // Price of 2 ETH per token
+        upperMaxTick: 46_052, // Price of 100 ETH per token
+      },
     })
   );
 
@@ -88,38 +95,38 @@ async function main(hre: HardhatRuntimeEnvironment) {
     await launchpad.tokens((await launchpad.getTotalTokens()) - 1n)
   );
 
-  // perform a swap
-  console.log("performing a swap");
-  await waitForTx(await maha.approve(launchpad.target, MaxUint256));
-  await waitForTx(await lastToken.approve(launchpad.target, MaxUint256));
-  await waitForTx(
-    await launchpad.presaleSwap(
-      lastToken.target,
-      deployer.address,
-      100000000n * e18,
-      "0",
-      true
-    )
-  );
-  await waitForTx(
-    await launchpad.presaleSwap(
-      lastToken.target,
-      deployer.address,
-      10000000n * e18,
-      "0",
-      false
-    )
-  );
-  await waitForTx(
-    await launchpad.presaleSwap(
-      lastToken.target,
-      deployer.address,
-      10000000000n * e18,
-      "0",
-      true
-    )
-  );
+  // // perform a swap
+  // console.log("performing a swap");
+  // await waitForTx(await maha.approve(launchpad.target, MaxUint256));
+  // await waitForTx(await lastToken.approve(launchpad.target, MaxUint256));
+  // await waitForTx(
+  //   await launchpad.presaleSwap(
+  //     lastToken.target,
+  //     deployer.address,
+  //     100000000n * e18,
+  //     "0",
+  //     true
+  //   )
+  // );
+  // await waitForTx(
+  //   await launchpad.presaleSwap(
+  //     lastToken.target,
+  //     deployer.address,
+  //     10000000n * e18,
+  //     "0",
+  //     false
+  //   )
+  // );
+  // await waitForTx(
+  //   await launchpad.presaleSwap(
+  //     lastToken.target,
+  //     deployer.address,
+  //     10000000000n * e18,
+  //     "0",
+  //     true
+  //   )
+  // );
 }
 
-main.tags = ["TestDeployment"];
+main.tags = ["TestDeploymentNile"];
 export default main;

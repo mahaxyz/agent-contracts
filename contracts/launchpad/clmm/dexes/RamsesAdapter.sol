@@ -13,6 +13,7 @@
 
 pragma solidity ^0.8.0;
 
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
@@ -20,13 +21,16 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamsesV2MintCallback.sol";
 
-contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
-  IClPoolFactory public immutable CL_POOL_FACTORY;
-  address public immutable LAUNCHPAD;
+import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
+import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
+
+contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
+  IClPoolFactory public CL_POOL_FACTORY;
+  address public LAUNCHPAD;
 
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
 
-  address private immutable me;
+  address private me;
   IClPool private transientClPool;
 
   struct LaunchTokenParams {
@@ -42,7 +46,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
     int24 tick2;
   }
 
-  constructor(address _launchpad, address _clPoolFactory) {
+  function initialize(address _launchpad, address _clPoolFactory) external initializer {
     LAUNCHPAD = _launchpad;
     CL_POOL_FACTORY = IClPoolFactory(_clPoolFactory);
     me = address(this);
@@ -66,6 +70,10 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
     require(msg.sender == LAUNCHPAD, "!launchpad");
     require(launchParams[_tokenBase].pool == IClPool(address(0)), "!launched");
 
+    uint160 sqrtPriceX960 = TickMath.getSqrtPriceAtTick(_tick0);
+    uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
+    uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
+
     IClPool pool = IClPool(CL_POOL_FACTORY.createPool(address(_tokenBase), address(_tokenQuote), _fee, _sqrtPriceX96));
     launchParams[_tokenBase] = LaunchTokenParams({
       tokenBase: _tokenBase,
@@ -74,19 +82,19 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
       fee: _fee,
       amountBaseBeforeTick: _amountBaseBeforeTick,
       amountBaseAfterTick: _amountBaseAfterTick,
-      sqrtPriceX96: _sqrtPriceX96,
+      sqrtPriceX96: sqrtPriceX960,
       tick0: _tick0,
       tick1: _tick1,
       tick2: _tick2
     });
     transientClPool = pool;
 
-    // uint128 liquidityBeforeTick0 = pool.liquidityForAmount0(_tick0, _tokenBase.balanceOf(me),
-    // _tokenQuote.balanceOf(me));
-    // uint128 liquidityBeforeTick1 = pool.liquidityForAmount0(_tick1, _tokenBase.balanceOf(me),
-    // _tokenQuote.balanceOf(me));
-    // pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
-    // pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
+    uint128 liquidityBeforeTick0 =
+      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, _amountBaseBeforeTick);
+    uint128 liquidityBeforeTick1 =
+      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, _amountBaseAfterTick);
+    pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
+    pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
 
     // add liquidity to the various tick ranges
     transientClPool = IClPool(address(0));

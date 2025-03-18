@@ -19,3 +19,4 @@ types
 solcInputs
 abi
 forge-build
+cache_hardhat

@@ -50,10 +50,17 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
       forking: {
-        url: `https://mainnet.base.org`,
+        url: `https://rpc.linea.build`,
       },
+      accounts: [
+        {
+          privateKey: process.env.PRIVATE_KEY || "",
+          balance: "1000000000000000000000000",
+        },
+      ],
     },
     base: _network("https://mainnet.base.org"),
+    linea: _network("https://rpc.linea.build", 100000000), // 0.1 gwei
     bsc: _network("https://bsc-dataseed1.bnbchain.org"),
   },
   namedAccounts: {

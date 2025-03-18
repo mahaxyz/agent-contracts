@@ -29,10 +29,11 @@ contract AgentLaunchpadForkLineaTest is Test {
     // }
 
     launchpad = new AgentLaunchpad();
-    adapter = new RamsesAdapter(address(launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
+    adapter = new RamsesAdapter();
     weth = new MockERC20("Wrapped Ether", "WETH", 18);
     tokenImpl = new AgentToken();
 
+    adapter.initialize(address(launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
     launchpad.initialize(address(weth), address(adapter), address(tokenImpl), owner);
   }
 
