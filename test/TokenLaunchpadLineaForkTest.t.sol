@@ -5,30 +5,24 @@ import {AgentToken} from "../contracts/token/AgentToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
-import {TokenLaunchpadBasic} from "contracts/launchpad/clmm/TokenLaunchpadBasic.sol";
+import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
 
-contract TokenLaunchpadBasicForkLineaTest is Test {
-  TokenLaunchpadBasic _launchpad;
+contract TokenLaunchpadLineaForkTest is Test {
+  TokenLaunchpadLinea _launchpad;
   MockERC20 _weth;
   RamsesAdapter _adapter;
   AgentToken _tokenImpl;
-  string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
 
+  string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
   address owner = makeAddr("owner");
 
   function setUp() public {
     uint256 lineaFork = vm.createFork(LINEA_RPC_URL);
     vm.selectFork(lineaFork);
 
-    //     constructor(address _launchpad, address _clPoolFactory) {
-    //   LAUNCHPAD = _launchpad;
-    //   CL_POOL_FACTORY = IClPoolFactory(_clPoolFactory);
-    //   me = address(this);
-    // }
-
-    _launchpad = new TokenLaunchpadBasic();
+    _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _tokenImpl = new AgentToken();

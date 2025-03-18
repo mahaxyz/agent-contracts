@@ -32,7 +32,7 @@ interface ICLMMAdapter {
 
   /// @notice Returns the address of the Launchpad contract
   /// @return The address of the Launchpad contract
-  function LAUNCHPAD() external view returns (address);
+  function launchpad() external view returns (address);
 
   /// @notice Checks if a token has been launched
   /// @param _token The token address to check

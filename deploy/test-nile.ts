@@ -41,9 +41,9 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const tokenD = await deployContract(hre, "AgentToken", [], "AgentTokenImpl");
   const launchpadD = await deployContract(
     hre,
-    "AgentLaunchpad",
+    "TokenLaunchpadLinea",
     [],
-    "AgentLaunchpad"
+    "TokenLaunchpadLinea"
   );
   const mahaD = await deployContract(
     hre,
@@ -54,7 +54,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
   const launchpad = await hre.ethers.getContractAt(
-    "AgentLaunchpad",
+    "TokenLaunchpadLinea",
     launchpadD.address
   );
   const tokenImpl = await hre.ethers.getContractAt(
@@ -75,7 +75,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
 
   // initialize the contracts if they are not initialized
-  if ((await adapter.LAUNCHPAD()) !== launchpad.target) {
+  if ((await adapter.launchpad()) !== launchpad.target) {
     await waitForTx(
       await adapter.initialize(
         launchpad.target,
@@ -88,14 +88,12 @@ async function main(hre: HardhatRuntimeEnvironment) {
         name: "", // string name;
         symbol: "", // string symbol;
         metadata: "", // string metadata;
-        whitelisted: [deployer.address], // address[] fundManagers;
-        limitPerWallet: 0, // uint256 limitPerWallet;
-        adapter: ZeroAddress, // address adapter;
+        limitPerWallet: 1000000000000000000n, // uint256 limitPerWallet;
+        adapter: adapterD.address, // address adapter;
       })
     );
     await waitForTx(
       await launchpad.initialize(
-        mahaD.address,
         adapterD.address,
         tokenD.address,
         deployer.address
@@ -120,13 +118,13 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const endingMarketCapInUSD = 69000; // 69,000$ ending market cap
 
   // calculate ticks
-  const lowerTick = computeTickPrice(
+  const launchTick = computeTickPrice(
     startingMarketCapInUSD,
     priceOfETHinUSD,
     18,
     tickSpacing
   );
-  const upperTick = computeTickPrice(
+  const graduationTick = computeTickPrice(
     endingMarketCapInUSD,
     priceOfETHinUSD,
     18,
@@ -148,16 +146,16 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
 
   const data = {
-    base: {
-      fee,
-      fundingToken: wethAddressOnLinea,
-      limitPerWallet,
-      metadata,
-      name,
-      salt,
-      symbol,
-    },
-    liquidity: { lowerTick, upperTick, upperMaxTick },
+    fee,
+    fundingToken: wethAddressOnLinea,
+    limitPerWallet,
+    metadata,
+    name,
+    salt,
+    symbol,
+    launchTick,
+    graduationTick,
+    upperMaxTick,
   };
 
   // create a launchpad token

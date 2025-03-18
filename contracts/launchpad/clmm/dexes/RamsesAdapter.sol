@@ -27,7 +27,7 @@ import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol
 
 contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   IClPoolFactory public clPoolFactory;
-  address public LAUNCHPAD;
+  address public launchpad;
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
 
   address private _me;
@@ -44,7 +44,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   }
 
   function initialize(address _launchpad, address _clPoolFactory) external initializer {
-    LAUNCHPAD = _launchpad;
+    launchpad = _launchpad;
     clPoolFactory = IClPoolFactory(_clPoolFactory);
     _me = address(this);
   }
@@ -61,7 +61,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     int24 _tick1,
     int24 _tick2
   ) external {
-    require(msg.sender == LAUNCHPAD, "!launchpad");
+    require(msg.sender == launchpad, "!launchpad");
     require(launchParams[_tokenBase].pool == IClPool(address(0)), "!launched");
 
     uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
@@ -100,7 +100,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   }
 
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
-    require(msg.sender == LAUNCHPAD, "!launchpad");
+    require(msg.sender == launchpad, "!launchpad");
     LaunchTokenParams memory params = launchParams[IERC20(_token)];
     require(params.pool != IClPool(address(0)), "!launched");
 
@@ -116,12 +116,9 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     IERC20(params.pool.token1()).transfer(msg.sender, fee1);
   }
 
-  function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata) external {
+  function ramsesV2MintCallback(uint256 amount0, uint256, bytes calldata) external {
     require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
-
-    // todo add validation that only token needs to be sent; not quote token
-    if (amount0 > 0) IERC20(_transientClPool.token0()).transferFrom(LAUNCHPAD, msg.sender, amount0);
-    if (amount1 > 0) IERC20(_transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
+    IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
   }
 
   function graduated(address token) external view returns (bool) {

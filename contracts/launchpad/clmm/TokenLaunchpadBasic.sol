@@ -13,10 +13,11 @@
 
 pragma solidity ^0.8.0;
 
-import {TokenLaunchpad} from "./TokenLaunchpad.sol";
+import {IERC20, TokenLaunchpad} from "./TokenLaunchpad.sol";
 
 contract TokenLaunchpadBasic is TokenLaunchpad {
   function _distributeFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal override {
-    // todo distribute fees properly to the various parties
+    IERC20(_token0).transfer(feeDestination, _amount0);
+    IERC20(_token1).transfer(feeDestination, _amount1);
   }
 }
