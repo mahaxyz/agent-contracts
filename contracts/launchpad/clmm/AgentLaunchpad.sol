@@ -19,7 +19,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
-abstract contract AgentLaunchpad is AgentLaunchpadLocker {
+contract AgentLaunchpad is AgentLaunchpadLocker {
   function initialize(address _coreToken, address _adapter, address _tokenImplementation, address _owner)
     external
     initializer
@@ -31,23 +31,8 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
     __ERC721_init("AI Token Launchpad", "BLONKS");
   }
 
-  function setSettings(
-    uint256 _creationFee,
-    uint256 _maxDuration,
-    uint256 _minDuration,
-    uint256 _minFundingGoal,
-    address _feeDestination,
-    uint256 _feeCutE18
-  ) external onlyOwner {
+  function setSettings(uint256 _creationFee, address _feeDestination, uint256 _feeCutE18) external onlyOwner {
     creationFee = _creationFee;
-    maxDuration = _maxDuration;
-    minDuration = _minDuration;
-    minFundingGoal = _minFundingGoal;
-
-    feeDestination = _feeDestination;
-    feeCutE18 = _feeCutE18;
-
-    emit SettingsUpdated(_creationFee, _maxDuration, _minDuration, _minFundingGoal, _feeDestination, _feeCutE18);
   }
 
   function whitelist(address _address, bool _what) external onlyOwner {
@@ -57,7 +42,7 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
 
   function create(CreateParams memory p) external returns (address) {
     if (creationFee > 0) {
-      p.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
+      p.base.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
     }
 
     address[] memory whitelisted = new address[](2);
@@ -65,15 +50,15 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
     whitelisted[1] = address(this);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
-      name: p.name,
-      symbol: p.symbol,
-      metadata: p.metadata,
+      name: p.base.name,
+      symbol: p.base.symbol,
+      metadata: p.base.metadata,
       whitelisted: whitelisted,
-      limitPerWallet: p.limitPerWallet,
+      limitPerWallet: p.base.limitPerWallet,
       adapter: address(adapter)
     });
 
-    IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.salt));
+    IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, p.base.salt));
 
     token.initialize(params);
     tokens.push(token);
@@ -82,14 +67,14 @@ abstract contract AgentLaunchpad is AgentLaunchpadLocker {
 
     adapter.addSingleSidedLiquidity(
       token, // IERC20 _tokenBase,
-      p.fundingToken, // IERC20 _tokenQuote,
-      p.amountBaseBeforeTick, // uint256 _amountBaseBeforeTick,
-      p.amountBaseAfterTick, // uint256 _amountBaseAfterTick,
-      p.fee, // uint24 _fee,
-      p.initialSqrtPrice, // uint160 _sqrtPriceX96,
-      p.lowerTick, // int24 _tick0,
-      p.upperTick, // int24 _tick1,
-      p.upperMaxTick // int24 _tick2
+      p.base.fundingToken, // IERC20 _tokenQuote,
+      p.liquidity.amountBaseBeforeTick, // uint256 _amountBaseBeforeTick,
+      p.liquidity.amountBaseAfterTick, // uint256 _amountBaseAfterTick,
+      p.base.fee, // uint24 _fee,
+      p.liquidity.initialSqrtPrice, // uint160 _sqrtPriceX96,
+      p.liquidity.lowerTick, // int24 _tick0,
+      p.liquidity.upperTick, // int24 _tick1,
+      p.liquidity.upperMaxTick // int24 _tick2
     );
     _mint(msg.sender, tokenToNftId[token]);
 

@@ -33,20 +33,28 @@ interface IAgentLaunchpad {
     bytes32 salt
   );
 
-  struct CreateParams {
+  struct CreateParamsBase {
     string name;
     string symbol;
     string metadata;
     IERC20 fundingToken;
     uint24 fee;
+    uint256 limitPerWallet;
+    bytes32 salt;
+  }
+
+  struct CreateParamsLiquidity {
     uint256 amountBaseBeforeTick;
     uint256 amountBaseAfterTick;
-    bytes32 salt;
-    uint256 limitPerWallet;
     uint160 initialSqrtPrice;
     int24 lowerTick;
     int24 upperTick;
     int24 upperMaxTick;
+  }
+
+  struct CreateParams {
+    CreateParamsBase base;
+    CreateParamsLiquidity liquidity;
   }
 
   // 0, // uint256 _amountBaseBeforeTick,
@@ -90,144 +98,4 @@ interface IAgentLaunchpad {
     uint256 feeCutE18
   );
   event TokenGraduated(address indexed token, uint256 assetsRaised);
-
-  /// @notice Returns the token at the specified index
-  /// @param index The index of the token
-  /// @return token The token at the specified index
-  function tokens(uint256 index) external view returns (IERC20 token);
-
-  /// @notice Checks if an account is whitelisted
-  /// @param account The account to check
-  /// @return whitelisted True if the account is whitelisted, false otherwise
-  function whitelisted(address account) external view returns (bool whitelisted);
-
-  /// @notice Returns the creation fee
-  /// @return fee The creation fee
-  function creationFee() external view returns (uint256 fee);
-
-  /// @notice Returns the maximum duration
-  /// @return duration The maximum duration
-  function maxDuration() external view returns (uint256 duration);
-
-  /// @notice Returns the minimum duration
-  /// @return duration The minimum duration
-  function minDuration() external view returns (uint256 duration);
-
-  /// @notice Returns the minimum funding goal
-  /// @return goal The minimum funding goal
-  function minFundingGoal() external view returns (uint256 goal);
-
-  /// @notice Returns the address of the governor
-  /// @return what The address of the governor
-  function governor() external view returns (address what);
-
-  /// @notice Returns the address of the checker
-  /// @return what The address of the checker
-  function checker() external view returns (address what);
-
-  /// @notice Returns the address of the fee destination
-  /// @return what The address of the fee destination
-  function feeDestination() external view returns (address what);
-
-  /// @notice Returns the fee cut in E18 format
-  /// @return fee The fee cut in E18 format
-  function feeCutE18() external view returns (uint256 fee);
-
-  /// @notice Returns the AeroPoolFactory instance
-  /// @return factory The AeroPoolFactory instance
-  function aeroFactory() external view returns (IPoolFactory factory);
-
-  /// @notice Returns the core token
-  /// @return token The core token
-  function coreToken() external view returns (IERC20 token);
-
-  /// @notice Returns the bonding curve for a given token
-  /// @param token The token to get the bonding curve for
-  /// @return curve The bonding curve for the given token
-  function curves(IAgentToken token) external view returns (IBondingCurve curve);
-
-  /// @notice Returns the funding goal for a given token
-  /// @param token The token to get the funding goal for
-  /// @return goal The funding goal for the given token
-  function fundingGoals(IAgentToken token) external view returns (uint256 goal);
-
-  /// @notice Returns the funding progress for a given token
-  /// @param token The token to get the funding progress for
-  /// @return progress The funding progress for the given token
-  function fundingProgress(IAgentToken token) external view returns (uint256 progress);
-
-  /// @notice Claims the fees for a given token
-  /// @param token The token to claim the fees for
-  function claimFees(IERC20 token) external;
-
-  /// @notice Performs a presale swap
-  /// @param token The token to swap
-  /// @param amountIn The amount of tokens to swap in
-  /// @param minAmountOut The minimum amount of tokens to receive
-  /// @param buy True if buying, false if selling
-  function presaleSwap(IAgentToken token, address destination, uint256 amountIn, uint256 minAmountOut, bool buy)
-    external;
-
-  function presaleSwapWithOdos(
-    IAgentToken token,
-    address destination,
-    uint256 tokensToBuyOrSell,
-    uint256 minAmountOut,
-    bool buy,
-    IERC20 inputToken,
-    uint256 inputAmount,
-    bytes memory data
-  ) external payable;
-
-  /// @notice Graduates a given token
-  /// @param token The token to graduate
-  function graduate(IAgentToken token) external;
-
-  /// @notice Checks if the funding goal is met for a given token
-  /// @param token The token to check the funding goal for
-  /// @return True if the funding goal is met, false otherwise
-  function checkFundingGoalMet(IAgentToken token) external view returns (bool);
-
-  /// @notice Initializes the contract with the given parameters
-  /// @param _fundingToken The funding token
-  /// @param _aeroFactory The AeroPoolFactory instance
-  /// @param _owner The owner of the contract
-  function initialize(
-    address _fundingToken,
-    address _odos,
-    address _aeroFactory,
-    address _tokenImplementation,
-    address _owner,
-    address _hook,
-    address _poolManager
-  ) external;
-
-  /// @notice Sets the settings for the contract
-  /// @param _creationFee The creation fee
-  /// @param _maxDuration The maximum duration
-  /// @param _minDuration The minimum duration
-  /// @param _minFundingGoal The minimum funding goal
-  /// @param _feeDestination The address of the fee destination
-  /// @param _feeCutE18 The fee cut in E18 format
-  function setSettings(
-    uint256 _creationFee,
-    uint256 _maxDuration,
-    uint256 _minDuration,
-    uint256 _minFundingGoal,
-    address _feeDestination,
-    uint256 _feeCutE18
-  ) external;
-
-  /// @notice Whitelists or removes an address from the whitelist
-  /// @param _address The address to whitelist or remove from the whitelist
-  /// @param _what True to whitelist, false to remove from the whitelist
-  function whitelist(address _address, bool _what) external;
-
-  /// @notice Creates a new entity with the given parameters
-  /// @param p The parameters for creation
-  function create(CreateParams memory p) external returns (address);
-
-  /// @notice Returns the total number of tokens
-  /// @return total The total number of tokens
-  function getTotalTokens() external view returns (uint256 total);
 }

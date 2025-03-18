@@ -31,9 +31,6 @@ abstract contract AgentLaunchpadBase is IAgentLaunchpad, OwnableUpgradeable, ERC
   IERC20[] public tokens;
   mapping(address => bool) public whitelisted;
   uint256 public creationFee;
-  uint256 public maxDuration;
-  uint256 public minDuration;
-  uint256 public minFundingGoal;
 
   address public governor;
   address public checker;

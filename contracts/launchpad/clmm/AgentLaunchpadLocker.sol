@@ -35,6 +35,14 @@ abstract contract AgentLaunchpadLocker is AgentLaunchpadBase {
 
     // address dest = ownerOf(tokenToNftId[IAgentToken(token)]);
 
+    // (uint256 fee0, uint256 fee1) = adapter.claimFees(token);
+
+    // uint256 bribeAmount = (fee0 + fee1) * 20 / 100; // 20% to nile as bribes
+    // uint256 launchpadAmount = (fee0 + fee1) * 40 / 100; // 40% to the launchpad
+    // uint256 creatorAmount = (fee0 + fee1) * 40 / 100; // 40% to the creator
+
+    // IERC20(token.token0()).transfer(dest, fee0);
+    // IERC20(token.token1()).transfer(dest, fee1);
     // IPool pool = lock.liquidityToken;
     // (uint256 fee0, uint256 fee1) = adapter.claimFees(token);
 

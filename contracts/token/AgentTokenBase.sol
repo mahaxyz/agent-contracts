@@ -36,22 +36,22 @@ abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
 
   function _update(address _from, address _to, uint256 _value) internal override {
     super._update(_from, _to, _value);
-    if (!unlocked) {
-      if (adapter.graduated(address(this))) {
-        // if the token is graduated, then allow transfers
-        unlocked = true;
-        emit Unlocked();
-        return;
-      } else if (whitelisted[_from]) {
-        // buy tokens; limit to `limitPerWallet` per wallet
-        require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet");
-      } else if (whitelisted[_to]) {
-        // sell tokens; allow without limits
-      } else {
-        // disallow transfers between users until the presale is over
-        require(false, "!transfer");
-      }
-    }
+    // if (!unlocked) {
+    //   if (adapter.graduated(address(this))) {
+    //     // if the token is graduated, then allow transfers
+    //     unlocked = true;
+    //     emit Unlocked();
+    //     return;
+    //   } else if (whitelisted[_from]) {
+    //     // buy tokens; limit to `limitPerWallet` per wallet
+    //     require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet");
+    //   } else if (whitelisted[_to]) {
+    //     // sell tokens; allow without limits
+    //   } else {
+    //     // disallow transfers between users until the presale is over
+    //     require(false, "!transfer");
+    //   }
+    // }
   }
 
   function isWhitelisted(address _address) external view override returns (bool) {

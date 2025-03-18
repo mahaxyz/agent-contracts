@@ -14,6 +14,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-foundry": "^1.1.3",
     "@nomicfoundation/hardhat-ignition": "^0.15.0",
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
@@ -29,6 +30,7 @@
     "ethers": "^6.4.0",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-deploy": "^0.14.0",
+    "hardhat-foundry": "^0.0.5",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-typechain": "^0.3.5",
     "solidity-coverage": "^0.8.0",

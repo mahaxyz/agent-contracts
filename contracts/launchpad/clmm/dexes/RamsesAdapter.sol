@@ -20,11 +20,9 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamsesV2MintCallback.sol";
 
-abstract contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
+contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
   IClPoolFactory public immutable CL_POOL_FACTORY;
   address public immutable LAUNCHPAD;
-
-  address public feeDistributor;
 
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
 
@@ -44,11 +42,10 @@ abstract contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
     int24 tick2;
   }
 
-  constructor(address _launchpad, address _clPoolFactory, address _feeDistributor) {
+  constructor(address _launchpad, address _clPoolFactory) {
     LAUNCHPAD = _launchpad;
     CL_POOL_FACTORY = IClPoolFactory(_clPoolFactory);
     me = address(this);
-    feeDistributor = _feeDistributor;
   }
 
   function launchedTokens(IERC20 _token) external view returns (bool launched) {
@@ -108,8 +105,8 @@ abstract contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
 
-    IERC20(params.pool.token0()).transfer(feeDistributor, fee0);
-    IERC20(params.pool.token1()).transfer(feeDistributor, fee1);
+    IERC20(params.pool.token0()).transfer(msg.sender, fee0);
+    IERC20(params.pool.token1()).transfer(msg.sender, fee1);
   }
 
   function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
@@ -117,5 +114,9 @@ abstract contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback {
     if (address(transientClPool) == address(0)) return;
     if (amount0 > 0) IERC20(transientClPool.token0()).transfer(msg.sender, amount0);
     if (amount1 > 0) IERC20(transientClPool.token1()).transfer(msg.sender, amount1);
+  }
+
+  function graduated(address _token) external view returns (bool) {
+    return false;
   }
 }
