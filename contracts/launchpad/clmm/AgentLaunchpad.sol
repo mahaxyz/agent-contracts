@@ -28,7 +28,7 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
-    __ERC721_init("AI Token Launchpad", "BLONKS");
+    __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
 
   function setSettings(uint256 _creationFee, address _feeDestination, uint256 _feeCutE18) external onlyOwner {

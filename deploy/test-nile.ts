@@ -80,10 +80,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
       name: "Test Token",
       symbol: "TEST",
       metadata: "Test metadata",
-      fundingToken: mahaD.address,
+      fundingToken: "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
       fee: 3000,
       limitPerWallet: 1000,
-      salt: keccak256("0x"),
+      salt: keccak256("0x12"),
     },
     liquidity: {
       amountBaseBeforeTick: 600_000_000n * e18,
