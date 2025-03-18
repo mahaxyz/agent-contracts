@@ -26,12 +26,12 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
 
 contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
-  IClPoolFactory public CL_POOL_FACTORY;
+  IClPoolFactory public clPoolFactory;
   address public LAUNCHPAD;
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
 
-  address private me;
-  IClPool private transientClPool;
+  address private _me;
+  IClPool private _transientClPool;
 
   struct LaunchTokenParams {
     IERC20 tokenBase;
@@ -45,8 +45,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
 
   function initialize(address _launchpad, address _clPoolFactory) external initializer {
     LAUNCHPAD = _launchpad;
-    CL_POOL_FACTORY = IClPoolFactory(_clPoolFactory);
-    me = address(this);
+    clPoolFactory = IClPoolFactory(_clPoolFactory);
+    _me = address(this);
   }
 
   function launchedTokens(IERC20 _token) external view returns (bool launched) {
@@ -73,7 +73,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     uint256 amountBaseAfterTick = 400_000_000 ether;
 
     IClPool pool =
-      IClPool(CL_POOL_FACTORY.createPool(address(_tokenBase), address(_tokenQuote), _fee, sqrtPriceX96Launch));
+      IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), _fee, sqrtPriceX96Launch));
     launchParams[_tokenBase] = LaunchTokenParams({
       tokenBase: _tokenBase,
       tokenQuote: _tokenQuote,
@@ -83,33 +83,20 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       tick1: _tick1,
       tick2: _tick2
     });
-
+    require(address(_tokenBase) == pool.token0(), "!token0");
     IAgentToken(address(_tokenBase)).whitelist(address(pool));
 
-    transientClPool = pool;
-
     // calculate the liquidity for the various tick ranges
+    uint128 liquidityBeforeTick0 =
+      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, amountBaseBeforeTick);
+    uint128 liquidityBeforeTick1 =
+      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, amountBaseAfterTick);
+
     // add liquidity to the various tick ranges
-
-    if (address(_tokenBase) == transientClPool.token0()) {
-      uint128 liquidityBeforeTick0 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, amountBaseBeforeTick);
-      uint128 liquidityBeforeTick1 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, amountBaseAfterTick);
-
-      pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
-      pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
-    } else {
-      uint128 liquidityBeforeTick0 =
-        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX961, sqrtPriceX960, amountBaseBeforeTick);
-      uint128 liquidityBeforeTick1 =
-        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX962, sqrtPriceX961, amountBaseAfterTick);
-
-      pool.mint(me, _tick1, _tick0, liquidityBeforeTick0, "");
-      pool.mint(me, _tick2, _tick1, liquidityBeforeTick1, "");
-    }
-
-    transientClPool = IClPool(address(0));
+    _transientClPool = pool;
+    pool.mint(_me, _tick0, _tick1, liquidityBeforeTick0, "");
+    pool.mint(_me, _tick1, _tick2, liquidityBeforeTick1, "");
+    _transientClPool = IClPool(address(0));
   }
 
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
@@ -118,9 +105,9 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     require(params.pool != IClPool(address(0)), "!launched");
 
     (uint256 fee00, uint256 fee01) =
-      params.pool.collect(me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
+      params.pool.collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
     (uint256 fee10, uint256 fee11) =
-      params.pool.collect(me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
+      params.pool.collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
 
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
@@ -130,12 +117,11 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   }
 
   function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata) external {
-    require(msg.sender == address(transientClPool), "!clPool");
-    if (address(transientClPool) == address(0)) return;
+    require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
 
     // todo add validation that only token needs to be sent; not quote token
-    if (amount0 > 0) IERC20(transientClPool.token0()).transferFrom(LAUNCHPAD, msg.sender, amount0);
-    if (amount1 > 0) IERC20(transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
+    if (amount0 > 0) IERC20(_transientClPool.token0()).transferFrom(LAUNCHPAD, msg.sender, amount0);
+    if (amount1 > 0) IERC20(_transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
   }
 
   function graduated(address token) external view returns (bool) {

@@ -17,7 +17,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
-import {AgentLaunchpad} from "contracts/launchpad/clmm/AgentLaunchpad.sol";
+import {TokenLaunchpadBasic} from "contracts/launchpad/clmm/TokenLaunchpadBasic.sol";
 
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";

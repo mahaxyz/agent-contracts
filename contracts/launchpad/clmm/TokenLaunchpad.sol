@@ -13,31 +13,38 @@
 
 pragma solidity ^0.8.0;
 
-import {AgentLaunchpadLocker} from "./AgentLaunchpadLocker.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ERC721EnumerableUpgradeable} from
+  "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
-contract AgentLaunchpad is AgentLaunchpadLocker {
-  function initialize(address _coreToken, address _adapter, address _tokenImplementation, address _owner)
-    external
-    initializer
-  {
-    coreToken = IERC20(_coreToken);
+abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
+  address public tokenImplementation;
+  IERC20[] public tokens;
+  uint256 public creationFee;
+  address public feeDestination;
+  ICLMMAdapter public adapter;
+  mapping(IAgentToken token => CreateParams) public launchParams;
+  mapping(IAgentToken token => uint256) public tokenToNftId;
+
+  receive() external payable {}
+
+  function initialize(address _adapter, address _tokenImplementation, address _owner) external initializer {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
 
-  function setSettings(uint256 _creationFee) external onlyOwner {
-    creationFee = _creationFee;
-  }
-
-  function whitelist(address _address, bool _what) external onlyOwner {
-    whitelisted[_address] = _what;
-    // todo add event
+  function setFeeSettings(address _feeDestination, uint256 _fee) external onlyOwner {
+    feeDestination = _feeDestination;
+    creationFee = _fee;
+    emit FeeUpdated(_feeDestination, _fee);
   }
 
   function create(CreateParams memory p, address expected) external payable returns (address) {
@@ -47,14 +54,14 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
     }
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
-      name: p.base.name,
-      symbol: p.base.symbol,
-      metadata: p.base.metadata,
-      limitPerWallet: p.base.limitPerWallet,
+      name: p.name,
+      symbol: p.symbol,
+      metadata: p.metadata,
+      limitPerWallet: p.limitPerWallet,
       adapter: address(adapter)
     });
 
-    bytes32 salt = keccak256(abi.encode(p.base.salt, msg.sender, p.base.name, p.base.symbol));
+    bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
 
     IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, salt));
     require(expected == address(0) || address(token) == expected, "Invalid token address");
@@ -68,11 +75,11 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
 
     adapter.addSingleSidedLiquidity(
       token, // IERC20 _tokenBase,
-      p.base.fundingToken, // IERC20 _tokenQuote,
-      p.base.fee, // uint24 _fee,
-      p.liquidity.lowerTick, // int24 _tick0,
-      p.liquidity.upperTick, // int24 _tick1,
-      p.liquidity.upperMaxTick // int24 _tick2
+      p.fundingToken, // IERC20 _tokenQuote,
+      p.fee, // uint24 _fee,
+      p.launchTick, // int24 _tick0,
+      p.graduationTick, // int24 _tick1,
+      p.upperMaxTick // int24 _tick2
     );
 
     _mint(msg.sender, tokenToNftId[token]);
@@ -83,4 +90,13 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
   function getTotalTokens() external view returns (uint256) {
     return tokens.length;
   }
+
+  function claimFees(IAgentToken _token) external {
+    require(msg.sender == address(adapter), "!adapter");
+    address token1 = address(launchParams[_token].fundingToken);
+    (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
+    _distributeFees(address(_token), token1, fee0, fee1);
+  }
+
+  function _distributeFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal virtual;
 }

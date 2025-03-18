@@ -13,13 +13,10 @@
 
 pragma solidity ^0.8.0;
 
-// import {IPool} from "contracts/aerodrome/interfaces/IPool.sol";
-import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {TokenLaunchpad} from "./TokenLaunchpad.sol";
 
-abstract contract UniswapV3Adapter is ICLMMAdapter {
-  address public immutable LAUNCHPAD;
-
-  constructor(address _launchpad) {
-    LAUNCHPAD = _launchpad;
+contract TokenLaunchpadLinea is TokenLaunchpad {
+  function _distributeFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal override {
+    // todo distribute fees properly to the various parties
   }
 }

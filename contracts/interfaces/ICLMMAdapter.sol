@@ -30,11 +30,19 @@ interface ICLMMAdapter {
     int24 _tick2
   ) external;
 
+  /// @notice Returns the address of the Launchpad contract
+  /// @return The address of the Launchpad contract
   function LAUNCHPAD() external view returns (address);
 
+  /// @notice Checks if a token has been launched
+  /// @param _token The token address to check
+  /// @return true if the token has been launched, false otherwise
   function launchedTokens(IERC20 _token) external view returns (bool launched);
 
   /// @notice Claim accumulated fees from the pool
+  /// @param _token The token address to claim fees for
+  /// @return fee0 The amount of token0 fees to claim
+  /// @return fee1 The amount of token1 fees to claim
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1);
 
   /// @notice Check if a token has graduated
