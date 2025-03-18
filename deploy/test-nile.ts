@@ -1,13 +1,42 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { deployContract, deployProxy, waitForTx } from "../scripts/utils";
-import { keccak256, MaxUint256, ZeroAddress } from "ethers";
+import { deployContract, waitForTx } from "../scripts/utils";
+import { ZeroAddress } from "ethers";
 import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
+
+// Helper function to compute the tick price for a given market cap in USD
+const computeTickPrice = (
+  marketCapInUSD: number,
+  priceOfQuoteTokenInUSD: number,
+  quoteSupplyDecimals: number,
+  tickSpacing: number
+) => {
+  const e18 = 10n ** 18n;
+  const marketCapInQuoteToken = marketCapInUSD / priceOfQuoteTokenInUSD;
+  const totalSupply = 1000000000n * e18; // 1bn tokens
+  const quoteSupply =
+    (BigInt(Math.floor(marketCapInQuoteToken * 1000)) *
+      10n ** BigInt(quoteSupplyDecimals)) /
+    1000n;
+
+  // Calculate sqrtPriceX96 following Uniswap v3 format
+  const sqrtPriceRatio = (quoteSupply * e18) / totalSupply;
+  const sqrtPriceX96 = BigInt(
+    Math.floor(Math.sqrt(Number(sqrtPriceRatio)) * 2 ** 96)
+  );
+  const tick = Math.floor(
+    Math.log(Number(sqrtPriceX96) / 2 ** 96) / Math.log(Math.sqrt(1.0001))
+  );
+
+  return roundTickToNearestTick(tick, tickSpacing);
+};
+
+// Helper function to round tick to the nearest tick spacing
+const roundTickToNearestTick = (tick: number, tickSpacing: number) => {
+  return Math.round(tick / tickSpacing) * tickSpacing;
+};
 
 async function main(hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
-
-  console.log("deployer", deployer.address);
-  const e18 = 1000000000000000000n;
 
   const tokenD = await deployContract(hre, "AgentToken", [], "AgentTokenImpl");
   const launchpadD = await deployContract(
@@ -71,20 +100,45 @@ async function main(hre: HardhatRuntimeEnvironment) {
     )
   );
 
-  await waitForTx(await launchpad.whitelist(mahaD.address, true));
+  // CONTRACTS ARE DEPLOYED; NOW WE CAN LAUNCH A NEW TOKEN
+
+  // setup parameters
+  const e18 = 1000000000000000000n;
+  const name = "Test Token";
+  const symbol = "TEST";
+  const priceOfETHinUSD = 1800; // feed this with the price of ETH in USD
+  const wethAddressOnLinea = "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f";
+  const tickSpacing = 200; // tick spacing for 1% fee
+  const fee = 10000; // 1% fee
+  const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
+  const limitPerWallet = 30000000n * e18; // 3% per wallet
+
+  const startingMarketCapInUSD = 5000; // 5,000$ starting market cap
+  const endingMarketCapInUSD = 69000; // 69,000$ ending market cap
+
+  // calculate ticks
+  const lowerTick = computeTickPrice(
+    startingMarketCapInUSD,
+    priceOfETHinUSD,
+    18,
+    tickSpacing
+  );
+  const upperTick = computeTickPrice(
+    endingMarketCapInUSD,
+    priceOfETHinUSD,
+    18,
+    tickSpacing
+  );
+  const upperMaxTick = roundTickToNearestTick(887220, tickSpacing); // Maximum possible tick value
 
   // mint some tokens
   await waitForTx(await maha.mint(deployer.address, 100000000000n * e18));
-
-  const fundingToken = "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f";
-  const name = "Test Token";
-  const symbol = "TEST";
 
   // guess the salt and computed address for the given token
   const { salt, computedAddress } = await guessTokenAddress(
     launchpad.target,
     tokenImpl.target,
-    fundingToken,
+    wethAddressOnLinea,
     deployer.address,
     name,
     symbol
@@ -92,21 +146,15 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   const data = {
     base: {
+      fee,
+      fundingToken: wethAddressOnLinea,
+      limitPerWallet,
+      metadata,
       name,
-      symbol,
-      metadata: '{"image":"https://i.imgur.com/56aQaCV.png"}',
-      fundingToken: fundingToken,
-      fee: 3000,
-      limitPerWallet: 1000,
       salt,
+      symbol,
     },
-    liquidity: {
-      amountBaseBeforeTick: 600_000_000n * e18,
-      amountBaseAfterTick: 400_000_000n * e18,
-      lowerTick: 46020, // Price of 1 ETH per token
-      upperTick: 46080, // Price of 2 ETH per token
-      upperMaxTick: 887220, // Maximum possible tick value
-    },
+    liquidity: { lowerTick, upperTick, upperMaxTick },
   };
 
   // create a launchpad token
