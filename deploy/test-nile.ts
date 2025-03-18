@@ -90,7 +90,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
       amountBaseAfterTick: 400_000_000n * e18,
       lowerTick: 46020, // Price of 1 ETH per token
       upperTick: 46080, // Price of 2 ETH per token
-      upperMaxTick: 46140, // Price of 100 ETH per token
+      upperMaxTick: 887220, // Maximum possible tick value
     },
   };
 
