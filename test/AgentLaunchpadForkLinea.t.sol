@@ -10,10 +10,10 @@ import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
 
 contract AgentLaunchpadForkLineaTest is Test {
-  AgentLaunchpad launchpad;
-  MockERC20 weth;
-  RamsesAdapter adapter;
-  AgentToken tokenImpl;
+  AgentLaunchpad _launchpad;
+  MockERC20 _weth;
+  RamsesAdapter _adapter;
+  AgentToken _tokenImpl;
   string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
 
   address owner = makeAddr("owner");
@@ -28,43 +28,37 @@ contract AgentLaunchpadForkLineaTest is Test {
     //   me = address(this);
     // }
 
-    launchpad = new AgentLaunchpad();
-    adapter = new RamsesAdapter();
-    weth = new MockERC20("Wrapped Ether", "WETH", 18);
-    tokenImpl = new AgentToken();
+    _launchpad = new AgentLaunchpad();
+    _adapter = new RamsesAdapter();
+    _weth = new MockERC20("Wrapped Ether", "WETH", 18);
+    _tokenImpl = new AgentToken();
 
-    vm.label(address(launchpad), "launchpad");
-    vm.label(address(adapter), "nileAdapter");
-    vm.label(address(weth), "weth");
+    vm.label(address(_launchpad), "launchpad");
+    vm.label(address(_adapter), "nileAdapter");
+    vm.label(address(_weth), "weth");
 
-    adapter.initialize(address(launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
-    launchpad.initialize(address(weth), address(adapter), address(tokenImpl), owner);
+    _adapter.initialize(address(_launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
+    _launchpad.initialize(address(_weth), address(_adapter), address(_tokenImpl), owner);
   }
 
   function test_create() public {
-    uint256 price0inEth = 1 ether;
-    uint256 price1inEth = 2 ether;
-    uint256 price2inEth = 100 ether;
-
     IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
       base: IAgentLaunchpad.CreateParamsBase({
         name: "Test Token",
         symbol: "TEST",
         metadata: "Test metadata",
-        fundingToken: IERC20(address(weth)),
+        fundingToken: IERC20(address(_weth)),
         fee: 3000,
         limitPerWallet: 1000,
         salt: bytes32(0)
       }),
       liquidity: IAgentLaunchpad.CreateParamsLiquidity({
-        amountBaseBeforeTick: 600_000_000 ether,
-        amountBaseAfterTick: 400_000_000 ether,
         lowerTick: 46_020, // Price of 1 ETH per token (aligned to tick spacing of 60)
         upperTick: 46_080, // Price of 2 ETH per token (aligned to tick spacing of 60)
-        upperMaxTick: 46_140 // Price of 100 ETH per token (aligned to tick spacing of 60)
+        upperMaxTick: 887_220 // Price of 100 ETH per token (aligned to tick spacing of 60)
       })
     });
 
-    launchpad.create(params);
+    _launchpad.create(params, address(0));
   }
 }

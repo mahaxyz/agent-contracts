@@ -44,8 +44,6 @@ interface IAgentLaunchpad {
   }
 
   struct CreateParamsLiquidity {
-    uint256 amountBaseBeforeTick;
-    uint256 amountBaseAfterTick;
     int24 lowerTick;
     int24 upperTick;
     int24 upperMaxTick;

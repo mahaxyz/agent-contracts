@@ -24,8 +24,6 @@ interface ICLMMAdapter {
   function addSingleSidedLiquidity(
     IERC20 _tokenBase,
     IERC20 _tokenQuote,
-    uint256 _amountBaseBeforeTick,
-    uint256 _amountBaseAfterTick,
     uint24 _fee,
     int24 _tick0,
     int24 _tick1,

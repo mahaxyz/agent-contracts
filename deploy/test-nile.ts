@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { deployContract, deployProxy, waitForTx } from "../scripts/utils";
 import { keccak256, MaxUint256, ZeroAddress } from "ethers";
+import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
 
 async function main(hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
@@ -75,15 +76,29 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // mint some tokens
   await waitForTx(await maha.mint(deployer.address, 100000000000n * e18));
 
+  const fundingToken = "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f";
+  const name = "Test Token";
+  const symbol = "TEST";
+
+  // guess the salt and computed address for the given token
+  const { salt, computedAddress } = await guessTokenAddress(
+    launchpad.target,
+    tokenImpl.target,
+    fundingToken,
+    deployer.address,
+    name,
+    symbol
+  );
+
   const data = {
     base: {
-      name: "Test Token",
-      symbol: "TEST",
-      metadata: "Test metadata",
-      fundingToken: "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+      name,
+      symbol,
+      metadata: '{"image":"https://i.imgur.com/56aQaCV.png"}',
+      fundingToken: fundingToken,
       fee: 3000,
       limitPerWallet: 1000,
-      salt: keccak256("0x12"),
+      salt,
     },
     liquidity: {
       amountBaseBeforeTick: 600_000_000n * e18,
@@ -96,45 +111,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // create a launchpad token
   console.log("creating a launchpad token");
-  console.log("data", await launchpad.create.populateTransaction(data));
-  await waitForTx(await launchpad.create(data));
-
-  const lastToken = await hre.ethers.getContractAt(
-    "AgentToken",
-    await launchpad.tokens((await launchpad.getTotalTokens()) - 1n)
-  );
-
-  // // perform a swap
-  // console.log("performing a swap");
-  // await waitForTx(await maha.approve(launchpad.target, MaxUint256));
-  // await waitForTx(await lastToken.approve(launchpad.target, MaxUint256));
-  // await waitForTx(
-  //   await launchpad.presaleSwap(
-  //     lastToken.target,
-  //     deployer.address,
-  //     100000000n * e18,
-  //     "0",
-  //     true
-  //   )
-  // );
-  // await waitForTx(
-  //   await launchpad.presaleSwap(
-  //     lastToken.target,
-  //     deployer.address,
-  //     10000000n * e18,
-  //     "0",
-  //     false
-  //   )
-  // );
-  // await waitForTx(
-  //   await launchpad.presaleSwap(
-  //     lastToken.target,
-  //     deployer.address,
-  //     10000000000n * e18,
-  //     "0",
-  //     true
-  //   )
-  // );
+  await waitForTx(await launchpad.create(data, computedAddress));
 }
 
 main.tags = ["TestDeploymentNile"];

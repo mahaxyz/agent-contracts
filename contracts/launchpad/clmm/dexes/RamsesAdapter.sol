@@ -37,8 +37,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     IERC20 tokenQuote;
     IClPool pool;
     uint24 fee;
-    uint256 amountBaseBeforeTick;
-    uint256 amountBaseAfterTick;
     int24 tick0;
     int24 tick1;
     int24 tick2;
@@ -57,8 +55,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   function addSingleSidedLiquidity(
     IERC20 _tokenBase,
     IERC20 _tokenQuote,
-    uint256 _amountBaseBeforeTick,
-    uint256 _amountBaseAfterTick,
     uint24 _fee,
     int24 _tick0,
     int24 _tick1,
@@ -72,6 +68,9 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
     uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
 
+    uint256 amountBaseBeforeTick = 600_000_000 ether;
+    uint256 amountBaseAfterTick = 400_000_000 ether;
+
     IClPool pool =
       IClPool(CL_POOL_FACTORY.createPool(address(_tokenBase), address(_tokenQuote), _fee, sqrtPriceX96Launch));
     launchParams[_tokenBase] = LaunchTokenParams({
@@ -79,10 +78,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       tokenQuote: _tokenQuote,
       pool: pool,
       fee: _fee,
-      amountBaseBeforeTick: _amountBaseBeforeTick,
-      amountBaseAfterTick: _amountBaseAfterTick,
-      // sqrtPriceX96: TickMath.getSqrtPriceAtTick(_tick0 - 1),
-      // sqrtPriceX96: sqrtPriceX960,
       tick0: _tick0,
       tick1: _tick1,
       tick2: _tick2
@@ -95,17 +90,17 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
 
     if (address(_tokenBase) == transientClPool.token0()) {
       uint128 liquidityBeforeTick0 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, _amountBaseBeforeTick);
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, amountBaseBeforeTick);
       uint128 liquidityBeforeTick1 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, _amountBaseAfterTick);
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, amountBaseAfterTick);
 
       pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
       pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
     } else {
       uint128 liquidityBeforeTick0 =
-        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX961, sqrtPriceX960, _amountBaseBeforeTick);
+        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX961, sqrtPriceX960, amountBaseBeforeTick);
       uint128 liquidityBeforeTick1 =
-        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX962, sqrtPriceX961, _amountBaseAfterTick);
+        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX962, sqrtPriceX961, amountBaseAfterTick);
 
       pool.mint(me, _tick1, _tick0, liquidityBeforeTick0, "");
       pool.mint(me, _tick2, _tick1, liquidityBeforeTick1, "");
@@ -131,7 +126,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     IERC20(params.pool.token1()).transfer(msg.sender, fee1);
   }
 
-  function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
+  function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata) external {
     require(msg.sender == address(transientClPool), "!clPool");
     if (address(transientClPool) == address(0)) return;
 
@@ -140,7 +135,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     if (amount1 > 0) IERC20(transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
   }
 
-  function graduated(address _token) external view returns (bool) {
+  function graduated(address) external pure returns (bool) {
     return false;
   }
 }
