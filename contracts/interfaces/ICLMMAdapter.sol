@@ -36,7 +36,7 @@ interface ICLMMAdapter {
 
   /// @notice Checks if a token has been launched
   /// @param _token The token address to check
-  /// @return true if the token has been launched, false otherwise
+  /// @return launched true if the token has been launched, false otherwise
   function launchedTokens(IERC20 _token) external view returns (bool launched);
 
   /// @notice Claim accumulated fees from the pool
