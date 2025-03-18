@@ -27,7 +27,6 @@ interface ICLMMAdapter {
     uint256 _amountBaseBeforeTick,
     uint256 _amountBaseAfterTick,
     uint24 _fee,
-    uint160 _sqrtPriceX96,
     int24 _tick0,
     int24 _tick1,
     int24 _tick2

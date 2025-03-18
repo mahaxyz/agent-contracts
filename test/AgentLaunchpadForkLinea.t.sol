@@ -33,11 +33,19 @@ contract AgentLaunchpadForkLineaTest is Test {
     weth = new MockERC20("Wrapped Ether", "WETH", 18);
     tokenImpl = new AgentToken();
 
+    vm.label(address(launchpad), "launchpad");
+    vm.label(address(adapter), "nileAdapter");
+    vm.label(address(weth), "weth");
+
     adapter.initialize(address(launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
     launchpad.initialize(address(weth), address(adapter), address(tokenImpl), owner);
   }
 
   function test_create() public {
+    uint256 price0inEth = 1 ether;
+    uint256 price1inEth = 2 ether;
+    uint256 price2inEth = 100 ether;
+
     IAgentLaunchpad.CreateParams memory params = IAgentLaunchpad.CreateParams({
       base: IAgentLaunchpad.CreateParamsBase({
         name: "Test Token",
@@ -51,10 +59,9 @@ contract AgentLaunchpadForkLineaTest is Test {
       liquidity: IAgentLaunchpad.CreateParamsLiquidity({
         amountBaseBeforeTick: 600_000_000 ether,
         amountBaseAfterTick: 400_000_000 ether,
-        initialSqrtPrice: 79_228_162_514_264_337_593_543_950_336, // sqrt(1) * 2^96 for 1 ETH per token
-        lowerTick: 6931, // Price of 1 ETH per token
-        upperTick: 6932, // Price of 2 ETH per token
-        upperMaxTick: 46_052 // Price of 100 ETH per token
+        lowerTick: 46_020, // Price of 1 ETH per token (aligned to tick spacing of 60)
+        upperTick: 46_080, // Price of 2 ETH per token (aligned to tick spacing of 60)
+        upperMaxTick: 46_140 // Price of 100 ETH per token (aligned to tick spacing of 60)
       })
     });
 

@@ -32,14 +32,23 @@ async function main(hre: HardhatRuntimeEnvironment) {
     tokenD.address
   );
 
-  const adapter = await deployContract(
+  const adapterD = await deployContract(
     hre,
     "RamsesAdapter",
-    [
-      launchpad.target, // address _launchpad,
-      "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42", // address _clPoolFactory
-    ],
+    [],
     "RamsesAdapter"
+  );
+
+  const adapter = await hre.ethers.getContractAt(
+    "RamsesAdapter",
+    adapterD.address
+  );
+
+  await waitForTx(
+    await adapter.initialize(
+      launchpad.target,
+      "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42"
+    )
   );
 
   await waitForTx(
@@ -55,7 +64,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   await waitForTx(
     await launchpad.initialize(
       mahaD.address,
-      adapter.address,
+      adapterD.address,
       tokenD.address,
       deployer.address
     )
@@ -66,29 +75,29 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // mint some tokens
   await waitForTx(await maha.mint(deployer.address, 100000000000n * e18));
 
+  const data = {
+    base: {
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: mahaD.address,
+      fee: 3000,
+      limitPerWallet: 1000,
+      salt: keccak256("0x"),
+    },
+    liquidity: {
+      amountBaseBeforeTick: 600_000_000n * e18,
+      amountBaseAfterTick: 400_000_000n * e18,
+      lowerTick: 46020, // Price of 1 ETH per token
+      upperTick: 46080, // Price of 2 ETH per token
+      upperMaxTick: 46140, // Price of 100 ETH per token
+    },
+  };
+
   // create a launchpad token
   console.log("creating a launchpad token");
-  await waitForTx(
-    await launchpad.create({
-      base: {
-        name: "Test Token",
-        symbol: "TEST",
-        metadata: "Test metadata",
-        fundingToken: mahaD.address,
-        fee: 3000,
-        limitPerWallet: 1000,
-        salt: keccak256("0x"),
-      },
-      liquidity: {
-        amountBaseBeforeTick: 600_000_000n * e18,
-        amountBaseAfterTick: 400_000_000n * e18,
-        initialSqrtPrice: 79_228_162_514_264_337_593_543_950_336n, // sqrt(1) * 2^96 for 1 ETH per token
-        lowerTick: 6931, // Price of 1 ETH per token
-        upperTick: 6932, // Price of 2 ETH per token
-        upperMaxTick: 46_052, // Price of 100 ETH per token
-      },
-    })
-  );
+  console.log("data", await launchpad.create.populateTransaction(data));
+  await waitForTx(await launchpad.create(data));
 
   const lastToken = await hre.ethers.getContractAt(
     "AgentToken",

@@ -46,7 +46,6 @@ interface IAgentLaunchpad {
   struct CreateParamsLiquidity {
     uint256 amountBaseBeforeTick;
     uint256 amountBaseAfterTick;
-    uint160 initialSqrtPrice;
     int24 lowerTick;
     int24 upperTick;
     int24 upperMaxTick;
@@ -56,14 +55,6 @@ interface IAgentLaunchpad {
     CreateParamsBase base;
     CreateParamsLiquidity liquidity;
   }
-
-  // 0, // uint256 _amountBaseBeforeTick,
-  // 0, // uint256 _amountBaseAfterTick,
-  // 0, // uint24 _fee,
-  // 0, // uint160 _sqrtPriceX96,
-  // 0, // int24 _tick0,
-  // 0, // int24 _tick1,
-  // 0 // int24 _tick2
 
   struct LiquidityLock {
     IPool liquidityToken;

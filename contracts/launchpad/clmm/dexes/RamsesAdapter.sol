@@ -27,7 +27,6 @@ import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol
 contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   IClPoolFactory public CL_POOL_FACTORY;
   address public LAUNCHPAD;
-
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
 
   address private me;
@@ -40,7 +39,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     uint24 fee;
     uint256 amountBaseBeforeTick;
     uint256 amountBaseAfterTick;
-    uint160 sqrtPriceX96;
     int24 tick0;
     int24 tick1;
     int24 tick2;
@@ -62,7 +60,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     uint256 _amountBaseBeforeTick,
     uint256 _amountBaseAfterTick,
     uint24 _fee,
-    uint160 _sqrtPriceX96,
     int24 _tick0,
     int24 _tick1,
     int24 _tick2
@@ -70,11 +67,13 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     require(msg.sender == LAUNCHPAD, "!launchpad");
     require(launchParams[_tokenBase].pool == IClPool(address(0)), "!launched");
 
+    uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
     uint160 sqrtPriceX960 = TickMath.getSqrtPriceAtTick(_tick0);
     uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
     uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
 
-    IClPool pool = IClPool(CL_POOL_FACTORY.createPool(address(_tokenBase), address(_tokenQuote), _fee, _sqrtPriceX96));
+    IClPool pool =
+      IClPool(CL_POOL_FACTORY.createPool(address(_tokenBase), address(_tokenQuote), _fee, sqrtPriceX96Launch));
     launchParams[_tokenBase] = LaunchTokenParams({
       tokenBase: _tokenBase,
       tokenQuote: _tokenQuote,
@@ -82,21 +81,36 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       fee: _fee,
       amountBaseBeforeTick: _amountBaseBeforeTick,
       amountBaseAfterTick: _amountBaseAfterTick,
-      sqrtPriceX96: sqrtPriceX960,
+      // sqrtPriceX96: TickMath.getSqrtPriceAtTick(_tick0 - 1),
+      // sqrtPriceX96: sqrtPriceX960,
       tick0: _tick0,
       tick1: _tick1,
       tick2: _tick2
     });
+
     transientClPool = pool;
 
-    uint128 liquidityBeforeTick0 =
-      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, _amountBaseBeforeTick);
-    uint128 liquidityBeforeTick1 =
-      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, _amountBaseAfterTick);
-    pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
-    pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
-
+    // calculate the liquidity for the various tick ranges
     // add liquidity to the various tick ranges
+
+    if (address(_tokenBase) == transientClPool.token0()) {
+      uint128 liquidityBeforeTick0 =
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, _amountBaseBeforeTick);
+      uint128 liquidityBeforeTick1 =
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, _amountBaseAfterTick);
+
+      pool.mint(me, _tick0, _tick1, liquidityBeforeTick0, "");
+      pool.mint(me, _tick1, _tick2, liquidityBeforeTick1, "");
+    } else {
+      uint128 liquidityBeforeTick0 =
+        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX961, sqrtPriceX960, _amountBaseBeforeTick);
+      uint128 liquidityBeforeTick1 =
+        LiquidityAmounts.getLiquidityForAmount1(sqrtPriceX962, sqrtPriceX961, _amountBaseAfterTick);
+
+      pool.mint(me, _tick1, _tick0, liquidityBeforeTick0, "");
+      pool.mint(me, _tick2, _tick1, liquidityBeforeTick1, "");
+    }
+
     transientClPool = IClPool(address(0));
   }
 
@@ -120,8 +134,10 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   function ramsesV2MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
     require(msg.sender == address(transientClPool), "!clPool");
     if (address(transientClPool) == address(0)) return;
-    if (amount0 > 0) IERC20(transientClPool.token0()).transfer(msg.sender, amount0);
-    if (amount1 > 0) IERC20(transientClPool.token1()).transfer(msg.sender, amount1);
+
+    // todo add validation that only token needs to be sent; not quote token
+    if (amount0 > 0) IERC20(transientClPool.token0()).transferFrom(LAUNCHPAD, msg.sender, amount0);
+    if (amount1 > 0) IERC20(transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
   }
 
   function graduated(address _token) external view returns (bool) {

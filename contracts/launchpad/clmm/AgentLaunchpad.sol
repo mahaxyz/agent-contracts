@@ -65,13 +65,14 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
     tokenToNftId[token] = tokens.length;
     launchParams[token] = p;
 
+    token.approve(address(adapter), type(uint256).max);
+
     adapter.addSingleSidedLiquidity(
       token, // IERC20 _tokenBase,
       p.base.fundingToken, // IERC20 _tokenQuote,
       p.liquidity.amountBaseBeforeTick, // uint256 _amountBaseBeforeTick,
       p.liquidity.amountBaseAfterTick, // uint256 _amountBaseAfterTick,
       p.base.fee, // uint24 _fee,
-      p.liquidity.initialSqrtPrice, // uint160 _sqrtPriceX96,
       p.liquidity.lowerTick, // int24 _tick0,
       p.liquidity.upperTick, // int24 _tick1,
       p.liquidity.upperMaxTick // int24 _tick2
