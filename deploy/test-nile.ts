@@ -74,31 +74,34 @@ async function main(hre: HardhatRuntimeEnvironment) {
     adapterD.address
   );
 
-  await waitForTx(
-    await adapter.initialize(
-      launchpad.target,
-      "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42"
-    )
-  );
+  // initialize the contracts if they are not initialized
+  if ((await adapter.LAUNCHPAD()) !== launchpad.target) {
+    await waitForTx(
+      await adapter.initialize(
+        launchpad.target,
+        "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42"
+      )
+    );
 
-  await waitForTx(
-    await tokenImpl.initialize({
-      name: "", // string name;
-      symbol: "", // string symbol;
-      metadata: "", // string metadata;
-      whitelisted: [deployer.address], // address[] fundManagers;
-      limitPerWallet: 0, // uint256 limitPerWallet;
-      adapter: ZeroAddress, // address adapter;
-    })
-  );
-  await waitForTx(
-    await launchpad.initialize(
-      mahaD.address,
-      adapterD.address,
-      tokenD.address,
-      deployer.address
-    )
-  );
+    await waitForTx(
+      await tokenImpl.initialize({
+        name: "", // string name;
+        symbol: "", // string symbol;
+        metadata: "", // string metadata;
+        whitelisted: [deployer.address], // address[] fundManagers;
+        limitPerWallet: 0, // uint256 limitPerWallet;
+        adapter: ZeroAddress, // address adapter;
+      })
+    );
+    await waitForTx(
+      await launchpad.initialize(
+        mahaD.address,
+        adapterD.address,
+        tokenD.address,
+        deployer.address
+      )
+    );
+  }
 
   // CONTRACTS ARE DEPLOYED; NOW WE CAN LAUNCH A NEW TOKEN
 
