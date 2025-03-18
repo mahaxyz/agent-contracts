@@ -15,6 +15,7 @@ pragma solidity ^0.8.0;
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
 import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
@@ -83,6 +84,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       tick2: _tick2
     });
 
+    IAgentToken(address(_tokenBase)).whitelist(address(pool));
+
     transientClPool = pool;
 
     // calculate the liquidity for the various tick ranges
@@ -135,7 +138,10 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     if (amount1 > 0) IERC20(transientClPool.token1()).transferFrom(LAUNCHPAD, msg.sender, amount1);
   }
 
-  function graduated(address) external pure returns (bool) {
-    return false;
+  function graduated(address token) external view returns (bool) {
+    LaunchTokenParams memory params = launchParams[IERC20(token)];
+    if (params.pool == IClPool(address(0))) return false;
+    (, int24 tick,,,,,) = params.pool.slot0();
+    return tick >= params.tick1;
   }
 }

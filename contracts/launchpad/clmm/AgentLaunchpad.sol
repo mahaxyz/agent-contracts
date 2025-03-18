@@ -31,7 +31,7 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
 
-  function setSettings(uint256 _creationFee, address _feeDestination, uint256 _feeCutE18) external onlyOwner {
+  function setSettings(uint256 _creationFee) external onlyOwner {
     creationFee = _creationFee;
   }
 
@@ -40,20 +40,16 @@ contract AgentLaunchpad is AgentLaunchpadLocker {
     // todo add event
   }
 
-  function create(CreateParams memory p, address expected) external returns (address) {
+  function create(CreateParams memory p, address expected) external payable returns (address) {
     if (creationFee > 0) {
-      p.base.fundingToken.transferFrom(msg.sender, address(0xdead), creationFee);
+      require(msg.value >= creationFee, "!creationFee");
+      payable(feeDestination).transfer(creationFee);
     }
-
-    address[] memory whitelisted = new address[](2);
-    whitelisted[0] = address(adapter.LAUNCHPAD());
-    whitelisted[1] = address(this);
 
     IAgentToken.InitParams memory params = IAgentToken.InitParams({
       name: p.base.name,
       symbol: p.base.symbol,
       metadata: p.base.metadata,
-      whitelisted: whitelisted,
       limitPerWallet: p.base.limitPerWallet,
       adapter: address(adapter)
     });
