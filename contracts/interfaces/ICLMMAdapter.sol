@@ -19,6 +19,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// @notice Interface for interacting with concentrated liquidity pools
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
+  /// @notice Returns the address of the pool for a given token
+  /// @param _token The token address
+  /// @return pool The address of the pool
+  function getPool(IERC20 _token) external view returns (address pool);
+
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
   function addSingleSidedLiquidity(

@@ -76,27 +76,32 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     adapter.addSingleSidedLiquidity(
       token, // IERC20 _tokenBase,
       p.fundingToken, // IERC20 _tokenQuote,
-      p.fee, // uint24 _fee,
+      10_000, // uint24 _fee,
       p.launchTick, // int24 _tick0,
       p.graduationTick, // int24 _tick1,
       p.upperMaxTick // int24 _tick2
     );
+
+    emit TokenLaunched(token, adapter.getPool(token), params);
 
     _mint(msg.sender, tokenToNftId[token]);
 
     return address(token);
   }
 
+  event TokenLaunched(IAgentToken token, address pool, IAgentToken.InitParams params);
+
   function getTotalTokens() external view returns (uint256) {
     return tokens.length;
   }
 
   function claimFees(IAgentToken _token) external {
-    require(msg.sender == address(adapter), "!adapter");
     address token1 = address(launchParams[_token].fundingToken);
     (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
-    _distributeFees(address(_token), token1, fee0, fee1);
+    _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
   }
 
-  function _distributeFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal virtual;
+  function _distributeFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
+    internal
+    virtual;
 }

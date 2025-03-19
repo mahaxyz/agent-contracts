@@ -112,9 +112,9 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const tickSpacing = 200; // tick spacing for 1% fee
   const fee = 10000; // 1% fee
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
-  const limitPerWallet = 30000000n * e18; // 3% per wallet
+  const limitPerWallet = 1000000000n * e18; // 100% per wallet
 
-  const startingMarketCapInUSD = 5000; // 5,000$ starting market cap
+  const startingMarketCapInUSD = 68000; // 5,000$ starting market cap
   const endingMarketCapInUSD = 69000; // 69,000$ ending market cap
 
   // calculate ticks

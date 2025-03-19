@@ -127,4 +127,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     (, int24 tick,,,,,) = params.pool.slot0();
     return tick >= params.tick1;
   }
+
+  function getPool(IERC20 _token) external view returns (address pool) {
+    pool = address(launchParams[_token].pool);
+  }
 }

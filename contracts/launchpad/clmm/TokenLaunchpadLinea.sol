@@ -13,10 +13,27 @@
 
 pragma solidity ^0.8.0;
 
-import {TokenLaunchpad} from "./TokenLaunchpad.sol";
+import {IERC20, TokenLaunchpad} from "./TokenLaunchpad.sol";
 
 contract TokenLaunchpadLinea is TokenLaunchpad {
-  function _distributeFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal override {
-    // todo distribute fees properly to the various parties
+  function _distributeFees(address _token0, address, address _token1, uint256 _amount0, uint256 _amount1)
+    internal
+    override
+  {
+    address nileTreasury = 0xF0FfFD0292dE675e865A9b506bd2c434e0813d74;
+    address mahaTreasury = 0x7202136d70026DA33628dD3f3eFccb43F62a2469;
+    address efrogsTreasury = 0x0000000000000000000000000000000000000000;
+
+    // 20% to the nile treasury
+    // 40% to the maha treasury
+    // 40% to the efrogs treasury
+
+    IERC20(_token0).transfer(nileTreasury, _amount0 * 20 / 100);
+    IERC20(_token0).transfer(mahaTreasury, _amount0 * 40 / 100);
+    IERC20(_token0).transfer(efrogsTreasury, _amount0 * 40 / 100);
+
+    IERC20(_token1).transfer(nileTreasury, _amount1 * 20 / 100);
+    IERC20(_token1).transfer(mahaTreasury, _amount1 * 40 / 100);
+    IERC20(_token1).transfer(efrogsTreasury, _amount1 * 40 / 100);
   }
 }
