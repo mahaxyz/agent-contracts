@@ -89,8 +89,6 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     return address(token);
   }
 
-  event TokenLaunched(IAgentToken token, address pool, IAgentToken.InitParams params);
-
   function getTotalTokens() external view returns (uint256) {
     return tokens.length;
   }

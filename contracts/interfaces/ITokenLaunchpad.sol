@@ -46,7 +46,13 @@ interface ITokenLaunchpad {
   /// @notice Emitted when fee settings are updated
   /// @param feeDestination The address where fees will be sent
   /// @param fee The new fee amount
-  event FeeUpdated(address feeDestination, uint256 fee);
+  event FeeUpdated(address indexed feeDestination, uint256 fee);
+
+  /// @notice Emitted when a token is launched
+  /// @param token The token that was launched
+  /// @param pool The address of the pool for the token
+  /// @param params The parameters used to launch the token
+  event TokenLaunched(IAgentToken indexed token, address indexed pool, IAgentToken.InitParams params);
 
   /// @notice Initializes the launchpad contract
   /// @param _adapter The DEX adapter contract address
