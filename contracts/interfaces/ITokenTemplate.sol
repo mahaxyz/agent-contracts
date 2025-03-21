@@ -9,27 +9,29 @@
 
 // Website: https://maha.xyz
 // Discord: https://discord.gg/mahadao
-// Twitter: https://twitter.com/mahaxyz_
+// Twitter: https://twitter.com/mahaxyz
 
 pragma solidity ^0.8.0;
 
-import {AgentTokenBase, ICLMMAdapter} from "./AgentTokenBase.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract AgentToken is AgentTokenBase {
-  function initialize(InitParams memory p) public initializer {
-    limitPerWallet = p.limitPerWallet;
-    metadata = p.metadata;
-    unlocked = false;
-    adapter = ICLMMAdapter(p.adapter);
-
-    __ERC20_init(p.name, p.symbol);
-
-    whitelisted[msg.sender] = true;
-    whitelisted[address(adapter)] = true;
-    whitelisted[address(0)] = true;
-    _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
-
-    // todo add event
+interface ITokenTemplate is IERC20 {
+  struct InitParams {
+    string name;
+    string symbol;
+    string metadata;
+    uint256 limitPerWallet;
+    address adapter;
   }
+
+  event Unlocked();
+  event Whitelisted(address indexed _address);
+
+  function initialize(InitParams memory p) external;
+
+  function unlocked() external view returns (bool);
+
+  function isWhitelisted(address _address) external view returns (bool);
+
+  function whitelist(address _address) external;
 }

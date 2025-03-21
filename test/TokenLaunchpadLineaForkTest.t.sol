@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {AgentToken} from "../contracts/token/AgentToken.sol";
+import {TokenTemplate} from "contracts/TokenTemplate.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
@@ -13,7 +13,7 @@ contract TokenLaunchpadLineaForkTest is Test {
   TokenLaunchpadLinea _launchpad;
   MockERC20 _weth;
   RamsesAdapter _adapter;
-  AgentToken _tokenImpl;
+  TokenTemplate _tokenImpl;
 
   string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
   address owner = makeAddr("owner");
@@ -25,14 +25,14 @@ contract TokenLaunchpadLineaForkTest is Test {
     _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
-    _tokenImpl = new AgentToken();
+    _tokenImpl = new TokenTemplate();
 
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "nileAdapter");
     vm.label(address(_weth), "weth");
 
     _adapter.initialize(address(_launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner);
+    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }
 
   function test_create() public {
@@ -49,6 +49,6 @@ contract TokenLaunchpadLineaForkTest is Test {
       upperMaxTick: 887_220
     });
 
-    _launchpad.create(params, address(0));
+    _launchpad.createAndBuy(params, address(0), 0);
   }
 }

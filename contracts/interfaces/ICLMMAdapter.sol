@@ -40,6 +40,13 @@ interface ICLMMAdapter {
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external;
 
+  /// @notice Swap for exact input
+  /// @param _tokenIn The token to swap from
+  /// @param _tokenOut The token to swap to
+  /// @param _amountIn The amount of tokens to swap
+  /// @param _minAmountOut The minimum amount of tokens to receive
+  // function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external;
+
   /// @notice Returns the address of the Launchpad contract
   /// @return The address of the Launchpad contract
   function launchpad() external view returns (address);

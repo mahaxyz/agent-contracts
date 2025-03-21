@@ -13,16 +13,17 @@
 
 pragma solidity ^0.8.0;
 
-import {IAgentToken} from "../interfaces/IAgentToken.sol";
-
-import {ICLMMAdapter} from "../interfaces/ICLMMAdapter.sol";
 import {ERC20BurnableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
-abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
+contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
   // basic info
   string public metadata;
   bool public unlocked;
@@ -30,8 +31,20 @@ abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
   mapping(address => bool) public whitelisted;
   ICLMMAdapter public adapter;
 
-  receive() external payable {
-    // accepts eth into this contract
+  uint256 private txCount;
+
+  function initialize(InitParams memory p) public initializer {
+    limitPerWallet = p.limitPerWallet;
+    metadata = p.metadata;
+    unlocked = false;
+    adapter = ICLMMAdapter(p.adapter);
+
+    __ERC20_init(p.name, p.symbol);
+
+    whitelisted[msg.sender] = true;
+    whitelisted[address(adapter)] = true;
+    whitelisted[address(0)] = true;
+    _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
   }
 
   function _update(address _from, address _to, uint256 _value) internal override {
@@ -49,9 +62,12 @@ abstract contract AgentTokenBase is IAgentToken, ERC20BurnableUpgradeable {
         // sell tokens; allow without limits
       } else {
         // disallow transfers between users until the presale is over
-        require(false, "!transfer");
+        require(false, "!graduated");
       }
     }
+
+    // automatically claim fees every 100 transactions
+    if (txCount++ % 100 == 0) adapter.claimFees(address(this));
   }
 
   function whitelist(address _address) external {

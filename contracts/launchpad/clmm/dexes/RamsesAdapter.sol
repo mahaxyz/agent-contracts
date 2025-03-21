@@ -20,8 +20,9 @@ import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
-import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
+
 import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamsesV2MintCallback.sol";
@@ -68,7 +69,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       launchParams[_tokenBase] =
         LaunchTokenParams({pool: pool, poolKey: poolKey, tick0: _tick0, tick1: _tick1, tick2: _tick2});
       require(address(_tokenBase) == pool.token0(), "!token0");
-      IAgentToken(address(_tokenBase)).whitelist(address(pool));
+      ITokenTemplate(address(_tokenBase)).whitelist(address(pool));
     }
 
     // calculate the liquidity for the various tick ranges

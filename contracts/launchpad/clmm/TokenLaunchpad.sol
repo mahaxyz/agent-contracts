@@ -18,10 +18,11 @@ import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 
-import {IAgentToken} from "contracts/interfaces/IAgentToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   address public tokenImplementation;
@@ -29,14 +30,19 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   uint256 public creationFee;
   address public feeDestination;
   ICLMMAdapter public adapter;
-  mapping(IAgentToken token => CreateParams) public launchParams;
-  mapping(IAgentToken token => uint256) public tokenToNftId;
+  IWETH9 public weth;
+  mapping(ITokenTemplate token => CreateParams) public launchParams;
+  mapping(ITokenTemplate token => uint256) public tokenToNftId;
 
   receive() external payable {}
 
-  function initialize(address _adapter, address _tokenImplementation, address _owner) external initializer {
+  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth)
+    external
+    initializer
+  {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
+    weth = IWETH9(_weth);
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
@@ -47,13 +53,21 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     emit FeeUpdated(_feeDestination, _fee);
   }
 
-  function create(CreateParams memory p, address expected) external payable returns (address) {
+  function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
     if (creationFee > 0) {
       require(msg.value >= creationFee, "!creationFee");
       payable(feeDestination).transfer(creationFee);
     }
 
-    IAgentToken.InitParams memory params = IAgentToken.InitParams({
+    if (amount > 0) {
+      if (p.fundingToken == weth && msg.value > amount + creationFee) {
+        weth.deposit{value: amount}();
+      } else {
+        p.fundingToken.transferFrom(msg.sender, address(this), amount);
+      }
+    }
+
+    ITokenTemplate.InitParams memory params = ITokenTemplate.InitParams({
       name: p.name,
       symbol: p.symbol,
       metadata: p.metadata,
@@ -63,7 +77,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
 
-    IAgentToken token = IAgentToken(Clones.cloneDeterministic(tokenImplementation, salt));
+    ITokenTemplate token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));
     require(expected == address(0) || address(token) == expected, "Invalid token address");
 
     token.initialize(params);
@@ -92,7 +106,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     return tokens.length;
   }
 
-  function claimFees(IAgentToken _token) external {
+  function claimFees(ITokenTemplate _token) external {
     address token1 = address(launchParams[_token].fundingToken);
     (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
     _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
