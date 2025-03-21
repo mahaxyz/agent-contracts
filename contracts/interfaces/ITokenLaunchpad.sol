@@ -69,12 +69,15 @@ interface ITokenLaunchpad {
   /// @notice Creates a new token launch
   /// @param p The parameters for the token launch
   /// @param expected The expected address where token will be deployed
-  /// @return The address of the newly created token
-  function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address);
+  /// @return token The address of the newly created token
+  function createAndBuy(CreateParams memory p, address expected, uint256 amount)
+    external
+    payable
+    returns (address token);
 
   /// @notice Gets the total number of tokens launched
-  /// @return The total count of launched tokens
-  function getTotalTokens() external view returns (uint256);
+  /// @return totalTokens The total count of launched tokens
+  function getTotalTokens() external view returns (uint256 totalTokens);
 
   /// @notice Claims accumulated fees for a specific token
   /// @param _token The token to claim fees for

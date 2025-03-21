@@ -40,10 +40,12 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     _me = address(this);
   }
 
+  /// @inheritdoc ICLMMAdapter
   function launchedTokens(IERC20 _token) external view returns (bool launched) {
     launched = launchParams[_token].pool != IClPool(address(0));
   }
 
+  /// @inheritdoc ICLMMAdapter
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external
   {
@@ -85,6 +87,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     delete _transientClPool;
   }
 
+  /// @inheritdoc ICLMMAdapter
   function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external {
     require(msg.sender == launchpad, "!launchpad");
     require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
@@ -92,8 +95,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     // _transientClPool = launchParams[_tokenIn].pool;
   }
 
+  /// @inheritdoc ICLMMAdapter
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
-    require(msg.sender == launchpad, "!launchpad");
     LaunchTokenParams memory params = launchParams[IERC20(_token)];
     require(params.pool != IClPool(address(0)), "!launched");
 
@@ -114,6 +117,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
   }
 
+  /// @inheritdoc ICLMMAdapter
   function graduated(address token) external view returns (bool) {
     LaunchTokenParams memory params = launchParams[IERC20(token)];
     if (params.pool == IClPool(address(0))) return false;

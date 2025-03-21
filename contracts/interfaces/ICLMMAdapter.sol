@@ -48,8 +48,8 @@ interface ICLMMAdapter {
   function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external;
 
   /// @notice Returns the address of the Launchpad contract
-  /// @return The address of the Launchpad contract
-  function launchpad() external view returns (address);
+  /// @return launchpad The address of the Launchpad contract
+  function launchpad() external view returns (address launchpad);
 
   /// @notice Checks if a token has been launched
   /// @param _token The token address to check
@@ -62,8 +62,8 @@ interface ICLMMAdapter {
   /// @return fee1 The amount of token1 fees to claim
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1);
 
-  /// @notice Check if a token has graduated
-  /// @param _token The token address to check
-  /// @return true if the token has graduated, false otherwise
-  function graduated(address _token) external view returns (bool);
+  /// @notice Checks if a token has graduated
+  /// @param token The token to check
+  /// @return graduated true if the token has graduated, false otherwise
+  function graduated(address token) external view returns (bool graduated);
 }
