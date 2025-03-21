@@ -45,7 +45,7 @@ interface ICLMMAdapter {
   /// @param _tokenOut The token to swap to
   /// @param _amountIn The amount of tokens to swap
   /// @param _minAmountOut The minimum amount of tokens to receive
-  // function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external;
+  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external;
 
   /// @notice Returns the address of the Launchpad contract
   /// @return The address of the Launchpad contract

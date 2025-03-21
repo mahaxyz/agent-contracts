@@ -99,6 +99,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     _mint(msg.sender, tokenToNftId[token]);
 
+    if (amount > 0) {
+      token.approve(address(adapter), amount);
+      adapter.swapForExactInput(p.fundingToken, token, amount, 0);
+    }
+
     return address(token);
   }
 

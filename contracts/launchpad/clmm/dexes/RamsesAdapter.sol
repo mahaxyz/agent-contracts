@@ -85,6 +85,13 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     delete _transientClPool;
   }
 
+  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external {
+    require(msg.sender == launchpad, "!launchpad");
+    require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
+
+    // _transientClPool = launchParams[_tokenIn].pool;
+  }
+
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     require(msg.sender == launchpad, "!launchpad");
     LaunchTokenParams memory params = launchParams[IERC20(_token)];

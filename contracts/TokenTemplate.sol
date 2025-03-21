@@ -23,16 +23,28 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
+/// @title TokenTemplate
+/// @notice A contract for creating and managing tokens with presale functionality
 contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
-  // basic info
+  /// @notice The metadata of the token
   string public metadata;
+
+  /// @notice Whether the token is unlocked for transfers
   bool public unlocked;
+
+  /// @notice The limit of tokens per wallet before the token is graduated
   uint256 public limitPerWallet;
+
+  /// @notice The whitelist of addresses that can transfer tokens before the token is graduated
   mapping(address => bool) public whitelisted;
+
+  /// @notice The adapter contract
   ICLMMAdapter public adapter;
 
+  /// @dev counts the number of transactions to claim fees
   uint256 private txCount;
 
+  /// @inheritdoc ITokenTemplate
   function initialize(InitParams memory p) public initializer {
     limitPerWallet = p.limitPerWallet;
     metadata = p.metadata;
@@ -67,15 +79,17 @@ contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
     }
 
     // automatically claim fees every 100 transactions
-    if (txCount++ % 100 == 0) adapter.claimFees(address(this));
+    if (++txCount % 100 == 0) adapter.claimFees(address(this));
   }
 
+  /// @inheritdoc ITokenTemplate
   function whitelist(address _address) external {
     require(msg.sender == address(adapter), "!whitelist");
     whitelisted[_address] = true;
     emit Whitelisted(_address);
   }
 
+  /// @inheritdoc ITokenTemplate
   function isWhitelisted(address _address) external view override returns (bool) {
     return whitelisted[_address];
   }
