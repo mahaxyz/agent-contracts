@@ -76,7 +76,6 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     adapter.addSingleSidedLiquidity(
       token, // IERC20 _tokenBase,
       p.fundingToken, // IERC20 _tokenQuote,
-      10_000, // uint24 _fee,
       p.launchTick, // int24 _tick0,
       p.graduationTick, // int24 _tick1,
       p.upperMaxTick // int24 _tick2
