@@ -22,7 +22,7 @@ contract TokenLaunchpadLinea is TokenLaunchpad {
   {
     address nileTreasury = 0xF0FfFD0292dE675e865A9b506bd2c434e0813d74;
     address mahaTreasury = 0x7202136d70026DA33628dD3f3eFccb43F62a2469;
-    address efrogsTreasury = 0x0000000000000000000000000000000000000000;
+    address efrogsTreasury = 0x4c11F940E2D09eF9D5000668c1C9410f0AaF0833;
 
     // 20% to the nile treasury
     // 40% to the maha treasury
