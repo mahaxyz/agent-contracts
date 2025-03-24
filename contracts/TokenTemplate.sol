@@ -72,9 +72,6 @@ contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
         require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet from");
       } else if (whitelisted[_to]) {
         // sell tokens; allow without limits
-      } else {
-        // disallow transfers between users until the presale is over
-        require(false, "!graduated");
       }
     }
 
