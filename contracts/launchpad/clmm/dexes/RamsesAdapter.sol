@@ -105,8 +105,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     returns (uint256 amountOut)
   {
     require(msg.sender == launchpad, "!launchpad");
-    require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
-
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
     amountOut = swapRouter.exactInputSingle(
       IRamsesSwapRouter.ExactInputSingleParams({
         tokenIn: address(_tokenIn),
@@ -126,8 +126,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     returns (uint256 amountIn)
   {
     require(msg.sender == launchpad, "!launchpad");
-    require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
-
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
     amountIn = swapRouter.exactOutputSingle(
       IRamsesSwapRouter.ExactOutputSingleParams({
         tokenIn: address(_tokenIn),
@@ -140,6 +140,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
         sqrtPriceLimitX96: 0
       })
     );
+    _tokenIn.safeTransfer(msg.sender, _maxAmountIn - amountIn);
   }
 
   /// @inheritdoc ICLMMAdapter

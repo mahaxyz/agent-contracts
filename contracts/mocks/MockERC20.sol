@@ -34,4 +34,13 @@ contract MockERC20 is ERC20 {
   function decimals() public view virtual override returns (uint8) {
     return decimals_;
   }
+
+  function deposit() external payable {
+    _mint(msg.sender, msg.value);
+  }
+
+  function withdraw(uint256 _amount) external {
+    _burn(msg.sender, _amount);
+    payable(msg.sender).transfer(_amount);
+  }
 }

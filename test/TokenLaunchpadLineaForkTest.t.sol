@@ -31,7 +31,12 @@ contract TokenLaunchpadLineaForkTest is Test {
     vm.label(address(_adapter), "nileAdapter");
     vm.label(address(_weth), "weth");
 
-    // _adapter.initialize(address(_launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
+    _adapter.initialize(
+      address(_launchpad),
+      address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42),
+      address(0xAAAE99091Fbb28D400029052821653C1C752483B),
+      address(_weth)
+    );
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }
 
@@ -44,11 +49,12 @@ contract TokenLaunchpadLineaForkTest is Test {
       fee: 3000,
       limitPerWallet: 1000,
       salt: bytes32(0),
-      launchTick: 46_020,
-      graduationTick: 46_080,
-      upperMaxTick: 887_220
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200
     });
 
-    _launchpad.createAndBuy(params, address(0), 0);
+    vm.deal(address(this), 100 ether);
+    _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
   }
 }

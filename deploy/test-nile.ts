@@ -40,7 +40,12 @@ const computeTickPrice = (
 async function main(hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
 
-  const tokenD = await deployContract(hre, "AgentToken", [], "AgentTokenImpl");
+  const tokenD = await deployContract(
+    hre,
+    "TokenTemplate",
+    [],
+    "TokenTemplateImpl"
+  );
   const launchpadD = await deployContract(
     hre,
     "TokenLaunchpadLinea",
@@ -60,7 +65,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     launchpadD.address
   );
   const tokenImpl = await hre.ethers.getContractAt(
-    "AgentToken",
+    "TokenTemplate",
     tokenD.address
   );
 
@@ -81,7 +86,9 @@ async function main(hre: HardhatRuntimeEnvironment) {
     await waitForTx(
       await adapter.initialize(
         launchpad.target,
-        "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42"
+        "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42",
+        "0xAAAE99091Fbb28D400029052821653C1C752483B",
+        "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
       )
     );
 
@@ -98,7 +105,8 @@ async function main(hre: HardhatRuntimeEnvironment) {
       await launchpad.initialize(
         adapterD.address,
         tokenD.address,
-        deployer.address
+        deployer.address,
+        "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
       )
     );
   }
@@ -162,7 +170,11 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // create a launchpad token
   console.log("creating a launchpad token");
-  await waitForTx(await launchpad.create(data, computedAddress));
+  await waitForTx(
+    await launchpad.createAndBuy(data, computedAddress, 0, {
+      value: 100000000000000n,
+    })
+  );
 }
 
 main.tags = ["TestDeploymentNile"];

@@ -102,13 +102,24 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     _mint(msg.sender, tokenToNftId[token]);
 
+    p.fundingToken.approve(address(adapter), type(uint256).max);
+
     // buy a small amount of tokens to register the token on tools like dexscreener
-    uint256 swapped = adapter.swapForExactOutput(p.fundingToken, token, 1000 * 1e18, 0);
+    uint256 balance = p.fundingToken.balanceOf(address(this));
+    uint256 swapped = adapter.swapForExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
-    if (amount > 0) {
-      token.approve(address(adapter), amount);
-      adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
+    if (amount > 0) adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
+
+    // refund any remaining tokens
+    uint256 remaining = p.fundingToken.balanceOf(address(this));
+    if (remaining > 0) {
+      if (p.fundingToken == weth) {
+        weth.withdraw(remaining);
+        payable(msg.sender).transfer(remaining);
+      } else {
+        p.fundingToken.transfer(msg.sender, remaining);
+      }
     }
 
     return address(token);
