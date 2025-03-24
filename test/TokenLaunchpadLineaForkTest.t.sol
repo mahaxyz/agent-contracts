@@ -31,7 +31,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     vm.label(address(_adapter), "nileAdapter");
     vm.label(address(_weth), "weth");
 
-    _adapter.initialize(address(_launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
+    // _adapter.initialize(address(_launchpad), address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42));
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }
 

@@ -35,6 +35,4 @@ interface IClPool is IClPoolImmutables, IClPoolState, IClPoolDerivedState, IClPo
     uint24 _fee,
     int24 _tickSpacing
   ) external;
-
-  function _advancePeriod() external;
 }

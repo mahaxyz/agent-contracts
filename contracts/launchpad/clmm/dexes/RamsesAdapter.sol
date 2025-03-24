@@ -21,23 +21,35 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
 
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamsesV2MintCallback.sol";
+import {IRamsesSwapRouter} from "contracts/interfaces/thirdparty/ramses/IRamsesSwapRouter.sol";
 
 contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   IClPoolFactory public clPoolFactory;
   address public launchpad;
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
   address private _me;
+  address public WETH9;
   IClPool private _transientClPool;
+  IRamsesSwapRouter public swapRouter;
 
-  function initialize(address _launchpad, address _clPoolFactory) external initializer {
+  using SafeERC20 for IERC20;
+
+  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9)
+    external
+    initializer
+  {
     launchpad = _launchpad;
     clPoolFactory = IClPoolFactory(_clPoolFactory);
+    swapRouter = IRamsesSwapRouter(_swapRouter);
     _me = address(this);
+    WETH9 = _WETH9;
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -88,11 +100,46 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut) external {
+  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+    external
+    returns (uint256 amountOut)
+  {
     require(msg.sender == launchpad, "!launchpad");
     require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
 
-    // _transientClPool = launchParams[_tokenIn].pool;
+    amountOut = swapRouter.exactInputSingle(
+      IRamsesSwapRouter.ExactInputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountIn: _amountIn,
+        recipient: address(this),
+        deadline: block.timestamp,
+        fee: 10_000,
+        amountOutMinimum: _minAmountOut,
+        sqrtPriceLimitX96: 0
+      })
+    );
+  }
+
+  function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+    external
+    returns (uint256 amountIn)
+  {
+    require(msg.sender == launchpad, "!launchpad");
+    require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
+
+    amountIn = swapRouter.exactOutputSingle(
+      IRamsesSwapRouter.ExactOutputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountOut: _amountOut,
+        recipient: address(this),
+        deadline: block.timestamp,
+        fee: 10_000,
+        amountInMaximum: _maxAmountIn,
+        sqrtPriceLimitX96: 0
+      })
+    );
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -112,11 +159,6 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     IERC20(params.pool.token1()).transfer(msg.sender, fee1);
   }
 
-  function ramsesV2MintCallback(uint256 amount0, uint256, bytes calldata) external {
-    require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
-    IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
-  }
-
   /// @inheritdoc ICLMMAdapter
   function graduated(address token) external view returns (bool) {
     LaunchTokenParams memory params = launchParams[IERC20(token)];
@@ -127,5 +169,10 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
 
   function getPool(IERC20 _token) external view returns (address pool) {
     pool = address(launchParams[_token].pool);
+  }
+
+  function ramsesV2MintCallback(uint256 amount0, uint256, bytes calldata) external {
+    require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
+    IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
   }
 }

@@ -54,15 +54,18 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
+    if (msg.value > 0) {
+      weth.deposit{value: msg.value}();
+    }
+
     if (creationFee > 0) {
-      require(msg.value >= creationFee, "!creationFee");
-      payable(feeDestination).transfer(creationFee);
+      require(msg.value - amount >= creationFee, "!creationFee");
+      weth.transfer(feeDestination, creationFee);
     }
 
     if (amount > 0) {
-      if (p.fundingToken == weth && msg.value > amount + creationFee) {
-        weth.deposit{value: amount}();
-      } else {
+      uint256 currentBalance = p.fundingToken.balanceOf(address(this));
+      if (currentBalance < amount) {
         p.fundingToken.transferFrom(msg.sender, address(this), amount);
       }
     }
@@ -99,9 +102,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     _mint(msg.sender, tokenToNftId[token]);
 
+    // buy a small amount of tokens to register the token on tools like dexscreener
+    uint256 swapped = adapter.swapForExactOutput(p.fundingToken, token, 1000 * 1e18, 0);
+
+    // if the user wants to buy more tokens, they can do so
     if (amount > 0) {
       token.approve(address(adapter), amount);
-      adapter.swapForExactInput(p.fundingToken, token, amount, 0);
+      adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
     }
 
     return address(token);
