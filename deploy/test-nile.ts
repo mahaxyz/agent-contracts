@@ -3,6 +3,11 @@ import { deployContract, waitForTx } from "../scripts/utils";
 import { ZeroAddress } from "ethers";
 import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
 
+// Helper function to round tick to the nearest tick spacing
+const roundTickToNearestTick = (tick: number, tickSpacing: number) => {
+  return Math.round(tick / tickSpacing) * tickSpacing;
+};
+
 // Helper function to compute the tick price for a given market cap in USD
 const computeTickPrice = (
   marketCapInUSD: number,
@@ -20,19 +25,16 @@ const computeTickPrice = (
 
   // Calculate sqrtPriceX96 following Uniswap v3 format
   const sqrtPriceRatio = (quoteSupply * e18) / totalSupply;
-  const sqrtPriceX96 = BigInt(
-    Math.floor(Math.sqrt(Number(sqrtPriceRatio)) * 2 ** 96)
-  );
+
+  const sqrtPriceX96 =
+    BigInt(Math.floor(Math.sqrt(Number(sqrtPriceRatio)) * 2 ** 96)) /
+    1000000000n;
+
   const tick = Math.floor(
     Math.log(Number(sqrtPriceX96) / 2 ** 96) / Math.log(Math.sqrt(1.0001))
   );
 
   return roundTickToNearestTick(tick, tickSpacing);
-};
-
-// Helper function to round tick to the nearest tick spacing
-const roundTickToNearestTick = (tick: number, tickSpacing: number) => {
-  return Math.round(tick / tickSpacing) * tickSpacing;
 };
 
 async function main(hre: HardhatRuntimeEnvironment) {
