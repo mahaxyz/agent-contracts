@@ -81,12 +81,11 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const symbol = "TEST";
   const priceOfETHinUSD = 1800; // feed this with the price of ETH in USD
   const wethAddressOnLinea = "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f";
-  const tickSpacing = 200; // tick spacing for 1% fee
-  const fee = 10000; // 1% fee
+  const tickSpacing = 500; // tick spacing for 1% fee
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
   const limitPerWallet = 1000000000n * e18; // 100% per wallet
 
-  const startingMarketCapInUSD = 68000; // 5,000$ starting market cap
+  const startingMarketCapInUSD = 67000; // 5,000$ starting market cap
   const endingMarketCapInUSD = 69000; // 69,000$ ending market cap
 
   // calculate ticks
@@ -96,12 +95,14 @@ async function main(hre: HardhatRuntimeEnvironment) {
     18,
     tickSpacing
   );
-  const graduationTick = computeTickPrice(
+  const _graduationTick = computeTickPrice(
     endingMarketCapInUSD,
     priceOfETHinUSD,
     18,
     tickSpacing
   );
+  const graduationTick =
+    _graduationTick == launchTick ? launchTick + tickSpacing : _graduationTick;
   const upperMaxTick = roundTickToNearestTick(887220, tickSpacing); // Maximum possible tick value
 
   // guess the salt and computed address for the given token
@@ -115,7 +116,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
 
   const data = {
-    fee,
     fundingToken: wethAddressOnLinea,
     limitPerWallet,
     metadata,
@@ -128,7 +128,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   };
 
   // create a launchpad token
-  console.log("creating a launchpad token");
+  console.log("creating a launchpad token", data);
   await waitForTx(
     await launchpad.createAndBuy(data, computedAddress, 0, {
       value: 100000000000000n,
