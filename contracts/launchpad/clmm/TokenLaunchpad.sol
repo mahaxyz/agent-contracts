@@ -17,9 +17,9 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
@@ -99,8 +99,6 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     emit TokenLaunched(token, adapter.getPool(token), params);
 
-    // 1000000000000000000000000000
-    // 262906904978341125688029611
     _mint(msg.sender, tokenToNftId[token]);
 
     p.fundingToken.approve(address(adapter), type(uint256).max);
