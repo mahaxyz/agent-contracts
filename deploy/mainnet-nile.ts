@@ -1,9 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { deployContract, waitForTx } from "../scripts/utils";
+import { deployContract, deployProxy, waitForTx } from "../scripts/utils";
 import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
+import { computeTickPrice, roundTickToNearestTick } from "./utils";
 
 async function main(hre: HardhatRuntimeEnvironment) {
-  const [deployer] = await hre.ethers.getSigners();
+  const deployer = "0xb0a8169d471051130cc458e4862b7fd0008cdf82";
+  const proxyAdmin = "0x7202136d70026DA33628dD3f3eFccb43F62a2469";
 
   const tokenD = await deployContract(
     hre,
@@ -11,20 +13,31 @@ async function main(hre: HardhatRuntimeEnvironment) {
     [],
     "TokenTemplateImpl"
   );
-  const launchpadD = await deployContract(
+
+  const adapterD = await deployProxy(
     hre,
-    "TokenLaunchpadLinea",
+    "RamsesAdapter",
     [],
-    "TokenLaunchpadLinea"
-  );
-  const mahaD = await deployContract(
-    hre,
-    "MockERC20",
-    ["TEST MAHA", "TMAHA", 18],
-    "MAHA"
+    proxyAdmin,
+    "RamsesAdapter",
+    deployer,
+    true
   );
 
-  const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
+  const launchpadD = await deployProxy(
+    hre,
+    "TokenLaunchpadLinea",
+    [
+      adapterD.address,
+      tokenD.address,
+      deployer,
+      "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+    ],
+    proxyAdmin,
+    "TokenLaunchpadLinea",
+    deployer
+  );
+
   const launchpad = await hre.ethers.getContractAt(
     "TokenLaunchpadLinea",
     launchpadD.address
@@ -33,14 +46,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "TokenTemplate",
     tokenD.address
   );
-
-  const adapterD = await deployContract(
-    hre,
-    "RamsesAdapter",
-    [],
-    "RamsesAdapter"
-  );
-
   const adapter = await hre.ethers.getContractAt(
     "RamsesAdapter",
     adapterD.address
@@ -65,14 +70,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
         limitPerWallet: 1000000000000000000n, // uint256 limitPerWallet;
         adapter: adapterD.address, // address adapter;
       })
-    );
-    await waitForTx(
-      await launchpad.initialize(
-        adapterD.address,
-        tokenD.address,
-        deployer.address,
-        "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
-      )
     );
   }
 
@@ -107,15 +104,12 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
   const upperMaxTick = roundTickToNearestTick(887220, tickSpacing); // Maximum possible tick value
 
-  // mint some tokens
-  await waitForTx(await maha.mint(deployer.address, 100000000000n * e18));
-
   // guess the salt and computed address for the given token
   const { salt, computedAddress } = await guessTokenAddress(
     launchpad.target,
     tokenImpl.target,
     wethAddressOnLinea,
-    deployer.address,
+    deployer,
     name,
     symbol
   );
@@ -142,5 +136,5 @@ async function main(hre: HardhatRuntimeEnvironment) {
   );
 }
 
-main.tags = ["TestDeploymentNile"];
+main.tags = ["DeploymentNile"];
 export default main;
