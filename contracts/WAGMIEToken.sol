@@ -23,9 +23,9 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
-/// @title TokenTemplate
+/// @title WAGMIEToken
 /// @notice A contract for creating and managing tokens with presale functionality
-contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
+contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
   /// @notice The metadata of the token
   string public metadata;
 

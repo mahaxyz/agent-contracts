@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {TokenTemplate} from "contracts/TokenTemplate.sol";
+import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
@@ -13,7 +13,7 @@ contract TokenLaunchpadLineaForkTest is Test {
   TokenLaunchpadLinea _launchpad;
   MockERC20 _weth;
   RamsesAdapter _adapter;
-  TokenTemplate _tokenImpl;
+  WAGMIEToken _tokenImpl;
 
   string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
   address owner = makeAddr("owner");
@@ -28,7 +28,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
-    _tokenImpl = new TokenTemplate();
+    _tokenImpl = new WAGMIEToken();
 
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "nileAdapter");

@@ -11,7 +11,7 @@ export async function templateLaunchpad(
 ) {
   const tokenD = await deployContract(
     hre,
-    "TokenTemplate",
+    "WAGMIEToken",
     [],
     "TokenTemplateImpl"
   );
@@ -40,7 +40,7 @@ export async function templateLaunchpad(
     launchpadD.address
   );
   const tokenImpl = await hre.ethers.getContractAt(
-    "TokenTemplate",
+    "WAGMIEToken",
     tokenD.address
   );
   const adapter = await hre.ethers.getContractAt(

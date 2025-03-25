@@ -25,12 +25,15 @@ import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
-  address public tokenImplementation;
-  IERC20[] public tokens;
-  uint256 public creationFee;
   address public feeDestination;
+  address public referralDestination;
+  address public tokenImplementation;
   ICLMMAdapter public adapter;
+  IERC20[] public tokens;
   IWETH9 public weth;
+  uint256 public creationFee;
+  uint256 public referralFee;
+
   mapping(ITokenTemplate token => CreateParams) public launchParams;
   mapping(ITokenTemplate token => uint256) public tokenToNftId;
 

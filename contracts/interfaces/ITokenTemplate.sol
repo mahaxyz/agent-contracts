@@ -16,7 +16,7 @@ pragma solidity ^0.8.0;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title ITokenTemplate Interface
-/// @notice Interface for the TokenTemplate contract that implements a token with presale functionality
+/// @notice Interface for the WAGMIEToken contract that implements a token with presale functionality
 interface ITokenTemplate is IERC20 {
   /// @notice Parameters for initializing a new token
   /// @param name The name of the token

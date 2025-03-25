@@ -7,7 +7,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   const tokenD = await deployContract(
     hre,
-    "TokenTemplate",
+    "WAGMIEToken",
     [],
     "TokenTemplateImpl"
   );
@@ -30,7 +30,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     launchpadD.address
   );
   const tokenImpl = await hre.ethers.getContractAt(
-    "TokenTemplate",
+    "WAGMIEToken",
     tokenD.address
   );
 
