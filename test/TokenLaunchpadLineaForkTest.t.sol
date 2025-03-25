@@ -53,12 +53,11 @@ contract TokenLaunchpadLineaForkTest is Test {
       symbol: "TEST",
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
-      fee: 3000,
       limitPerWallet: 1_000_000_000 ether,
       salt: bytes32(0),
       launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
     });
 
     address token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
@@ -72,18 +71,17 @@ contract TokenLaunchpadLineaForkTest is Test {
       symbol: "TEST",
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
-      fee: 3000,
       limitPerWallet: 1_000_000_000 ether,
       salt: keccak256("test"),
       launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
     });
 
     vm.prank(owner);
     address _token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
     ITokenTemplate token = ITokenTemplate(_token);
-    vm.assertApproxEqAbs(token.balanceOf(owner), 262_906_904 ether, 1 ether);
+    vm.assertApproxEqAbs(token.balanceOf(owner), 255_952_913 ether, 1 ether);
     vm.assertEq(_adapter.graduated(_token), false);
   }
 
@@ -93,12 +91,11 @@ contract TokenLaunchpadLineaForkTest is Test {
       symbol: "TEST",
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
-      fee: 3000,
       limitPerWallet: 1_000_000_000 ether,
       salt: keccak256("test"),
       launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
     });
 
     vm.prank(owner);
@@ -112,12 +109,11 @@ contract TokenLaunchpadLineaForkTest is Test {
       symbol: "TEST",
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
-      fee: 3000,
       limitPerWallet: 100 ether,
       salt: keccak256("test"),
       launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
     });
 
     vm.prank(owner);
@@ -148,12 +144,11 @@ contract TokenLaunchpadLineaForkTest is Test {
       symbol: "TEST",
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
-      fee: 3000,
       limitPerWallet: 1_000_000_000 ether,
       salt: keccak256("test"),
       launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
     });
 
     vm.deal(owner, 1000 ether);

@@ -35,7 +35,6 @@ interface ITokenLaunchpad {
     string symbol;
     string metadata;
     IERC20 fundingToken;
-    uint24 fee;
     uint256 limitPerWallet;
     bytes32 salt;
     int24 launchTick;

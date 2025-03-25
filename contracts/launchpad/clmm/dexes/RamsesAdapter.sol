@@ -70,14 +70,14 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
 
     IClPool pool =
-      IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), 10_000, sqrtPriceX96Launch));
+      IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), 20_000, sqrtPriceX96Launch));
 
     {
       PoolKey memory poolKey = PoolKey({
         currency0: Currency.wrap(address(_tokenBase)),
         currency1: Currency.wrap(address(_tokenQuote)),
-        fee: 10_000,
-        tickSpacing: 200,
+        fee: 20_000,
+        tickSpacing: 500,
         hooks: IHooks(address(0))
       });
       launchParams[_tokenBase] =
@@ -113,7 +113,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
         amountIn: _amountIn,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: 10_000,
+        fee: 20_000,
         amountOutMinimum: _minAmountOut,
         sqrtPriceLimitX96: 0
       })
@@ -133,7 +133,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
         amountOut: _amountOut,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: 10_000,
+        fee: 20_000,
         amountInMaximum: _maxAmountIn,
         sqrtPriceLimitX96: 0
       })
