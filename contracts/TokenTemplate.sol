@@ -15,9 +15,7 @@ pragma solidity ^0.8.0;
 
 import {ERC20BurnableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
@@ -61,22 +59,24 @@ contract TokenTemplate is ITokenTemplate, ERC20BurnableUpgradeable {
 
   function _update(address _from, address _to, uint256 _value) internal override {
     super._update(_from, _to, _value);
-    if (!unlocked) {
-      if (adapter.graduated(address(this))) {
-        // if the token is graduated, then allow transfers
-        unlocked = true;
-        emit Unlocked();
-        return;
-      } else if (!whitelisted[_from]) {
-        // buy tokens; limit to `limitPerWallet` per wallet
-        require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet from");
-      } else if (whitelisted[_to]) {
-        // sell tokens; allow without limits
-      }
-    }
+    if (!unlocked) _checkLimitPerWallet(_to);
 
     // automatically claim fees every 100 transactions
     if (++txCount % 100 == 0) adapter.claimFees(address(this));
+  }
+
+  function _checkLimitPerWallet(address _to) internal {
+    if (!whitelisted[_to]) {
+      // buy tokens; limit to `limitPerWallet` per wallet
+      require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet _to");
+    }
+
+    if (adapter.graduated(address(this))) {
+      // if the token is graduated, then allow transfers
+      unlocked = true;
+      emit Unlocked();
+      return;
+    }
   }
 
   /// @inheritdoc ITokenTemplate

@@ -4,7 +4,7 @@ pragma solidity 0.8.26;
 import {TokenTemplate} from "contracts/TokenTemplate.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
-import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
@@ -17,6 +17,9 @@ contract TokenLaunchpadLineaForkTest is Test {
 
   string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
   address owner = makeAddr("owner");
+  address whale = makeAddr("whale");
+
+  receive() external payable {}
 
   function setUp() public {
     uint256 lineaFork = vm.createFork(LINEA_RPC_URL);
@@ -30,6 +33,10 @@ contract TokenLaunchpadLineaForkTest is Test {
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "nileAdapter");
     vm.label(address(_weth), "weth");
+
+    vm.deal(owner, 1000 ether);
+    vm.deal(whale, 1000 ether);
+    vm.deal(address(this), 100 ether);
 
     _adapter.initialize(
       address(_launchpad),
@@ -47,14 +54,112 @@ contract TokenLaunchpadLineaForkTest is Test {
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
       fee: 3000,
-      limitPerWallet: 1000,
+      limitPerWallet: 1_000_000_000 ether,
       salt: bytes32(0),
       launchTick: -171_000,
       graduationTick: -170_800,
       upperMaxTick: 887_200
     });
 
-    vm.deal(address(this), 100 ether);
-    _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+    address token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+
+    vm.assertEq(_adapter.graduated(token), false);
+  }
+
+  function test_createAndBuy_and_not_graduated() public {
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      fee: 3000,
+      limitPerWallet: 1_000_000_000 ether,
+      salt: keccak256("test"),
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200
+    });
+
+    vm.prank(owner);
+    address _token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
+    ITokenTemplate token = ITokenTemplate(_token);
+    vm.assertApproxEqAbs(token.balanceOf(owner), 262_906_904 ether, 1 ether);
+    vm.assertEq(_adapter.graduated(_token), false);
+  }
+
+  function test_createAndBuy_and_graduated() public {
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      fee: 3000,
+      limitPerWallet: 1_000_000_000 ether,
+      salt: keccak256("test"),
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200
+    });
+
+    vm.prank(owner);
+    address _token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 100 ether);
+    vm.assertEq(_adapter.graduated(_token), true);
+  }
+
+  function test_createAndBuy_and_graduated_and_limit_per_wallet() public {
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      fee: 3000,
+      limitPerWallet: 100 ether,
+      salt: keccak256("test"),
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200
+    });
+
+    vm.prank(owner);
+    address token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 0);
+
+    vm.startPrank(whale);
+    _weth.mint(whale, 10_000 ether);
+    _weth.approve(address(_adapter), 10_000 ether);
+
+    vm.expectRevert();
+    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1 ether, 0);
+
+    vm.expectRevert();
+    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 100 ether, 0);
+
+    vm.expectRevert();
+    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1000 ether, 0);
+
+    // should succeed
+    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1000, 0);
+
+    vm.stopPrank();
+  }
+
+  function test_claimFees() public {
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      fee: 3000,
+      limitPerWallet: 1_000_000_000 ether,
+      salt: keccak256("test"),
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200
+    });
+
+    vm.deal(owner, 1000 ether);
+    vm.startPrank(owner);
+    address token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 1 ether);
+    _launchpad.claimFees(ITokenTemplate(token));
+    vm.stopPrank();
   }
 }

@@ -36,6 +36,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   receive() external payable {}
 
+  /// @inheritdoc ITokenLaunchpad
   function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth)
     external
     initializer
@@ -47,16 +48,16 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
 
+  /// @inheritdoc ITokenLaunchpad
   function setFeeSettings(address _feeDestination, uint256 _fee) external onlyOwner {
     feeDestination = _feeDestination;
     creationFee = _fee;
     emit FeeUpdated(_feeDestination, _fee);
   }
 
+  /// @inheritdoc ITokenLaunchpad
   function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
-    if (msg.value > 0) {
-      weth.deposit{value: msg.value}();
-    }
+    if (msg.value > 0) weth.deposit{value: msg.value}();
 
     if (creationFee > 0) {
       require(msg.value - amount >= creationFee, "!creationFee");
@@ -65,9 +66,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     if (amount > 0) {
       uint256 currentBalance = p.fundingToken.balanceOf(address(this));
-      if (currentBalance < amount) {
-        p.fundingToken.transferFrom(msg.sender, address(this), amount);
-      }
+      if (currentBalance < amount) p.fundingToken.transferFrom(msg.sender, address(this), amount);
     }
 
     ITokenTemplate.InitParams memory params = ITokenTemplate.InitParams({
@@ -100,6 +99,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     emit TokenLaunched(token, adapter.getPool(token), params);
 
+    // 1000000000000000000000000000
+    // 262906904978341125688029611
     _mint(msg.sender, tokenToNftId[token]);
 
     p.fundingToken.approve(address(adapter), type(uint256).max);
@@ -112,23 +113,19 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     if (amount > 0) adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
 
     // refund any remaining tokens
-    uint256 remaining = p.fundingToken.balanceOf(address(this));
-    if (remaining > 0) {
-      if (p.fundingToken == weth) {
-        weth.withdraw(remaining);
-        payable(msg.sender).transfer(remaining);
-      } else {
-        p.fundingToken.transfer(msg.sender, remaining);
-      }
-    }
+    _refundTokens(token);
+    _refundTokens(p.fundingToken);
+    _refundTokens(weth);
 
     return address(token);
   }
 
+  /// @inheritdoc ITokenLaunchpad
   function getTotalTokens() external view returns (uint256) {
     return tokens.length;
   }
 
+  /// @inheritdoc ITokenLaunchpad
   function claimFees(ITokenTemplate _token) external {
     address token1 = address(launchParams[_token].fundingToken);
     (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
@@ -138,4 +135,15 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   function _distributeFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
     internal
     virtual;
+
+  function _refundTokens(IERC20 _token) internal {
+    uint256 remaining = _token.balanceOf(address(this));
+    if (remaining == 0) return;
+    if (_token == weth) {
+      weth.withdraw(remaining);
+      payable(msg.sender).transfer(remaining);
+    } else {
+      _token.transfer(msg.sender, remaining);
+    }
+  }
 }
