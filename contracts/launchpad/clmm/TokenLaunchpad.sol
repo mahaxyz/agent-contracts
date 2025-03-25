@@ -21,15 +21,17 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+
+import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   address public feeDestination;
-  address public referralDestination;
   address public tokenImplementation;
   ICLMMAdapter public adapter;
   IERC20[] public tokens;
+  IReferralDistributor public referralDestination;
   IWETH9 public weth;
   uint256 public creationFee;
   uint256 public referralFee;
@@ -60,7 +62,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   /// @inheritdoc ITokenLaunchpad
   function setReferralSettings(address _referralDestination, uint256 _referralFee) external onlyOwner {
-    referralDestination = _referralDestination;
+    referralDestination = IReferralDistributor(_referralDestination);
     referralFee = _referralFee;
     emit ReferralUpdated(_referralDestination, _referralFee);
   }
@@ -142,21 +144,38 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       uint256 referralFee0 = (fee0 * referralFee) / 100;
       uint256 referralFee1 = (fee1 * referralFee) / 100;
 
-      _distributeReferralFees(address(_token), ownerOf(tokenToNftId[_token]), token1, referralFee0, referralFee1);
+      _distributeReferralFees(address(_token), token1, referralFee0, referralFee1);
       _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0 - referralFee0, fee1 - referralFee1);
     } else {
       _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
     }
   }
 
+  /// @dev Distribute fees to the owner
+  /// @param _token0 The token to distribute fees from
+  /// @param _owner The owner of the token
+  /// @param _token1 The token to distribute fees to
+  /// @param _amount0 The amount of fees to distribute from token0
+  /// @param _amount1 The amount of fees to distribute from token1
   function _distributeFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
     internal
     virtual;
 
-  function _distributeReferralFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
-    internal
-  {}
+  /// @dev Distribute referral fees to the referral destination
+  /// @param _token0 The token to distribute fees from
+  /// @param _token1 The token to distribute fees to
+  /// @param _amount0 The amount of fees to distribute from token0
+  /// @param _amount1 The amount of fees to distribute from token1
+  function _distributeReferralFees(address _token0, address _token1, uint256 _amount0, uint256 _amount1) internal {
+    if (address(referralDestination) == address(0)) return;
+    IERC20(_token0).approve(address(referralDestination), _amount0);
+    IERC20(_token1).approve(address(referralDestination), _amount1);
+    IReferralDistributor distributor = referralDestination;
+    distributor.collectReferralFees(_token0, _token1, _amount0, _amount1);
+  }
 
+  /// @dev Refund tokens to the owner
+  /// @param _token The token to refund
   function _refundTokens(IERC20 _token) internal {
     uint256 remaining = _token.balanceOf(address(this));
     if (remaining == 0) return;
