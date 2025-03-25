@@ -21,7 +21,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     proxyAdmin,
     "RamsesAdapter",
     deployer,
-    true
+    true // skip initialization
   );
 
   const launchpadD = await deployProxy(

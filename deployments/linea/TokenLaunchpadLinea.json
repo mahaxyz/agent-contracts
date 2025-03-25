@@ -1,5 +1,5 @@
 {
-  "address": "0xdA1f78dd24A8749Ff21340d75cE99A358A72646F",
+  "address": "0xF4ab330C469B45F4a9CA2314a601f97A3840aba4",
   "abi": [
     {
       "inputs": [],
@@ -444,11 +444,6 @@
               "type": "address"
             },
             {
-              "internalType": "uint24",
-              "name": "fee",
-              "type": "uint24"
-            },
-            {
               "internalType": "uint256",
               "name": "limitPerWallet",
               "type": "uint256"
@@ -639,11 +634,6 @@
           "internalType": "contract IERC20",
           "name": "fundingToken",
           "type": "address"
-        },
-        {
-          "internalType": "uint24",
-          "name": "fee",
-          "type": "uint24"
         },
         {
           "internalType": "uint256",
@@ -1026,8 +1016,8 @@
     }
   ],
   "args": [
-    "0x6b11B17E79bbDC6c4e71e323bFD686e7a63511F1",
-    "0x571b22F8d47016FA776BAFF7128a5D42a4EE2254",
+    "0x3A7dfc553C37f69e297c2E36921487993AB8b587",
+    "0x8290159955e3C4BF20007fD45bf68C3ef7736d28",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
     "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
   ],
