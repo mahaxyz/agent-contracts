@@ -151,10 +151,33 @@ contract TokenLaunchpadLineaForkTest is Test {
       upperMaxTick: 887_000
     });
 
-    vm.deal(owner, 1000 ether);
     vm.startPrank(owner);
     address token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 1 ether);
     _launchpad.claimFees(ITokenTemplate(token));
     vm.stopPrank();
+  }
+
+  function test_createAndBuy_and_fees() public {
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      limitPerWallet: 1_000_000_000 ether,
+      salt: keccak256("test"),
+      launchTick: -171_000,
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
+    });
+
+    vm.prank(owner);
+    _launchpad.setFeeSettings(address(0x123), 1 ether);
+
+    // should revert because the fee is not set
+    vm.expectRevert();
+    _launchpad.createAndBuy{value: 0 ether}(params, address(0), 1 ether);
+
+    // should succeed because the fee is set
+    _launchpad.createAndBuy{value: 100 ether}(params, address(0), 1 ether);
   }
 }
