@@ -59,6 +59,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
+  function setReferralSettings(address _referralDestination, uint256 _referralFee) external onlyOwner {
+    referralDestination = _referralDestination;
+    referralFee = _referralFee;
+    emit ReferralUpdated(_referralDestination, _referralFee);
+  }
+
+  /// @inheritdoc ITokenLaunchpad
   function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
     if (msg.value > 0) weth.deposit{value: msg.value}();
 
@@ -130,12 +137,25 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   function claimFees(ITokenTemplate _token) external {
     address token1 = address(launchParams[_token].fundingToken);
     (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
-    _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
+
+    if (referralFee > 0) {
+      uint256 referralFee0 = (fee0 * referralFee) / 100;
+      uint256 referralFee1 = (fee1 * referralFee) / 100;
+
+      _distributeReferralFees(address(_token), ownerOf(tokenToNftId[_token]), token1, referralFee0, referralFee1);
+      _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0 - referralFee0, fee1 - referralFee1);
+    } else {
+      _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
+    }
   }
 
   function _distributeFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
     internal
     virtual;
+
+  function _distributeReferralFees(address _token0, address _owner, address _token1, uint256 _amount0, uint256 _amount1)
+    internal
+  {}
 
   function _refundTokens(IERC20 _token) internal {
     uint256 remaining = _token.balanceOf(address(this));

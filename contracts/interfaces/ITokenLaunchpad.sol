@@ -53,12 +53,22 @@ interface ITokenLaunchpad {
   /// @param params The parameters used to launch the token
   event TokenLaunched(ITokenTemplate indexed token, address indexed pool, ITokenTemplate.InitParams params);
 
+  /// @notice Emitted when referral settings are updated
+  /// @param referralDestination The address where referrals will be sent
+  /// @param referralFee The new referral fee amount
+  event ReferralUpdated(address indexed referralDestination, uint256 referralFee);
+
   /// @notice Initializes the launchpad contract
   /// @param _adapter The DEX adapter contract address
   /// @param _tokenImplementation The implementation contract for new tokens
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
   function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth) external;
+
+  /// @notice Updates the referral settings
+  /// @param _referralDestination The address to receive referrals
+  /// @param _referralFee The new referral fee amount
+  function setReferralSettings(address _referralDestination, uint256 _referralFee) external;
 
   /// @notice Updates the fee settings
   /// @param _feeDestination The address to receive fees

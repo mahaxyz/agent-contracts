@@ -1,5 +1,5 @@
 {
-  "address": "0xF4ab330C469B45F4a9CA2314a601f97A3840aba4",
+  "address": "0xDF90BcBe8D0512a27965491a7dc8b8555e3f49EB",
   "abi": [
     {
       "inputs": [],
@@ -277,6 +277,25 @@
         }
       ],
       "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "referralDestination",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "referralFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReferralUpdated",
       "type": "event"
     },
     {
@@ -711,6 +730,32 @@
     },
     {
       "inputs": [],
+      "name": "referralDestination",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "referralFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -799,6 +844,24 @@
         }
       ],
       "name": "setFeeSettings",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_referralDestination",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_referralFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "setReferralSettings",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1016,10 +1079,10 @@
     }
   ],
   "args": [
-    "0x3A7dfc553C37f69e297c2E36921487993AB8b587",
-    "0x8290159955e3C4BF20007fD45bf68C3ef7736d28",
+    "0xBF459F3e75D232a8F658c75116EBA9AD52527F04",
+    "0x2157c2c478e9B240F94AC8347715255A24d62CF0",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
     "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
   ],
-  "numDeployments": 4
+  "numDeployments": 2
 }

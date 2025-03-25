@@ -30,6 +30,13 @@ interface ICLMMAdapter {
     int24 tick2;
   }
 
+  /// @notice Initializes the adapter
+  /// @param _launchpad The address of the launchpad
+  /// @param _clPoolFactory The address of the CL pool factory
+  /// @param _swapRouter The address of the swap router
+  /// @param _WETH9 The address of the WETH9 token
+  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9) external;
+
   /// @notice Returns the address of the pool for a given token
   /// @param _token The token address
   /// @return pool The address of the pool
