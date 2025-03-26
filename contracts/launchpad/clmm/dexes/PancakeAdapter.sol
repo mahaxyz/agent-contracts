@@ -133,7 +133,7 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
         uint256 _amountIn,
         uint256 _minAmountOut
     ) external returns (uint256 amountOut) {
-        require(msg.sender == launchpad, "!launchpad");
+
         _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
         _tokenIn.approve(address(swapRouter), type(uint256).max);
 
@@ -158,7 +158,7 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
         uint256 _amountOut,
         uint256 _maxAmountIn
     ) external returns (uint256 amountIn) {
-        require(msg.sender == launchpad, "!launchpad");
+
         _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
         _tokenIn.approve(address(swapRouter), type(uint256).max);
 
@@ -241,6 +241,5 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
     }
 
     receive() external payable {}
-    fallback() external payable {}
     
 }
