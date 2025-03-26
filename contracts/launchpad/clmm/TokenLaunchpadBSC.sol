@@ -20,7 +20,7 @@ contract TokenLaunchpadBSC is TokenLaunchpad {
     internal
     override
   {
-    address mahaTreasury = 0xeD3Af36D7b9C5Bbd7ECFa7fb794eDa6E242016f5; // TODO: change to BSC treasury
+    address mahaTreasury = address(1); // TODO: change to BSC treasury
 
     // 40% to MAHA treasury
     // 60% to the owner

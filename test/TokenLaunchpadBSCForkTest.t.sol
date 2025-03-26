@@ -10,14 +10,14 @@ import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol"
 
 contract TokenLaunchpadBscForkTest is Test {
     // BSC Mainnet addresses
-    address constant PANCAKE_FACTORY =
-        0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865;
-    address constant PANCAKE_ROUTER =
-        0x1b81D678ffb9C0263b24A97847620C99d213eB14;
+
+    address constant PANCAKE_FACTORY = 0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865;
+    address constant PANCAKE_ROUTER = 0x1b81D678ffb9C0263b24A97847620C99d213eB14;
 
     TokenLaunchpadBSC _launchpad;
     PancakeAdapter _adapter;
     MockERC20 _weth;
+
     WAGMIEToken _tokenImpl;
     address owner = makeAddr("owner");
     address whale = makeAddr("whale");
@@ -32,6 +32,7 @@ contract TokenLaunchpadBscForkTest is Test {
         _launchpad = new TokenLaunchpadBSC();
         _adapter = new PancakeAdapter();
         _weth = new MockERC20("Wrapped Ether", "WETH", 18);
+
         _tokenImpl = new WAGMIEToken();
 
         // Label contracts for better trace output
@@ -238,6 +239,6 @@ contract TokenLaunchpadBscForkTest is Test {
         // should succeed because the fee is set
         _launchpad.createAndBuy{value: 100 ether}(params, address(0), 1 ether);
     }
+
     receive() external payable {}
-    
 }

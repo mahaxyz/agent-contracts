@@ -12,11 +12,13 @@
 // Twitter: https://twitter.com/mahaxyz
 
 pragma solidity ^0.8.0;
+
 import {IPancakeSwapCallback} from "contracts/interfaces/thirdparty/pancake/IPancakeSwapCallback.sol";
 
 /// @title Router token swapping functionality
 /// @notice Functions for swapping tokens via PancakeSwap V3
 interface IPancakeSwapRouter is IPancakeSwapCallback {
+
     struct ExactInputSingleParams {
         address tokenIn;
         address tokenOut;
