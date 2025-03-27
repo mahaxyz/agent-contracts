@@ -29,7 +29,7 @@ import {ICLMMAdapter, IERC20} from "contracts/interfaces/ICLMMAdapter.sol";
 import {UniversalRouter} from "@uniswap/universal-router/contracts/UniversalRouter.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 
-abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
+contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
     using PoolIdLibrary for PoolKey;
     using StateLibrary for IPoolManager;
 
@@ -120,7 +120,9 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
                 tickSpacing: 500,
                 hooks: IHooks(address(0))
             });
-            poolManager.initialize(poolKey, sqrtPriceX96Launch);
+            int24 tick = positionManager.initializePool(poolKey, sqrtPriceX96Launch);
+            require(tick != type(int24).max, "!pool");
+
             launchParams[_tokenBase] = LaunchTokenParams({
                 pool: pool,
                 poolKey: poolKey,
@@ -128,7 +130,7 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
                 tick1: _tick1,
                 tick2: _tick2
             });
-            require(address(_tokenBase) == pool.token0(), "!token0");
+            require(address(_tokenBase) == poolKey.currency0.unwrap(), "!token0");
             ITokenTemplate(address(_tokenBase)).whitelist(address(pool));
         }
 
@@ -191,6 +193,7 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
         );
     }
 
+    // @inheritdoc ICLMMAdapter
     function claimFees(
         address _token
     ) external returns (uint256 fee0, uint256 fee1) {
@@ -231,6 +234,7 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
         if (fee1 > 0) params.poolKey.currency1.transfer(msg.sender, fee1);
     }
 
+    // @inheritdoc ICLMMAdapter
     function swapForExactInput(
         IERC20 _tokenIn,
         IERC20 _tokenOut,
@@ -284,6 +288,7 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
         require(amountOut >= _minAmountOut, "Insufficient output amount");
     }
 
+    // @inheritdoc ICLMMAdapter
     function swapForExactOutput(
         IERC20 _tokenIn,
         IERC20 _tokenOut,
@@ -337,6 +342,7 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
         require(amountIn <= _maxAmountIn, "Too much input amount");
     }
 
+    // @inheritdoc ICLMMAdapter
     function graduated(address token) external view returns (bool) {
         LaunchTokenParams memory params = launchParams[IERC20(token)];
         if (params.poolKey.fee == 0) return false;
