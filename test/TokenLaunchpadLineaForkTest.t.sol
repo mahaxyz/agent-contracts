@@ -42,7 +42,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       address(_launchpad),
       address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42),
       address(0xAAAE99091Fbb28D400029052821653C1C752483B),
-      address(_weth)
+      address(_weth),
+      address(0x0000000000000000000000000000000000000000)
     );
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }

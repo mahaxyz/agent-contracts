@@ -35,7 +35,8 @@ interface ICLMMAdapter {
   /// @param _clPoolFactory The address of the CL pool factory
   /// @param _swapRouter The address of the swap router
   /// @param _WETH9 The address of the WETH9 token
-  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9) external;
+  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9, address _odos)
+    external;
 
   /// @notice Returns the address of the pool for a given token
   /// @param _token The token address
@@ -66,6 +67,24 @@ interface ICLMMAdapter {
   function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
     external
     returns (uint256 amountIn);
+
+  /// @notice Swap for exact input with Odos
+  /// @param _odosTokenIn The token to swap into odos
+  /// @param _tokenIn The token to swap from
+  /// @param _tokenOut The token to swap to
+  /// @param _odosTokenInAmount The amount of tokens to swap into odos
+  /// @param _minOdosTokenOut The minimum amount of tokens to receive from odos
+  /// @param _minAmountOut The minimum amount of tokens to receive from the swap
+  /// @param _odosData The data to pass to the odos contract
+  function swapForExactInputWithOdos(
+    IERC20 _odosTokenIn,
+    IERC20 _tokenIn,
+    IERC20 _tokenOut,
+    uint256 _odosTokenInAmount,
+    uint256 _minOdosTokenOut,
+    uint256 _minAmountOut,
+    bytes calldata _odosData
+  ) external payable returns (uint256 amountOut);
 
   /// @notice Returns the address of the Launchpad contract
   /// @return launchpad The address of the Launchpad contract

@@ -30,17 +30,19 @@ import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamse
 import {IRamsesSwapRouter} from "contracts/interfaces/thirdparty/ramses/IRamsesSwapRouter.sol";
 
 contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
-  IClPoolFactory public clPoolFactory;
-  address public launchpad;
-  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
-  address private _me;
-  address public WETH9;
-  IClPool private _transientClPool;
-  IRamsesSwapRouter public swapRouter;
-
   using SafeERC20 for IERC20;
 
-  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9)
+  address public launchpad;
+  address public ODOS;
+  IClPoolFactory public clPoolFactory;
+  IRamsesSwapRouter public swapRouter;
+  IWETH9 public WETH9;
+  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
+
+  address private _me;
+  IClPool private _transientClPool;
+
+  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9, address _odos)
     external
     initializer
   {
@@ -48,7 +50,8 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     clPoolFactory = IClPoolFactory(_clPoolFactory);
     swapRouter = IRamsesSwapRouter(_swapRouter);
     _me = address(this);
-    WETH9 = _WETH9;
+    WETH9 = IWETH9(_WETH9);
+    ODOS = _odos;
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -119,6 +122,7 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
     );
   }
 
+  /// @inheritdoc ICLMMAdapter
   function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
     external
     returns (uint256 amountIn)
@@ -138,6 +142,42 @@ contract RamsesAdapter is ICLMMAdapter, IRamsesV2MintCallback, Initializable {
       })
     );
     _tokenIn.safeTransfer(msg.sender, _maxAmountIn - amountIn);
+  }
+
+  /// @inheritdoc ICLMMAdapter
+  function swapForExactInputWithOdos(
+    IERC20 _odosTokenIn,
+    IERC20 _tokenIn,
+    IERC20 _tokenOut,
+    uint256 _odosTokenInAmount,
+    uint256 _minOdosTokenOut,
+    uint256 _minAmountOut,
+    bytes calldata _odosData
+  ) external payable returns (uint256 amountOut) {
+    if (address(_odosTokenIn) == address(WETH9)) WETH9.deposit{value: _odosTokenInAmount}();
+    else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
+    _odosTokenIn.approve(address(swapRouter), type(uint256).max);
+
+    // call the odos contract to get the amount of tokens to buy
+    (bool success,) = ODOS.call(_odosData);
+    require(success, "!odos");
+
+    // ensure that the odos has given us enough tokens to perform the raw swap
+    uint256 amountIn = _tokenIn.balanceOf(address(this));
+    require(amountIn >= _minOdosTokenOut, "!minAmountIn");
+
+    amountOut = swapRouter.exactInputSingle(
+      IRamsesSwapRouter.ExactInputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountIn: amountIn,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        fee: 20_000,
+        amountOutMinimum: _minAmountOut,
+        sqrtPriceLimitX96: 0
+      })
+    );
   }
 
   /// @inheritdoc ICLMMAdapter
