@@ -34,11 +34,11 @@ contract PancakeAdapter is BaseAdapter {
   IPancakeSwapRouter public swapRouter;
   IPancakePool private _transientClPool;
 
-  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9, address _odos)
+  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9)
     external
     initializer
   {
-    __BaseAdapter_init(_launchpad, _WETH9, _odos);
+    __BaseAdapter_init(_launchpad, _WETH9);
     poolFactory = IPancakeFactory(_poolFactory);
     swapRouter = IPancakeSwapRouter(_swapRouter);
   }
@@ -86,25 +86,7 @@ contract PancakeAdapter is BaseAdapter {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function buyWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
-    external
-    returns (uint256 amountOut)
-  {
-    amountOut =
-      buyWithExactOutputWithOdos(_tokenIn, _tokenIn, _tokenOut, _amountIn, _amountIn, _minAmountOut, bytes(""));
-  }
-
-  /// @inheritdoc ICLMMAdapter
-  function sellWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
-    external
-    returns (uint256 amountOut)
-  {
-    amountOut =
-      sellWithExactOutputWithOdos(_tokenIn, _tokenIn, _tokenOut, _amountIn, _amountIn, _minAmountOut, bytes(""));
-  }
-
-  /// @inheritdoc ICLMMAdapter
-  function buyWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
     external
     returns (uint256 amountIn)
   {
@@ -117,103 +99,33 @@ contract PancakeAdapter is BaseAdapter {
         amountOut: _amountOut,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: 10_000,
+        fee: 20_000,
         amountInMaximum: _maxAmountIn,
         sqrtPriceLimitX96: 0
       })
     );
-    _tokenIn.safeTransfer(msg.sender, _maxAmountIn - amountIn);
   }
 
   /// @inheritdoc ICLMMAdapter
-  function buyWithExactOutputWithOdos(
-    IERC20 _odosTokenIn,
-    IERC20 _tokenIn,
-    IERC20 _tokenOut,
-    uint256 _odosTokenInAmount,
-    uint256 _minOdosTokenOut,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) public payable returns (uint256 amountOut) {
-    if (msg.value > 0) WETH9.deposit{value: msg.value}();
-    else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
-    _odosTokenIn.approve(address(swapRouter), type(uint256).max);
-
-    // call the odos contract to get the amount of tokens to buy
-    if (_odosData.length > 0) {
-      (bool success,) = ODOS.call(_odosData);
-      require(success, "!odos");
-    }
-
-    // ensure that the odos has given us enough tokens to perform the raw swap
-    uint256 amountIn = _tokenIn.balanceOf(address(this));
-    require(amountIn >= _minOdosTokenOut, "!minAmountIn");
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+    external
+    returns (uint256 amountOut)
+  {
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
 
     amountOut = swapRouter.exactInputSingle(
       IPancakeSwapRouter.ExactInputSingleParams({
         tokenIn: address(_tokenIn),
         tokenOut: address(_tokenOut),
-        amountIn: amountIn,
+        amountIn: _amountIn,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: 10_000,
+        fee: 20_000,
         amountOutMinimum: _minAmountOut,
         sqrtPriceLimitX96: 0
       })
     );
-
-    _refundTokens(_tokenIn);
-    _refundTokens(_tokenOut);
-    _refundTokens(_odosTokenIn);
-  }
-
-  /// @inheritdoc ICLMMAdapter
-  function sellWithExactOutputWithOdos(
-    IERC20 _tokenIn,
-    IERC20 _odosTokenOut,
-    IERC20 _tokenOut,
-    uint256 _tokenInAmount,
-    uint256 _minOdosTokenIn,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) public payable returns (uint256 amountOut) {
-    _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
-    _tokenIn.approve(address(swapRouter), type(uint256).max);
-
-    // ensure that the odos has given us enough tokens to perform the raw swap
-    uint256 amountIn = _tokenIn.balanceOf(address(this));
-    require(amountIn >= _minOdosTokenIn, "!minAmountIn");
-
-    uint256 amountSwapOut = swapRouter.exactInputSingle(
-      IPancakeSwapRouter.ExactInputSingleParams({
-        tokenIn: address(_tokenIn),
-        tokenOut: address(_tokenOut),
-        amountIn: amountIn,
-        recipient: msg.sender,
-        deadline: block.timestamp,
-        fee: 10_000,
-        amountOutMinimum: _minAmountOut,
-        sqrtPriceLimitX96: 0
-      })
-    );
-
-    require(amountSwapOut > _minOdosTokenIn, "!amountSwapOut");
-
-    // call the odos contract to get the amount of tokens to buy
-    if (_odosData.length > 0) {
-      _odosTokenOut.approve(ODOS, type(uint256).max);
-      (bool success,) = ODOS.call(_odosData);
-      require(success, "!odos");
-      amountOut = _tokenOut.balanceOf(address(this));
-    } else {
-      amountOut = amountSwapOut;
-    }
-
-    require(amountOut >= _minAmountOut, "!minAmountOut");
-
-    _refundTokens(_tokenIn);
-    _refundTokens(_tokenOut);
-    _refundTokens(_odosTokenOut);
   }
 
   /// @inheritdoc ICLMMAdapter

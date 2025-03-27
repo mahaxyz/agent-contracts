@@ -42,10 +42,9 @@ contract TokenLaunchpadLineaForkTest is Test {
       address(_launchpad),
       address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42),
       address(0xAAAE99091Fbb28D400029052821653C1C752483B),
-      address(_weth),
-      address(0x0000000000000000000000000000000000000000)
+      address(_weth)
     );
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
+    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(0));
   }
 
   function test_create() public {
@@ -125,16 +124,16 @@ contract TokenLaunchpadLineaForkTest is Test {
     _weth.approve(address(_adapter), 10_000 ether);
 
     vm.expectRevert();
-    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1 ether, 0);
+    _adapter.swapWithExactInput(IERC20(address(_weth)), IERC20(token), 1 ether, 0);
 
     vm.expectRevert();
-    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 100 ether, 0);
+    _adapter.swapWithExactInput(IERC20(address(_weth)), IERC20(token), 100 ether, 0);
 
     vm.expectRevert();
-    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1000 ether, 0);
+    _adapter.swapWithExactInput(IERC20(address(_weth)), IERC20(token), 1000 ether, 0);
 
     // should succeed
-    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1000, 0);
+    _adapter.swapWithExactInput(IERC20(address(_weth)), IERC20(token), 1000, 0);
 
     vm.stopPrank();
   }

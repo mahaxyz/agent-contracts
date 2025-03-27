@@ -23,16 +23,14 @@ abstract contract BaseAdapter is ICLMMAdapter, Initializable {
   using SafeERC20 for IERC20;
 
   address public launchpad;
-  address public ODOS;
   IWETH9 public WETH9;
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
   address internal _me;
 
-  function __BaseAdapter_init(address _launchpad, address _WETH9, address _odos) internal {
+  function __BaseAdapter_init(address _launchpad, address _WETH9) internal {
     launchpad = _launchpad;
     _me = address(this);
     WETH9 = IWETH9(_WETH9);
-    ODOS = _odos;
   }
 
   function launchedTokens(IERC20 _token) external view returns (bool launched) {
@@ -50,11 +48,6 @@ abstract contract BaseAdapter is ICLMMAdapter, Initializable {
   function _refundTokens(IERC20 _token) internal {
     uint256 remaining = _token.balanceOf(address(this));
     if (remaining == 0) return;
-    if (_token == WETH9) {
-      WETH9.withdraw(remaining);
-      payable(msg.sender).transfer(remaining);
-    } else {
-      _token.safeTransfer(msg.sender, remaining);
-    }
+    _token.safeTransfer(msg.sender, remaining);
   }
 }

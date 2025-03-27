@@ -39,10 +39,10 @@ contract TokenLaunchpadBscForkTest is Test {
     vm.label(PANCAKE_ROUTER, "pancakeRouter");
 
     // Initialize adapter
-    _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), address(0));
+    _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth));
 
     // Initialize launchpad
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
+    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(0));
   }
 
   function test_Initialize() public view {
@@ -50,7 +50,6 @@ contract TokenLaunchpadBscForkTest is Test {
     assertEq(address(_adapter.poolFactory()), PANCAKE_FACTORY);
     assertEq(address(_adapter.swapRouter()), PANCAKE_ROUTER);
     assertEq(address(_adapter.WETH9()), address(_weth));
-    assertEq(address(_adapter.ODOS()), address(0));
 
     assertEq(address(_launchpad.adapter()), address(_adapter));
     assertEq(_launchpad.owner(), owner);
