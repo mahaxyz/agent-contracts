@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@uniswap/universal-router": "^2.0.0",
     "hardhat": "^2.22.19"
   },
   "devDependencies": {
