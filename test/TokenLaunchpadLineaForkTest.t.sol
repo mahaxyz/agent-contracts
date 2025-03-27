@@ -125,16 +125,16 @@ contract TokenLaunchpadLineaForkTest is Test {
     _weth.approve(address(_adapter), 10_000 ether);
 
     vm.expectRevert();
-    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1 ether, 0);
+    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1 ether, 0);
 
     vm.expectRevert();
-    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 100 ether, 0);
+    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 100 ether, 0);
 
     vm.expectRevert();
-    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1000 ether, 0);
+    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1000 ether, 0);
 
     // should succeed
-    _adapter.swapForExactInput(IERC20(address(_weth)), IERC20(token), 1000, 0);
+    _adapter.buyWithExactInput(IERC20(address(_weth)), IERC20(token), 1000, 0);
 
     vm.stopPrank();
   }

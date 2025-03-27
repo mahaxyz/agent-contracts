@@ -116,23 +116,6 @@ abstract contract UniswapV4Adapter is ICLMMAdapter, BaseHook {
     if (fee1 > 0) params.poolKey.currency1.transfer(msg.sender, fee1);
   }
 
-  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
-    external
-    returns (uint256 amountOut)
-  {
-    require(msg.sender == launchpad, "!launchpad");
-    // require(launchParams[_tokenIn].pool != IClPool(address(0)), "!launched");
-
-    // _transientClPool = launchParams[_tokenIn].pool;
-  }
-
-  function graduated(address token) external view returns (bool) {
-    LaunchTokenParams memory params = launchParams[IERC20(token)];
-    if (params.poolKey.fee == 0) return false;
-    (, int24 tick,,,,,) = params.pool.slot0();
-    return tick >= params.tick1;
-  }
-
   // function ramsesV2MintCallback(uint256 amount0, uint256, bytes calldata) external {
   //   require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
   //   IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);

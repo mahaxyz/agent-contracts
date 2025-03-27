@@ -15,56 +15,40 @@ pragma solidity ^0.8.0;
 
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
-import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
-import {IPancakeAdapter, PoolKey} from "contracts/interfaces/thirdparty/pancake/IPancakeAdapter.sol";
 
+import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
+
+import {BaseAdapter, IERC20, IWETH9, SafeERC20} from "./BaseAdapter.sol";
 import {IPancakeFactory} from "contracts/interfaces/thirdparty/pancake/IPancakeFactory.sol";
 import {IPancakePool} from "contracts/interfaces/thirdparty/pancake/IPancakePool.sol";
 import {IPancakeSwapRouter} from "contracts/interfaces/thirdparty/pancake/IPancakeSwapRouter.sol";
 
-contract PancakeAdapter is IPancakeAdapter, Initializable {
+contract PancakeAdapter is BaseAdapter {
   using SafeERC20 for IERC20;
 
   IPancakeFactory public poolFactory;
-  address public launchpad;
-  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
-  address private _me;
-  address public WETH9;
-  IPancakePool private _transientClPool;
   IPancakeSwapRouter public swapRouter;
+  IPancakePool private _transientClPool;
 
-  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9)
+  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9, address _odos)
     external
     initializer
   {
-    launchpad = _launchpad;
+    __BaseAdapter_init(_launchpad, _WETH9, _odos);
     poolFactory = IPancakeFactory(_poolFactory);
     swapRouter = IPancakeSwapRouter(_swapRouter);
-    _me = address(this);
-    WETH9 = _WETH9;
   }
 
-  function launchedTokens(IERC20 _token) external view returns (bool launched) {
-    launched = launchParams[_token].pool != IPancakePool(address(0));
-  }
-
-  function getPool(IERC20 _token) external view returns (address pool) {
-    return address(launchParams[_token].pool);
-  }
-
-  /// @inheritdoc IPancakeAdapter
+  /// @inheritdoc ICLMMAdapter
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external
   {
     require(msg.sender == launchpad, "!launchpad");
-    require(launchParams[_tokenBase].pool == IPancakePool(address(0)), "!launched");
+    require(launchParams[_tokenBase].pool == address(0), "!launched");
 
     uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
     uint160 sqrtPriceX960 = TickMath.getSqrtPriceAtTick(_tick0);
@@ -83,7 +67,7 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
         hooks: IHooks(address(0))
       });
       launchParams[_tokenBase] =
-        LaunchTokenParams({pool: pool, poolKey: poolKey, tick0: _tick0, tick1: _tick1, tick2: _tick2});
+        LaunchTokenParams({pool: address(pool), poolKey: poolKey, tick0: _tick0, tick1: _tick1, tick2: _tick2});
       require(address(_tokenBase) == pool.token0(), "!token0");
       ITokenTemplate(address(_tokenBase)).whitelist(address(pool));
     }
@@ -101,86 +85,164 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
     delete _transientClPool;
   }
 
-  /// @inheritdoc IPancakeAdapter
-  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  /// @inheritdoc ICLMMAdapter
+  function buyWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
     external
     returns (uint256 amountOut)
   {
-    require(msg.sender == launchpad, "!launchpad");
-    _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
-    _tokenIn.approve(address(swapRouter), type(uint256).max);
-
-    IPancakeSwapRouter.ExactInputSingleParams memory params = IPancakeSwapRouter.ExactInputSingleParams({
-      tokenIn: address(_tokenIn),
-      tokenOut: address(_tokenOut),
-      fee: 10_000,
-      recipient: msg.sender,
-      deadline: block.timestamp, // TODO: change to deadline
-      amountIn: _amountIn,
-      amountOutMinimum: _minAmountOut,
-      sqrtPriceLimitX96: 0
-    });
-
-    amountOut = swapRouter.exactInputSingle(params);
+    amountOut =
+      buyWithExactOutputWithOdos(_tokenIn, _tokenIn, _tokenOut, _amountIn, _amountIn, _minAmountOut, bytes(""));
   }
 
-  function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  /// @inheritdoc ICLMMAdapter
+  function sellWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+    external
+    returns (uint256 amountOut)
+  {
+    amountOut =
+      sellWithExactOutputWithOdos(_tokenIn, _tokenIn, _tokenOut, _amountIn, _amountIn, _minAmountOut, bytes(""));
+  }
+
+  /// @inheritdoc ICLMMAdapter
+  function buyWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
     external
     returns (uint256 amountIn)
   {
-    require(msg.sender == launchpad, "!launchpad");
     _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
     _tokenIn.approve(address(swapRouter), type(uint256).max);
-
-    IPancakeSwapRouter.ExactOutputSingleParams memory params = IPancakeSwapRouter.ExactOutputSingleParams({
-      tokenIn: address(_tokenIn),
-      tokenOut: address(_tokenOut),
-      fee: 10_000,
-      recipient: msg.sender,
-      deadline: block.timestamp, // TODO: change to deadline
-      amountOut: _amountOut,
-      amountInMaximum: _maxAmountIn,
-      sqrtPriceLimitX96: 0
-    });
-
-    amountIn = swapRouter.exactOutputSingle(params);
+    amountIn = swapRouter.exactOutputSingle(
+      IPancakeSwapRouter.ExactOutputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountOut: _amountOut,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        fee: 10_000,
+        amountInMaximum: _maxAmountIn,
+        sqrtPriceLimitX96: 0
+      })
+    );
     _tokenIn.safeTransfer(msg.sender, _maxAmountIn - amountIn);
   }
 
-  /// @inheritdoc IPancakeAdapter
+  /// @inheritdoc ICLMMAdapter
+  function buyWithExactOutputWithOdos(
+    IERC20 _odosTokenIn,
+    IERC20 _tokenIn,
+    IERC20 _tokenOut,
+    uint256 _odosTokenInAmount,
+    uint256 _minOdosTokenOut,
+    uint256 _minAmountOut,
+    bytes memory _odosData
+  ) public payable returns (uint256 amountOut) {
+    if (msg.value > 0) WETH9.deposit{value: msg.value}();
+    else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
+    _odosTokenIn.approve(address(swapRouter), type(uint256).max);
+
+    // call the odos contract to get the amount of tokens to buy
+    if (_odosData.length > 0) {
+      (bool success,) = ODOS.call(_odosData);
+      require(success, "!odos");
+    }
+
+    // ensure that the odos has given us enough tokens to perform the raw swap
+    uint256 amountIn = _tokenIn.balanceOf(address(this));
+    require(amountIn >= _minOdosTokenOut, "!minAmountIn");
+
+    amountOut = swapRouter.exactInputSingle(
+      IPancakeSwapRouter.ExactInputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountIn: amountIn,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        fee: 10_000,
+        amountOutMinimum: _minAmountOut,
+        sqrtPriceLimitX96: 0
+      })
+    );
+
+    _refundTokens(_tokenIn);
+    _refundTokens(_tokenOut);
+    _refundTokens(_odosTokenIn);
+  }
+
+  /// @inheritdoc ICLMMAdapter
+  function sellWithExactOutputWithOdos(
+    IERC20 _tokenIn,
+    IERC20 _odosTokenOut,
+    IERC20 _tokenOut,
+    uint256 _tokenInAmount,
+    uint256 _minOdosTokenIn,
+    uint256 _minAmountOut,
+    bytes memory _odosData
+  ) public payable returns (uint256 amountOut) {
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
+
+    // ensure that the odos has given us enough tokens to perform the raw swap
+    uint256 amountIn = _tokenIn.balanceOf(address(this));
+    require(amountIn >= _minOdosTokenIn, "!minAmountIn");
+
+    uint256 amountSwapOut = swapRouter.exactInputSingle(
+      IPancakeSwapRouter.ExactInputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountIn: amountIn,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        fee: 10_000,
+        amountOutMinimum: _minAmountOut,
+        sqrtPriceLimitX96: 0
+      })
+    );
+
+    require(amountSwapOut > _minOdosTokenIn, "!amountSwapOut");
+
+    // call the odos contract to get the amount of tokens to buy
+    if (_odosData.length > 0) {
+      _odosTokenOut.approve(ODOS, type(uint256).max);
+      (bool success,) = ODOS.call(_odosData);
+      require(success, "!odos");
+      amountOut = _tokenOut.balanceOf(address(this));
+    } else {
+      amountOut = amountSwapOut;
+    }
+
+    require(amountOut >= _minAmountOut, "!minAmountOut");
+
+    _refundTokens(_tokenIn);
+    _refundTokens(_tokenOut);
+    _refundTokens(_odosTokenOut);
+  }
+
+  /// @inheritdoc ICLMMAdapter
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     LaunchTokenParams memory params = launchParams[IERC20(_token)];
     require(address(params.pool) != address(0), "!launched");
 
     (uint256 fee00, uint256 fee01) =
-      params.pool.collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
+      IPancakePool(params.pool).collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
     (uint256 fee10, uint256 fee11) =
-      params.pool.collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
+      IPancakePool(params.pool).collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
 
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
 
-    IERC20(params.pool.token0()).transfer(msg.sender, fee0);
-    IERC20(params.pool.token1()).transfer(msg.sender, fee1);
+    IERC20(IPancakePool(params.pool).token0()).transfer(msg.sender, fee0);
+    IERC20(IPancakePool(params.pool).token1()).transfer(msg.sender, fee1);
   }
 
-  /// @inheritdoc IPancakeAdapter
+  /// @inheritdoc ICLMMAdapter
   function graduated(address token) external view returns (bool) {
     LaunchTokenParams memory params = launchParams[IERC20(token)];
-    if (params.pool == IPancakePool(address(0))) return false;
-    (, int24 tick,,,,,) = params.pool.slot0();
+    if (params.pool == address(0)) return false;
+    (, int24 tick,,,,,) = IPancakePool(params.pool).slot0();
     return tick >= params.tick1;
   }
 
-  function pancakeV3MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
+  function pancakeV3MintCallback(uint256 amount0, uint256, bytes calldata) external {
     require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
     IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
   }
-
-  function pancakeV3SwapCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
-    require(msg.sender == address(_transientClPool), "!clPool");
-  }
-
-  receive() external payable {}
-  fallback() external payable {}
 }

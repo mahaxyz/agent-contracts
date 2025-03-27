@@ -23,7 +23,7 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
   struct LaunchTokenParams {
-    IClPool pool;
+    address pool;
     PoolKey poolKey;
     int24 tick0;
     int24 tick1;
@@ -48,43 +48,70 @@ interface ICLMMAdapter {
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external;
 
-  /// @notice Swap for exact input
-  /// @param _tokenIn The token to swap from
-  /// @param _tokenOut The token to swap to
-  /// @param _amountIn The amount of tokens to swap
+  /// @notice Buy a token with exact input
+  /// @param _tokenIn The token to buy
+  /// @param _tokenOut The token to sell
+  /// @param _amountIn The amount of tokens to buy
   /// @param _minAmountOut The minimum amount of tokens to receive
   /// @return amountOut The amount of tokens received
-  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function buyWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
     external
     returns (uint256 amountOut);
 
-  /// @notice Swap for exact output
-  /// @param _tokenIn The token to swap from
-  /// @param _tokenOut The token to swap to
-  /// @param _amountOut The amount of tokens to receive
-  /// @param _maxAmountIn The maximum amount of tokens to spend
-  /// @return amountIn The amount of tokens to spend
-  function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  /// @notice Sell a token with exact input
+  /// @param _tokenIn The token to sell
+  /// @param _tokenOut The token to buy
+  /// @param _amountIn The amount of tokens to sell
+  /// @param _minAmountOut The minimum amount of tokens to receive
+  /// @return amountOut The amount of tokens received
+  function sellWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
     external
-    returns (uint256 amountIn);
+    returns (uint256 amountOut);
 
-  /// @notice Swap for exact input with Odos
-  /// @param _odosTokenIn The token to swap into odos
-  /// @param _tokenIn The token to swap from
-  /// @param _tokenOut The token to swap to
-  /// @param _odosTokenInAmount The amount of tokens to swap into odos
-  /// @param _minOdosTokenOut The minimum amount of tokens to receive from odos
-  /// @param _minAmountOut The minimum amount of tokens to receive from the swap
-  /// @param _odosData The data to pass to the odos contract
-  function swapForExactInputWithOdos(
+  /// @notice Buy a token with exact output using odos to swap intermediate tokens
+  /// @param _odosTokenIn The token to buy
+  /// @param _tokenIn The token to sell
+  /// @param _tokenOut The token to buy
+  /// @param _odosTokenInAmount The amount of tokens to buy
+  /// @param _minOdosTokenOut The minimum amount of tokens to receive
+  /// @param _minAmountOut The minimum amount of tokens to receive
+  function buyWithExactOutputWithOdos(
     IERC20 _odosTokenIn,
     IERC20 _tokenIn,
     IERC20 _tokenOut,
     uint256 _odosTokenInAmount,
     uint256 _minOdosTokenOut,
     uint256 _minAmountOut,
-    bytes calldata _odosData
+    bytes memory _odosData
   ) external payable returns (uint256 amountOut);
+
+  /// @notice Sell a token with exact output using odos to swap intermediate tokens
+  /// @param _tokenIn The token to sell
+  /// @param _odosTokenOut The token to buy
+  /// @param _tokenOut The token to buy
+  /// @param _tokenInAmount The amount of tokens to sell
+  /// @param _minOdosTokenIn The minimum amount of tokens to receive
+  /// @param _minAmountOut The minimum amount of tokens to receive
+  /// @param _odosData The data to pass to the odos contract
+  function sellWithExactOutputWithOdos(
+    IERC20 _tokenIn,
+    IERC20 _odosTokenOut,
+    IERC20 _tokenOut,
+    uint256 _tokenInAmount,
+    uint256 _minOdosTokenIn,
+    uint256 _minAmountOut,
+    bytes memory _odosData
+  ) external payable returns (uint256 amountOut);
+
+  /// @notice Buy a token with exact output
+  /// @param _tokenIn The token to buy
+  /// @param _tokenOut The token to sell
+  /// @param _amountIn The amount of tokens to buy
+  /// @param _minAmountOut The minimum amount of tokens to receive
+  /// @return amountIn The amount of tokens received
+  function buyWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+    external
+    returns (uint256 amountIn);
 
   /// @notice Returns the address of the Launchpad contract
   /// @return launchpad The address of the Launchpad contract

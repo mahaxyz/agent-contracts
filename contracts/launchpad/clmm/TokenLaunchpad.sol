@@ -117,10 +117,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // buy a small amount of tokens to register the token on tools like dexscreener
     uint256 balance = p.fundingToken.balanceOf(address(this));
-    uint256 swapped = adapter.swapForExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
+    uint256 swapped = adapter.buyWithExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
-    if (amount > 0) adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
+    if (amount > 0) adapter.buyWithExactInput(p.fundingToken, token, amount - swapped, 0);
 
     // refund any remaining tokens
     _refundTokens(token);
