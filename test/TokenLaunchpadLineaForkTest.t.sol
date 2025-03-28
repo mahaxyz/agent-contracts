@@ -65,6 +65,50 @@ contract TokenLaunchpadLineaForkTest is Test {
     vm.assertEq(_adapter.graduated(token), false);
   }
 
+  function test_create_not_eth(uint256 salt) public {
+    MockERC20 _token = new MockERC20("Best Token", "BEST", 18);
+    _token.mint(whale, 1_000_000_000 ether);
+
+    vm.startPrank(whale);
+    _token.approve(address(_launchpad), 1_000_000_000 ether);
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_token)),
+      limitPerWallet: 1_000_000_000 ether,
+      salt: keccak256(abi.encode(salt)),
+      launchTick: -171_000,
+      graduationTick: -170_000,
+      upperMaxTick: 887_000
+    });
+    vm.assume(true);
+    address token = _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 0);
+
+    vm.assertEq(_adapter.graduated(token), false);
+  }
+
+  // function test_create_not_eth_with_buy(uint256 salt) public {
+  //   MockERC20 _token = new MockERC20("Test Token", "TEST", 18);
+
+  //   ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+  //     name: "Test Token",
+  //     symbol: "TEST",
+  //     metadata: "Test metadata",
+  //     fundingToken: IERC20(address(_token)),
+  //     limitPerWallet: 1_000_000_000 ether,
+  //     salt: bytes32(salt),
+  //     launchTick: -171_000,
+  //     graduationTick: -170_000,
+  //     upperMaxTick: 887_000
+  //   });
+
+  //   vm.assume(true);
+  //   address token = _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 0);
+
+  //   vm.assertEq(_adapter.graduated(token), false);
+  // }
+
   function test_createAndBuy_and_not_graduated() public {
     ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
       name: "Test Token",

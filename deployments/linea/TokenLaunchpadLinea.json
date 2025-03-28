@@ -1,5 +1,5 @@
 {
-  "address": "0xDF90BcBe8D0512a27965491a7dc8b8555e3f49EB",
+  "address": "0xAF41BE9D49A8360B3E0C30c92E01d0d6469373Bc",
   "abi": [
     {
       "inputs": [],
@@ -176,6 +176,17 @@
         }
       ],
       "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
       "type": "error"
     },
     {
@@ -377,6 +388,19 @@
     },
     {
       "inputs": [],
+      "name": "ODOS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "adapter",
       "outputs": [
         {
@@ -423,6 +447,55 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_odosTokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_odosTokenInAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minOdosTokenOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minAmountOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_odosData",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyWithExactOutputWithOdos",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -593,6 +666,11 @@
           "internalType": "address",
           "name": "_weth",
           "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_odos",
+          "type": "address"
         }
       ],
       "name": "initialize",
@@ -733,7 +811,7 @@
       "name": "referralDestination",
       "outputs": [
         {
-          "internalType": "address",
+          "internalType": "contract IReferralDistributor",
           "name": "",
           "type": "address"
         }
@@ -810,6 +888,55 @@
       "name": "safeTransferFrom",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_odosTokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenInAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minOdosTokenIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minAmountOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_odosData",
+          "type": "bytes"
+        }
+      ],
+      "name": "sellWithExactOutputWithOdos",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -1079,10 +1206,11 @@
     }
   ],
   "args": [
-    "0xBF459F3e75D232a8F658c75116EBA9AD52527F04",
-    "0x2157c2c478e9B240F94AC8347715255A24d62CF0",
+    "0x242b8fdd3f350f0dc52c397D518a6507F05a3f00",
+    "0xce09635fCaD70f7Db6B56f4a865240b26b1D70a6",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
-    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
+    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+    "0x2d8879046f1559E53eb052E949e9544bCB72f414"
   ],
-  "numDeployments": 2
+  "numDeployments": 1
 }

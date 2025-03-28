@@ -1,5 +1,5 @@
 {
-  "address": "0xBF459F3e75D232a8F658c75116EBA9AD52527F04",
+  "address": "0x242b8fdd3f350f0dc52c397D518a6507F05a3f00",
   "abi": [
     {
       "inputs": [],
@@ -40,7 +40,7 @@
       "name": "WETH9",
       "outputs": [
         {
-          "internalType": "address",
+          "internalType": "contract IWETH9",
           "name": "",
           "type": "address"
         }
@@ -195,7 +195,7 @@
       "name": "launchParams",
       "outputs": [
         {
-          "internalType": "contract IClPool",
+          "internalType": "address",
           "name": "pool",
           "type": "address"
         },
@@ -306,6 +306,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "swapRouter",
+      "outputs": [
+        {
+          "internalType": "contract IRamsesSwapRouter",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "contract IERC20",
@@ -328,7 +341,7 @@
           "type": "uint256"
         }
       ],
-      "name": "swapForExactInput",
+      "name": "swapWithExactInput",
       "outputs": [
         {
           "internalType": "uint256",
@@ -362,7 +375,7 @@
           "type": "uint256"
         }
       ],
-      "name": "swapForExactOutput",
+      "name": "swapWithExactOutput",
       "outputs": [
         {
           "internalType": "uint256",
@@ -374,19 +387,10 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "swapRouter",
-      "outputs": [
-        {
-          "internalType": "contract IRamsesSwapRouter",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "payable",
+      "type": "receive"
     }
   ],
   "args": [],
-  "numDeployments": 2
+  "numDeployments": 1
 }

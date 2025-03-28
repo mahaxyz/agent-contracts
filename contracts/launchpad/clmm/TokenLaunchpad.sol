@@ -72,13 +72,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   /// @inheritdoc ITokenLaunchpad
   function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
-    if (msg.value > 0) weth.deposit{value: msg.value}();
+    // send any creation fee to the fee destination
+    if (creationFee > 0) payable(feeDestination).transfer(creationFee - msg.value);
 
-    if (creationFee > 0) {
-      require(msg.value - amount >= creationFee, "!creationFee");
-      weth.transfer(feeDestination, creationFee);
-    }
+    // wrap anything pending into weth
+    if (address(this).balance > 0) weth.deposit{value: address(this).balance}();
 
+    // take any pending balance from the sender
     if (amount > 0) {
       uint256 currentBalance = p.fundingToken.balanceOf(address(this));
       if (currentBalance < amount) p.fundingToken.transferFrom(msg.sender, address(this), amount - currentBalance);
@@ -98,8 +98,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     require(expected == address(0) || address(token) == expected, "Invalid token address");
 
     token.initialize(params);
-    tokens.push(token);
     tokenToNftId[token] = tokens.length;
+    tokens.push(token);
     launchParams[token] = p;
 
     token.approve(address(adapter), type(uint256).max);
@@ -186,7 +186,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       weth.withdraw(remaining);
       payable(msg.sender).transfer(remaining);
     } else {
-      _token.transfer(msg.sender, remaining);
+      _token.safeTransfer(msg.sender, remaining);
     }
   }
 
