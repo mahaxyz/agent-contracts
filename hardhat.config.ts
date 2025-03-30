@@ -62,6 +62,7 @@ const config: HardhatUserConfig = {
     base: _network("https://mainnet.base.org"),
     linea: _network("https://rpc.linea.build", 100000000), // 0.1 gwei
     bsc: _network("https://bsc-dataseed1.bnbchain.org"),
+    unichain: _network("https://mainnet.unichain.org"), // 0.1 gwei
   },
   namedAccounts: {
     deployer: 0,
@@ -79,6 +80,7 @@ const config: HardhatUserConfig = {
       sonic: process.env.SONICSCAN_KEY || "",
       arbitrumOne: process.env.ARBISCAN_KEY || "",
       xlayer: "test",
+      unichain: process.env.UNISCAN_KEY || "",
     },
     customChains: [
       {
@@ -120,6 +122,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.scrollscan.com/api",
           browserURL: "https://scrollscan.com",
+        },
+      },
+      {
+        network: "unichain",
+        chainId: 130,
+        urls: {
+          apiURL: "https://api.uniscan.xyz/api",
+          browserURL: "https://uniscan.xyz",
         },
       },
     ],
