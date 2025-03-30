@@ -3,3 +3,4 @@
 @openzeppelin/contracts=lib/openzeppelin-contracts/contracts/
 @openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts-upgradeable/contracts/
 contracts/=contracts/
+@uniswap/permit2/=lib/permit2/
