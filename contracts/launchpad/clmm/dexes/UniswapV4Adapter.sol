@@ -35,6 +35,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IUniversalRouter} from "contracts/interfaces/thirdparty/uniswapv4/IUniversalRouter.sol";
 import {IUniswapV4Adapter} from "contracts/interfaces/IUniswapV4Adapter.sol";
 import { IPermit2 } from "@uniswap/permit2/src/interfaces/IPermit2.sol";
+import {SqrtPriceMath} from "@uniswap/v4-core/src/libraries/SqrtPriceMath.sol";
 contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
     using PoolIdLibrary for PoolKey;
     using StateLibrary for IPoolManager;
@@ -78,7 +79,6 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         uint160 sqrtPriceX960 = TickMath.getSqrtPriceAtTick(_tick0);
         uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
         uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
-        IERC20(_tokenBase).safeTransferFrom(msg.sender, address(this), 999999999999999999999885153);
 
         PoolKey memory poolKey = PoolKey({
             currency0: Currency.wrap(address(_tokenBase)),
@@ -116,6 +116,11 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             sqrtPriceX962,
             400_000_000 ether
         );
+
+        
+        uint256 amt0 = SqrtPriceMath.getAmount0Delta(sqrtPriceX960, sqrtPriceX961, liquidityBeforeTick0, true);
+        uint256 amt1 = SqrtPriceMath.getAmount0Delta(sqrtPriceX961, sqrtPriceX962, liquidityBeforeTick1, true);
+        IERC20(_tokenBase).safeTransferFrom(msg.sender, address(this), amt0+amt1);
 
         // Creating liquidity involves using Uniswap V4 periphery contracts. It is not recommended to directly provide liquidity with poolManager.modifyPosition
         // Define the sequence of operations:
@@ -275,53 +280,32 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         uint256 _amountOut,
         uint256 _maxAmountIn
     ) external returns (uint256 amountIn) {
-        PoolKey memory key = launchParams[_tokenOut].poolKey;
+        PoolKey memory key = launchParams[_tokenIn].poolKey;
         require(
-            Currency.unwrap(key.currency0) == address(_tokenOut) &&
-                Currency.unwrap(key.currency1) == address(_tokenIn),
+            key.currency0 == Currency.wrap(address(_tokenIn)) &&
+                key.currency1 == Currency.wrap(address(_tokenOut)),
             "!poolId"
         );
 
-        // Transfer the input token from the sender to this contract and approve the router
-         _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
-        _tokenIn.approve(address(permit2), type(uint256).max);
-        permit2.approve(address(_tokenIn), address(router), type(uint160).max, type(uint48).max);
+        // Approve router to spend input token
+        _tokenIn.approve(address(router), _maxAmountIn);
 
-        // Encode the Universal Router command
-        bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
-        bytes[] memory inputs = new bytes[](1);
-
-        // Encode V4Router actions
-        bytes memory actions = abi.encodePacked(
-            uint8(Actions.SWAP_EXACT_OUT_SINGLE),
-            uint8(Actions.SETTLE_ALL),
-            uint8(Actions.TAKE_ALL)
-        );
-
-        // Prepare parameters for each action
-        bytes[] memory params = new bytes[](3);
-        params[0] = abi.encode(
-            IV4Router.ExactOutputSingleParams({
-                poolKey: key,
-                zeroForOne: false,
-                amountOut: uint128(_amountOut),
-                amountInMaximum: uint128(_maxAmountIn),
-                hookData: bytes("")
-            })
-        );
-        params[1] = abi.encode(key.currency1, uint128(_maxAmountIn));
-        params[2] = abi.encode(key.currency0, uint128(_amountOut));
-
-        // Combine actions and params into inputs
-        inputs[0] = abi.encode(actions, params);
+        // Prepare swap parameters
+        V4SwapRouter.ExactOutputParams memory params = V4SwapRouter.ExactOutputParams({
+            poolKey: key,
+            recipient: msg.sender,
+            amountOut: _amountOut,
+            amountInMaximum: _maxAmountIn,
+            sqrtPriceLimitX96: 0,
+            tickLimit: 0,
+            hookData: ""
+        });
 
         // Execute the swap
-        router.execute(commands, inputs, block.timestamp + 60);
+        amountIn = router.exactOutput(params);
 
-        // Verify and return the input amount
-        amountIn = _tokenIn.balanceOf(address(this));
-        require(amountIn <= _maxAmountIn, "Too much input amount");
-        _tokenIn.safeTransfer(msg.sender, _maxAmountIn - amountIn);
+        // Revoke approval
+        _tokenIn.approve(address(router), 0);
     }
 
     // @inheritdoc ICLMMAdapter
@@ -339,5 +323,46 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         IERC20 _token
     ) external view returns (bool launched) {
         launched = launchParams[_token].poolKey.fee != 0;
+    }
+    
+    /// @notice Collects accumulated fees from a position
+    /// @param tokenId The ID of the position to collect fees from
+    /// @param recipient Address that will receive the fees
+    function collectFees(
+        uint256 tokenId,
+        address recipient
+    ) external {
+        require(msg.sender == launchpad, "!launchpad");
+        LaunchTokenParams memory params = launchParams[IERC20(_token)];
+        // Define the sequence of operations
+        bytes memory actions = abi.encodePacked(
+            Actions.DECREASE_LIQUIDITY, // Remove liquidity
+            Actions.TAKE_PAIR           // Receive both tokens
+        );
+
+        // Prepare parameters array
+        bytes[] memory params = new bytes[](2);
+
+        // Parameters for DECREASE_LIQUIDITY
+        // All zeros since we're only collecting fees
+        params[0] = abi.encode(
+            tokenId,    // Position to collect from
+            0,          // No liquidity change
+            0,          // No minimum for token0 (fees can't be manipulated)
+            0,          // No minimum for token1
+            ""          // No hook data needed
+        );
+
+        // Standard TAKE_PAIR for receiving all fees
+        params[1] = abi.encode(
+            params.poolKey.currency0,
+            params.poolKey.currency1,
+            recipient
+        );
+        // Execute fee collection
+        positionManager.modifyLiquidities(
+            abi.encode(actions, params),
+            block.timestamp + 60  // 60 second deadline
+        );
     }
 }
