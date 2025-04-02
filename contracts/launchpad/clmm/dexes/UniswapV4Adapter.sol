@@ -22,7 +22,6 @@ import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
-import {ICLMMAdapter, IERC20} from "contracts/interfaces/ICLMMAdapter.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {IPositionManager} from "@uniswap/v4-periphery/src/interfaces/IPositionManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
@@ -33,8 +32,8 @@ import {Commands} from "node_modules/@uniswap/universal-router/contracts/librari
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IUniversalRouter} from "contracts/interfaces/thirdparty/uniswapv4/IUniversalRouter.sol";
-import {IUniswapV4Adapter} from "contracts/interfaces/IUniswapV4Adapter.sol";
-import { IPermit2 } from "@uniswap/permit2/src/interfaces/IPermit2.sol";
+import {IUniswapV4Adapter, IERC20} from "contracts/interfaces/IUniswapV4Adapter.sol";
+import {IPermit2} from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 import {SqrtPriceMath} from "@uniswap/v4-core/src/libraries/SqrtPriceMath.sol";
 contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
     using PoolIdLibrary for PoolKey;
@@ -91,7 +90,10 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             poolKey,
             sqrtPriceX96Launch
         );
-        require(tick != type(int24).max, "!uniswapV4Adapter: pool not initialized");
+        require(
+            tick != type(int24).max,
+            "!uniswapV4Adapter: pool not initialized"
+        );
 
         launchParams[_tokenBase] = LaunchTokenParams({
             poolKey: poolKey,
@@ -103,7 +105,7 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             address(_tokenBase) == Currency.unwrap(poolKey.currency0),
             "!token0"
         );
-        ITokenTemplate(address(_tokenBase)).whitelist(address(positionManager));
+        ITokenTemplate(address(_tokenBase)).whitelist(address(poolManager));
 
         // calculate the liquidity for the various tick ranges
         uint128 liquidityBeforeTick0 = LiquidityAmounts.getLiquidityForAmount0(
@@ -117,10 +119,23 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             400_000_000 ether
         );
 
-        
-        uint256 amt0 = SqrtPriceMath.getAmount0Delta(sqrtPriceX960, sqrtPriceX961, liquidityBeforeTick0, true);
-        uint256 amt1 = SqrtPriceMath.getAmount0Delta(sqrtPriceX961, sqrtPriceX962, liquidityBeforeTick1, true);
-        IERC20(_tokenBase).safeTransferFrom(msg.sender, address(this), amt0+amt1);
+        uint256 amt0 = SqrtPriceMath.getAmount0Delta(
+            sqrtPriceX960,
+            sqrtPriceX961,
+            liquidityBeforeTick0,
+            true
+        );
+        uint256 amt1 = SqrtPriceMath.getAmount0Delta(
+            sqrtPriceX961,
+            sqrtPriceX962,
+            liquidityBeforeTick1,
+            true
+        );
+        IERC20(_tokenBase).safeTransferFrom(
+            msg.sender,
+            address(this),
+            amt0 + amt1
+        );
 
         // Creating liquidity involves using Uniswap V4 periphery contracts. It is not recommended to directly provide liquidity with poolManager.modifyPosition
         // Define the sequence of operations:
@@ -168,17 +183,24 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             poolKey.currency1 // Second token to settle
         );
 
-        IERC20(Currency.unwrap(poolKey.currency0)).approve(address(permit2), type(uint256).max);
-        permit2.approve(Currency.unwrap(poolKey.currency0), address(positionManager), type(uint160).max, type(uint48).max);
-        
+        IERC20(Currency.unwrap(poolKey.currency0)).approve(
+            address(permit2),
+            type(uint256).max
+        );
+        permit2.approve(
+            Currency.unwrap(poolKey.currency0),
+            address(positionManager),
+            type(uint160).max,
+            type(uint48).max
+        );
+
         positionManager.modifyLiquidities(
             abi.encode(actions, params),
             block.timestamp + 60 // 60 second deadline
         );
     }
 
-    // @inheritdoc ICLMMAdapter
-    // TODO: Implement this using positionManager
+    // @inheritdoc IUniswapV4Adapter
     function claimFees(
         address _token
     ) external returns (uint256 fee0, uint256 fee1) {
@@ -219,24 +241,29 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         if (fee1 > 0) params.poolKey.currency1.transfer(msg.sender, fee1);
     }
 
-    // @inheritdoc ICLMMAdapter
+    // @inheritdoc IUniswapV4Adapter
     function swapForExactInput(
         IERC20 _tokenIn,
         IERC20 _tokenOut,
         uint256 _amountIn,
         uint256 _minAmountOut
     ) external returns (uint256 amountOut) {
-        PoolKey memory key = launchParams[_tokenIn].poolKey;
+        PoolKey memory key = launchParams[_tokenOut].poolKey;
         require(
-            key.currency0 == Currency.wrap(address(_tokenIn)) &&
-                key.currency1 == Currency.wrap(address(_tokenOut)),
+            key.currency0 == Currency.wrap(address(_tokenOut)) &&
+                key.currency1 == Currency.wrap(address(_tokenIn)),
             "!poolId"
         );
 
         // Transfer the input token from the sender to this contract and approve the router
         _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
         _tokenIn.approve(address(permit2), type(uint256).max);
-        permit2.approve(address(_tokenIn), address(router), type(uint160).max, type(uint48).max);
+        permit2.approve(
+            address(_tokenIn),
+            address(router),
+            type(uint160).max,
+            type(uint48).max
+        );
         // Encode the Universal Router command
         bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
         bytes[] memory inputs = new bytes[](1);
@@ -253,62 +280,90 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         params[0] = abi.encode(
             IV4Router.ExactInputSingleParams({
                 poolKey: key,
-                zeroForOne: true,
+                zeroForOne: false,
                 amountIn: uint128(_amountIn),
                 amountOutMinimum: uint128(_minAmountOut),
                 hookData: bytes("")
             })
         );
-        params[1] = abi.encode(key.currency0, uint128(_amountIn));
-        params[2] = abi.encode(key.currency1, uint128(_minAmountOut));
+        params[1] = abi.encode(key.currency1, uint128(_amountIn));
+        params[2] = abi.encode(key.currency0, uint128(_minAmountOut));
 
         // Combine actions and params into inputs
         inputs[0] = abi.encode(actions, params);
 
         // Execute the swap
-        router.execute(commands, inputs, block.timestamp + 60);
+        router.execute(commands, inputs, block.timestamp);
 
         // Verify and return the output amount
         amountOut = _tokenOut.balanceOf(address(this));
         require(amountOut >= _minAmountOut, "Insufficient output amount");
+        _tokenOut.safeTransfer(msg.sender, amountOut);
     }
 
-    // @inheritdoc ICLMMAdapter
+    // @inheritdoc IUniswapV4Adapter
     function swapForExactOutput(
         IERC20 _tokenIn,
         IERC20 _tokenOut,
         uint256 _amountOut,
         uint256 _maxAmountIn
     ) external returns (uint256 amountIn) {
-        PoolKey memory key = launchParams[_tokenIn].poolKey;
+        PoolKey memory key = launchParams[_tokenOut].poolKey;
         require(
-            key.currency0 == Currency.wrap(address(_tokenIn)) &&
-                key.currency1 == Currency.wrap(address(_tokenOut)),
+            Currency.unwrap(key.currency0) == address(_tokenOut) &&
+                Currency.unwrap(key.currency1) == address(_tokenIn),
             "!poolId"
         );
 
-        // Approve router to spend input token
-        _tokenIn.approve(address(router), _maxAmountIn);
+        // Transfer the input token from the sender to this contract and approve the router
+        _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
 
-        // Prepare swap parameters
-        V4SwapRouter.ExactOutputParams memory params = V4SwapRouter.ExactOutputParams({
-            poolKey: key,
-            recipient: msg.sender,
-            amountOut: _amountOut,
-            amountInMaximum: _maxAmountIn,
-            sqrtPriceLimitX96: 0,
-            tickLimit: 0,
-            hookData: ""
-        });
+        _tokenIn.approve(address(permit2), type(uint256).max);
+        permit2.approve(
+            address(_tokenIn),
+            address(router),
+            type(uint160).max,
+            type(uint48).max
+        );
+
+        // Encode the Universal Router command
+        bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
+        bytes[] memory inputs = new bytes[](1);
+        // Encode V4Router actions
+        bytes memory actions = abi.encodePacked(
+            uint8(Actions.SWAP_EXACT_OUT_SINGLE),
+            uint8(Actions.SETTLE_ALL),
+            uint8(Actions.TAKE_ALL)
+        );
+
+        bytes[] memory params = new bytes[](3);
+        params[0] = abi.encode(
+            IV4Router.ExactOutputSingleParams({
+                poolKey: key,
+                zeroForOne: false,
+                amountOut: uint128(_amountOut),
+                amountInMaximum: uint128(_maxAmountIn),
+                hookData: bytes("")
+            })
+        );
+        params[1] = abi.encode(key.currency1, uint128(_maxAmountIn));
+        params[2] = abi.encode(key.currency0, uint128(_amountOut));
+
+        // Combine actions and params into inputs
+        inputs[0] = abi.encode(actions, params);
 
         // Execute the swap
-        amountIn = router.exactOutput(params);
+        router.execute(commands, inputs, block.timestamp);
+        // Verify and return the input amount
+        amountIn = _maxAmountIn - _tokenIn.balanceOf(address(this));
+        require(amountIn <= _maxAmountIn, "Too much input amount");
+        _tokenIn.safeTransfer(msg.sender, _tokenIn.balanceOf(address(this)));
 
-        // Revoke approval
-        _tokenIn.approve(address(router), 0);
+        // Send the output token to the sender
+        _tokenOut.safeTransfer(msg.sender, _tokenOut.balanceOf(address(this)));
     }
 
-    // @inheritdoc ICLMMAdapter
+    // @inheritdoc IUniswapV4Adapter
     function graduated(address token) external view returns (bool) {
         LaunchTokenParams memory params = launchParams[IERC20(token)];
         if (params.poolKey.fee == 0) return false;
@@ -316,7 +371,9 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         return tick >= params.tick1;
     }
 
-    function getPool(IERC20 _token) external view returns (PoolKey memory poolKey) {
+    function getPool(
+        IERC20 _token
+    ) external view returns (PoolKey memory poolKey) {
         poolKey = launchParams[_token].poolKey;
     }
     function launchedTokens(
@@ -324,20 +381,21 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
     ) external view returns (bool launched) {
         launched = launchParams[_token].poolKey.fee != 0;
     }
-    
+
     /// @notice Collects accumulated fees from a position
     /// @param tokenId The ID of the position to collect fees from
     /// @param recipient Address that will receive the fees
     function collectFees(
         uint256 tokenId,
-        address recipient
+        address recipient,
+        address _token
     ) external {
         require(msg.sender == launchpad, "!launchpad");
-        LaunchTokenParams memory params = launchParams[IERC20(_token)];
+        LaunchTokenParams memory param = launchParams[IERC20(_token)];
         // Define the sequence of operations
         bytes memory actions = abi.encodePacked(
             Actions.DECREASE_LIQUIDITY, // Remove liquidity
-            Actions.TAKE_PAIR           // Receive both tokens
+            Actions.TAKE_PAIR // Receive both tokens
         );
 
         // Prepare parameters array
@@ -346,23 +404,23 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         // Parameters for DECREASE_LIQUIDITY
         // All zeros since we're only collecting fees
         params[0] = abi.encode(
-            tokenId,    // Position to collect from
-            0,          // No liquidity change
-            0,          // No minimum for token0 (fees can't be manipulated)
-            0,          // No minimum for token1
-            ""          // No hook data needed
+            tokenId, // Position to collect from
+            0, // No liquidity change
+            0, // No minimum for token0 (fees can't be manipulated)
+            0, // No minimum for token1
+            "" // No hook data needed
         );
 
         // Standard TAKE_PAIR for receiving all fees
         params[1] = abi.encode(
-            params.poolKey.currency0,
-            params.poolKey.currency1,
+            param.poolKey.currency0,
+            param.poolKey.currency1,
             recipient
         );
         // Execute fee collection
         positionManager.modifyLiquidities(
             abi.encode(actions, params),
-            block.timestamp + 60  // 60 second deadline
+            block.timestamp + 60 // 60 second deadline
         );
     }
 }
