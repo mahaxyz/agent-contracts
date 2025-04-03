@@ -48,6 +48,7 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
     IPoolManager public poolManager;
     address public WETH9;
     IPermit2 public permit2;
+    mapping(address token => uint256 tokenId) public positionTokenIds;
     function initialize(
         address _launchpad,
         address _positionManager,
@@ -194,51 +195,12 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
             type(uint48).max
         );
 
+        uint256 tokenId = positionManager.nextTokenId();
+        positionTokenIds[Currency.unwrap(poolKey.currency0)] = tokenId;
         positionManager.modifyLiquidities(
             abi.encode(actions, params),
             block.timestamp + 60 // 60 second deadline
         );
-    }
-
-    // @inheritdoc IUniswapV4Adapter
-    function claimFees(
-        address _token
-    ) external returns (uint256 fee0, uint256 fee1) {
-        require(msg.sender == launchpad, "!launchpad");
-        LaunchTokenParams memory params = launchParams[IERC20(_token)];
-        // require(params.pool != address(0), "!launched");
-
-        // Get the position's fees from the PoolManager
-        // We need to collect fees for both positions (tick ranges)
-        (, BalanceDelta delta0) = poolManager.modifyLiquidity(
-            params.poolKey,
-            IPoolManager.ModifyLiquidityParams({
-                tickLower: params.tick0,
-                tickUpper: params.tick1,
-                liquidityDelta: 0,
-                salt: bytes32(0)
-            }),
-            ""
-        );
-
-        (, BalanceDelta delta1) = poolManager.modifyLiquidity(
-            params.poolKey,
-            IPoolManager.ModifyLiquidityParams({
-                tickLower: params.tick1,
-                tickUpper: params.tick2,
-                liquidityDelta: 0,
-                salt: bytes32(0)
-            }),
-            ""
-        );
-
-        // Sum up the fees from both positions
-        fee0 = uint256(int256(delta0.amount0() + delta1.amount0()));
-        fee1 = uint256(int256(delta0.amount1() + delta1.amount1()));
-
-        // Transfer the collected fees to the sender
-        if (fee0 > 0) params.poolKey.currency0.transfer(msg.sender, fee0);
-        if (fee1 > 0) params.poolKey.currency1.transfer(msg.sender, fee1);
     }
 
     // @inheritdoc IUniswapV4Adapter
@@ -382,29 +344,42 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         launched = launchParams[_token].poolKey.fee != 0;
     }
 
-    /// @notice Collects accumulated fees from a position
-    /// @param tokenId The ID of the position to collect fees from
-    /// @param recipient Address that will receive the fees
-    function collectFees(
-        uint256 tokenId,
-        address recipient,
+    // @inheritdoc IUniswapV4Adapter
+    function claimFees(
         address _token
-    ) external {
+    ) external returns (uint256 fee0, uint256 fee1) {
         require(msg.sender == launchpad, "!launchpad");
         LaunchTokenParams memory param = launchParams[IERC20(_token)];
+        uint256 tokenId = positionTokenIds[Currency.unwrap(param.poolKey.currency0)];
+
         // Define the sequence of operations
-        bytes memory actions = abi.encodePacked(
-            Actions.DECREASE_LIQUIDITY, // Remove liquidity
-            Actions.TAKE_PAIR // Receive both tokens
-        );
+        bytes memory actions = new bytes(3);
+
+        bytes1 action1 = bytes1(uint8(Actions.DECREASE_LIQUIDITY));
+        bytes1 action2 = bytes1(uint8(Actions.DECREASE_LIQUIDITY));
+        bytes1 action3 = bytes1(uint8(Actions.TAKE_PAIR));
+
+        actions[0] = action1;
+        actions[1] = action2;
+        actions[2] = action3;
 
         // Prepare parameters array
-        bytes[] memory params = new bytes[](2);
+        bytes[] memory params = new bytes[](3);
 
         // Parameters for DECREASE_LIQUIDITY
         // All zeros since we're only collecting fees
         params[0] = abi.encode(
-            tokenId, // Position to collect from
+            tokenId, // Position to collect from (tick0 to tick1)
+            0, // No liquidity change
+            0, // No minimum for token0 (fees can't be manipulated)
+            0, // No minimum for token1
+            "" // No hook data needed
+        );
+
+        // Parameters for DECREASE_LIQUIDITY
+        // All zeros since we're only collecting fees
+        params[1] = abi.encode(
+            tokenId+1, // Position to collect from
             0, // No liquidity change
             0, // No minimum for token0 (fees can't be manipulated)
             0, // No minimum for token1
@@ -412,15 +387,25 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         );
 
         // Standard TAKE_PAIR for receiving all fees
-        params[1] = abi.encode(
+        params[2] = abi.encode(
             param.poolKey.currency0,
             param.poolKey.currency1,
-            recipient
+            address(this)
         );
+
+        address token0 = Currency.unwrap(param.poolKey.currency0);
+        address token1 = Currency.unwrap(param.poolKey.currency1);
+
+        uint256 fee0Before = IERC20(token0).balanceOf(address(this));
+        uint256 fee1Before = IERC20(token1).balanceOf(address(this));
         // Execute fee collection
         positionManager.modifyLiquidities(
             abi.encode(actions, params),
-            block.timestamp + 60 // 60 second deadline
+            block.timestamp
         );
+        fee0 = IERC20(token0).balanceOf(address(this)) - fee0Before;
+        fee1 = IERC20(token1).balanceOf(address(this)) - fee1Before;
+        IERC20(token0).safeTransfer(msg.sender, fee0);
+        IERC20(token1).safeTransfer(msg.sender, fee1);
     }
 }
