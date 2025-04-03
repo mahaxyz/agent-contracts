@@ -23,7 +23,7 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
   struct LaunchTokenParams {
-    IClPool pool;
+    address pool;
     PoolKey poolKey;
     int24 tick0;
     int24 tick1;
@@ -47,25 +47,25 @@ interface ICLMMAdapter {
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external;
 
-  /// @notice Swap for exact input
-  /// @param _tokenIn The token to swap from
-  /// @param _tokenOut The token to swap to
+  /// @notice Swap a token with exact output
+  /// @param _tokenIn The token to swap
+  /// @param _tokenOut The token to receive
+  /// @param _amountOut The amount of tokens to swap
+  /// @param _maxAmountIn The maximum amount of tokens to receive
+  /// @return amountIn The amount of tokens received
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+    external
+    returns (uint256 amountIn);
+
+  /// @notice Swap a token with exact input
+  /// @param _tokenIn The token to swap
+  /// @param _tokenOut The token to receive
   /// @param _amountIn The amount of tokens to swap
   /// @param _minAmountOut The minimum amount of tokens to receive
   /// @return amountOut The amount of tokens received
-  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
     external
     returns (uint256 amountOut);
-
-  /// @notice Swap for exact output
-  /// @param _tokenIn The token to swap from
-  /// @param _tokenOut The token to swap to
-  /// @param _amountOut The amount of tokens to receive
-  /// @param _maxAmountIn The maximum amount of tokens to spend
-  /// @return amountIn The amount of tokens to spend
-  function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
-    external
-    returns (uint256 amountIn);
 
   /// @notice Returns the address of the Launchpad contract
   /// @return launchpad The address of the Launchpad contract

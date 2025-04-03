@@ -50,7 +50,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
       forking: {
-        url: `https://rpc.linea.build`,
+        url: `https://linea-rpc.publicnode.com`,
+        // blockNumber: 17380608,
       },
       accounts: [
         {
