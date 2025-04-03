@@ -17,16 +17,17 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
-
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
+  using SafeERC20 for IERC20;
+
   address public feeDestination;
   address public tokenImplementation;
   ICLMMAdapter public adapter;
@@ -35,6 +36,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   IWETH9 public weth;
   uint256 public creationFee;
   uint256 public referralFee;
+  address public ODOS;
 
   mapping(ITokenTemplate token => CreateParams) public launchParams;
   mapping(ITokenTemplate token => uint256) public tokenToNftId;
@@ -42,13 +44,14 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
-  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth)
+  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth, address _odos)
     external
     initializer
   {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
     weth = IWETH9(_weth);
+    ODOS = _odos;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
@@ -68,48 +71,65 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function createAndBuy(CreateParams memory p, address expected, uint256 amount) external payable returns (address) {
-    if (msg.value > 0) weth.deposit{value: msg.value}();
+  function createAndBuy(CreateParams memory p, address expected, uint256 amount)
+    external
+    payable
+    returns (address, uint256)
+  {
+    // send any creation fee to the fee destination
+    if (creationFee > 0) payable(feeDestination).transfer(creationFee - msg.value);
 
-    if (creationFee > 0) {
-      require(msg.value - amount >= creationFee, "!creationFee");
-      weth.transfer(feeDestination, creationFee);
-    }
+    // wrap anything pending into weth
+    if (address(this).balance > 0) weth.deposit{value: address(this).balance}();
 
+    // take any pending balance from the sender
     if (amount > 0) {
       uint256 currentBalance = p.fundingToken.balanceOf(address(this));
-      if (currentBalance < amount) p.fundingToken.transferFrom(msg.sender, address(this), amount);
+      if (currentBalance < amount) p.fundingToken.transferFrom(msg.sender, address(this), amount - currentBalance);
     }
 
-    ITokenTemplate.InitParams memory params = ITokenTemplate.InitParams({
-      name: p.name,
-      symbol: p.symbol,
-      metadata: p.metadata,
-      limitPerWallet: p.limitPerWallet,
-      adapter: address(adapter)
-    });
+    ITokenTemplate token;
 
-    bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
+    {
+      ITokenTemplate.InitParams memory params = ITokenTemplate.InitParams({
+        name: p.name,
+        symbol: p.symbol,
+        metadata: p.metadata,
+        limitPerWallet: p.limitPerWallet,
+        adapter: address(adapter)
+      });
 
-    ITokenTemplate token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));
-    require(expected == address(0) || address(token) == expected, "Invalid token address");
+      bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
+      token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));
+      require(expected == address(0) || address(token) == expected, "Invalid token address");
+      token.initialize(params);
+      tokenToNftId[token] = tokens.length;
+      tokens.push(token);
+      launchParams[token] = p;
 
-    token.initialize(params);
-    tokens.push(token);
-    tokenToNftId[token] = tokens.length;
-    launchParams[token] = p;
-
-    token.approve(address(adapter), type(uint256).max);
-
-    adapter.addSingleSidedLiquidity(
-      token, // IERC20 _tokenBase,
-      p.fundingToken, // IERC20 _tokenQuote,
-      p.launchTick, // int24 _tick0,
-      p.graduationTick, // int24 _tick1,
-      p.upperMaxTick // int24 _tick2
-    );
-
-    emit TokenLaunched(token, adapter.getPool(token), params);
+      token.approve(address(adapter), type(uint256).max);
+      adapter.addSingleSidedLiquidity(
+        token, // IERC20 _tokenBase,
+        p.fundingToken, // IERC20 _tokenQuote,
+        p.launchTick, // int24 _tick0,
+        p.graduationTick, // int24 _tick1,
+        p.upperMaxTick // int24 _tick2
+      );
+      emit TokenLaunched(token, adapter.getPool(token), params);
+    }
+    {
+      emit TokenLaunchParams(
+        token,
+        p.fundingToken,
+        p.launchTick,
+        p.graduationTick,
+        p.upperMaxTick,
+        p.limitPerWallet,
+        p.name,
+        p.symbol,
+        p.metadata
+      );
+    }
 
     _mint(msg.sender, tokenToNftId[token]);
 
@@ -117,17 +137,18 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // buy a small amount of tokens to register the token on tools like dexscreener
     uint256 balance = p.fundingToken.balanceOf(address(this));
-    uint256 swapped = adapter.swapForExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
+    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
-    if (amount > 0 && amount > swapped) adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
+    uint256 received;
+    if (amount > 0 && amount > swapped) received = adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
 
     // refund any remaining tokens
     _refundTokens(token);
     _refundTokens(p.fundingToken);
     _refundTokens(weth);
 
-    return address(token);
+    return (address(token), received);
   }
 
   /// @inheritdoc ITokenLaunchpad
@@ -183,7 +204,74 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       weth.withdraw(remaining);
       payable(msg.sender).transfer(remaining);
     } else {
-      _token.transfer(msg.sender, remaining);
+      _token.safeTransfer(msg.sender, remaining);
     }
+  }
+
+  /// @inheritdoc ITokenLaunchpad
+  function buyWithExactInputWithOdos(
+    IERC20 _odosTokenIn,
+    IERC20 _tokenIn,
+    IERC20 _tokenOut,
+    uint256 _odosTokenInAmount,
+    uint256 _minOdosTokenOut,
+    uint256 _minAmountOut,
+    bytes memory _odosData
+  ) public payable returns (uint256 amountOut) {
+    if (msg.value > 0) weth.deposit{value: msg.value}();
+    else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
+    _odosTokenIn.approve(address(adapter), type(uint256).max);
+
+    // call the odos contract to get the amount of tokens to buy
+    if (_odosData.length > 0) {
+      (bool success,) = ODOS.call(_odosData);
+      require(success, "!odos");
+    } else {
+      require(_odosTokenIn == _tokenOut, "!odosTokenIn");
+    }
+
+    // ensure that the odos has given us enough tokens to perform the raw swap
+    uint256 amountIn = _tokenIn.balanceOf(address(this));
+    require(amountIn >= _minOdosTokenOut, "!minAmountIn");
+
+    amountOut = adapter.swapWithExactInput(_tokenIn, _tokenOut, amountIn, _minAmountOut);
+
+    // send everything back
+    _refundTokens(_tokenIn);
+    _refundTokens(_tokenOut);
+    _refundTokens(_odosTokenIn);
+  }
+
+  /// @inheritdoc ITokenLaunchpad
+  function sellWithExactInputWithOdos(
+    IERC20 _tokenIn,
+    IERC20 _odosTokenOut,
+    IERC20 _tokenOut,
+    uint256 _tokenInAmount,
+    uint256 _minOdosTokenIn,
+    uint256 _minAmountOut,
+    bytes memory _odosData
+  ) public payable returns (uint256 amountOut) {
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
+    _tokenIn.approve(address(adapter), type(uint256).max);
+
+    uint256 amountSwapOut = adapter.swapWithExactOutput(_tokenIn, _odosTokenOut, _tokenInAmount, _minOdosTokenIn);
+
+    if (_odosData.length > 0) {
+      _odosTokenOut.approve(ODOS, type(uint256).max);
+      (bool success,) = ODOS.call(_odosData);
+      require(success, "!odos");
+      amountOut = _tokenOut.balanceOf(address(this));
+    } else {
+      require(_odosTokenOut == _tokenOut, "!odosTokenOut");
+      amountOut = amountSwapOut;
+    }
+
+    require(amountOut >= _minAmountOut, "!minAmountOut");
+
+    // send everything back
+    _refundTokens(_tokenIn);
+    _refundTokens(_tokenOut);
+    _refundTokens(_odosTokenOut);
   }
 }

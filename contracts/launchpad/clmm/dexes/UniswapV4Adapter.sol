@@ -396,15 +396,15 @@ contract UniswapV4Adapter is IUniswapV4Adapter, Initializable {
         address token0 = Currency.unwrap(param.poolKey.currency0);
         address token1 = Currency.unwrap(param.poolKey.currency1);
 
-        uint256 fee0Before = IERC20(token0).balanceOf(address(this));
-        uint256 fee1Before = IERC20(token1).balanceOf(address(this));
+        uint256 balanceToken0Before = IERC20(token0).balanceOf(address(this));
+        uint256 balanceToken1Before = IERC20(token1).balanceOf(address(this));
         // Execute fee collection
         positionManager.modifyLiquidities(
             abi.encode(actions, params),
             block.timestamp
         );
-        fee0 = IERC20(token0).balanceOf(address(this)) - fee0Before;
-        fee1 = IERC20(token1).balanceOf(address(this)) - fee1Before;
+        fee0 = IERC20(token0).balanceOf(address(this)) - balanceToken0Before;
+        fee1 = IERC20(token1).balanceOf(address(this)) - balanceToken1Before;
         IERC20(token0).safeTransfer(msg.sender, fee0);
         IERC20(token1).safeTransfer(msg.sender, fee1);
     }
