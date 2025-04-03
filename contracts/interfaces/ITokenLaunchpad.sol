@@ -58,6 +58,25 @@ interface ITokenLaunchpad {
   /// @param referralFee The new referral fee amount
   event ReferralUpdated(address indexed referralDestination, uint256 referralFee);
 
+  /// @notice Emitted when a token is launched
+  /// @param token The token that was launched
+  /// @param fundingToken The token used for funding the launch
+  /// @param launchTick The tick at which the token launches
+  /// @param graduationTick The tick that must be reached for graduation
+  /// @param upperMaxTick The maximum tick allowed
+  /// @param limitPerWallet The maximum amount a single wallet can participate
+  event TokenLaunchParams(
+    ITokenTemplate token,
+    IERC20 fundingToken,
+    int24 launchTick,
+    int24 graduationTick,
+    int24 upperMaxTick,
+    uint256 limitPerWallet,
+    string name,
+    string symbol,
+    string metadata
+  );
+
   /// @notice Initializes the launchpad contract
   /// @param _adapter The DEX adapter contract address
   /// @param _tokenImplementation The implementation contract for new tokens
@@ -81,10 +100,11 @@ interface ITokenLaunchpad {
   /// @param p The parameters for the token launch
   /// @param expected The expected address where token will be deployed
   /// @return token The address of the newly created token
+  /// @return received The amount of tokens received if the user chooses to buy at launch
   function createAndBuy(CreateParams memory p, address expected, uint256 amount)
     external
     payable
-    returns (address token);
+    returns (address token, uint256 received);
 
   /// @notice Gets the total number of tokens launched
   /// @return totalTokens The total count of launched tokens
@@ -94,14 +114,14 @@ interface ITokenLaunchpad {
   /// @param _token The token to claim fees for
   function claimFees(ITokenTemplate _token) external;
 
-  /// @notice Buys a token with exact output using ODOS
+  /// @notice Buys a token with exact input using ODOS
   /// @param _odosTokenIn The ODOS token to receive
   /// @param _tokenIn The token to buy
   /// @param _tokenOut The token to receive
   /// @param _odosTokenInAmount The amount of ODOS tokens to receive
   /// @param _minOdosTokenOut The minimum amount of ODOS tokens to receive
   /// @param _minAmountOut The minimum amount of tokens to receive
-  function buyWithExactOutputWithOdos(
+  function buyWithExactInputWithOdos(
     IERC20 _odosTokenIn,
     IERC20 _tokenIn,
     IERC20 _tokenOut,
@@ -111,14 +131,14 @@ interface ITokenLaunchpad {
     bytes memory _odosData
   ) external payable returns (uint256 amountOut);
 
-  /// @notice Sells a token with exact output using ODOS
+  /// @notice Sells a token with exact input using ODOS
   /// @param _tokenIn The token to sell
   /// @param _odosTokenOut The ODOS token to receive
   /// @param _tokenOut The token to receive
   /// @param _tokenInAmount The amount of tokens to sell
   /// @param _minOdosTokenIn The minimum amount of ODOS tokens to receive
   /// @param _minAmountOut The minimum amount of tokens to receive
-  function sellWithExactOutputWithOdos(
+  function sellWithExactInputWithOdos(
     IERC20 _tokenIn,
     IERC20 _odosTokenOut,
     IERC20 _tokenOut,

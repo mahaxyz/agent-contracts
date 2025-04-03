@@ -60,7 +60,7 @@ contract TokenLaunchpadLineaForkTest is Test {
       upperMaxTick: 887_000
     });
 
-    address token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+    (address token,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
 
     vm.assertEq(_adapter.graduated(token), false);
   }
@@ -83,7 +83,7 @@ contract TokenLaunchpadLineaForkTest is Test {
       upperMaxTick: 887_000
     });
     vm.assume(true);
-    address token = _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 0);
+    (address token,) = _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 0);
 
     vm.assertEq(_adapter.graduated(token), false);
   }
@@ -123,7 +123,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     });
 
     vm.prank(owner);
-    address _token = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
+    (address _token,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
     ITokenTemplate token = ITokenTemplate(_token);
     vm.assertApproxEqAbs(token.balanceOf(owner), 255_952_913 ether, 1 ether);
     vm.assertEq(_adapter.graduated(_token), false);
@@ -143,7 +143,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     });
 
     vm.prank(owner);
-    address _token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 100 ether);
+    (address _token,) = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 100 ether);
     vm.assertEq(_adapter.graduated(_token), true);
   }
 
@@ -161,7 +161,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     });
 
     vm.prank(owner);
-    address token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 0);
+    (address token,) = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 0);
 
     vm.startPrank(whale);
     _weth.mint(whale, 10_000 ether);
@@ -196,7 +196,7 @@ contract TokenLaunchpadLineaForkTest is Test {
     });
 
     vm.startPrank(owner);
-    address token = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 1 ether);
+    (address token,) = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 1 ether);
     _launchpad.claimFees(ITokenTemplate(token));
     vm.stopPrank();
   }
