@@ -46,7 +46,7 @@ contract TokenLaunchpadUnichainForkTest is Test {
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }
 
-  function test_create_unichain() public {
+  function test_create() public {
     ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
       name: "Test Token",
       symbol: "TEST",
@@ -64,7 +64,7 @@ contract TokenLaunchpadUnichainForkTest is Test {
     vm.assertEq(_adapter.graduated(token), false);
   }
 
-  function test_createAndBuy_and_not_graduated_unichain() public {
+  function test_createAndBuy_and_not_graduated() public {
     ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
       name: "Test Token",
       symbol: "TEST",
