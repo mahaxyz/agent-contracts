@@ -13,32 +13,34 @@
 
 pragma solidity ^0.8.0;
 
-import {BaseAdapter, IERC20, IWETH9, SafeERC20} from "./BaseAdapter.sol";
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
+
 import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
-import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
-import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
-import {IRamsesV2MintCallback} from "contracts/interfaces/thirdparty/pool/IRamsesV2MintCallback.sol";
-import {IRamsesSwapRouter} from "contracts/interfaces/thirdparty/ramses/IRamsesSwapRouter.sol";
 
-contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
+import {BaseAdapter, IERC20, IWETH9, SafeERC20} from "./BaseAdapter.sol";
+import {IPancakeFactory} from "contracts/interfaces/thirdparty/pancake/IPancakeFactory.sol";
+import {IPancakePool} from "contracts/interfaces/thirdparty/pancake/IPancakePool.sol";
+import {IPancakeSwapRouter} from "contracts/interfaces/thirdparty/pancake/IPancakeSwapRouter.sol";
+
+contract PancakeAdapter is BaseAdapter {
   using SafeERC20 for IERC20;
 
-  IClPoolFactory public clPoolFactory;
-  IRamsesSwapRouter public swapRouter;
-  IClPool private _transientClPool;
+  IPancakeFactory public poolFactory;
+  IPancakeSwapRouter public swapRouter;
+  IPancakePool private _transientClPool;
 
-  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9)
+  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9)
     external
     initializer
   {
     __BaseAdapter_init(_launchpad, _WETH9);
-    clPoolFactory = IClPoolFactory(_clPoolFactory);
-    swapRouter = IRamsesSwapRouter(_swapRouter);
+    poolFactory = IPancakeFactory(_poolFactory);
+    swapRouter = IPancakeSwapRouter(_swapRouter);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -53,15 +55,15 @@ contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
     uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
     uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
 
-    IClPool pool =
-      IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), 20_000, sqrtPriceX96Launch));
+    IPancakePool pool = IPancakePool(poolFactory.createPool(address(_tokenBase), address(_tokenQuote), 10_000));
+    pool.initialize(sqrtPriceX96Launch);
 
     {
       PoolKey memory poolKey = PoolKey({
         currency0: Currency.wrap(address(_tokenBase)),
         currency1: Currency.wrap(address(_tokenQuote)),
-        fee: 20_000,
-        tickSpacing: 500,
+        fee: 10_000,
+        tickSpacing: 200,
         hooks: IHooks(address(0))
       });
       launchParams[_tokenBase] =
@@ -91,7 +93,7 @@ contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
     _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
     _tokenIn.approve(address(swapRouter), type(uint256).max);
     amountIn = swapRouter.exactOutputSingle(
-      IRamsesSwapRouter.ExactOutputSingleParams({
+      IPancakeSwapRouter.ExactOutputSingleParams({
         tokenIn: address(_tokenIn),
         tokenOut: address(_tokenOut),
         amountOut: _amountOut,
@@ -102,7 +104,6 @@ contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
         sqrtPriceLimitX96: 0
       })
     );
-    _refundTokens(_tokenIn);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -114,7 +115,7 @@ contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
     _tokenIn.approve(address(swapRouter), type(uint256).max);
 
     amountOut = swapRouter.exactInputSingle(
-      IRamsesSwapRouter.ExactInputSingleParams({
+      IPancakeSwapRouter.ExactInputSingleParams({
         tokenIn: address(_tokenIn),
         tokenOut: address(_tokenOut),
         amountIn: _amountIn,
@@ -130,29 +131,29 @@ contract RamsesAdapter is BaseAdapter, IRamsesV2MintCallback {
   /// @inheritdoc ICLMMAdapter
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     LaunchTokenParams memory params = launchParams[IERC20(_token)];
-    require(params.pool != address(0), "!launched");
+    require(address(params.pool) != address(0), "!launched");
 
     (uint256 fee00, uint256 fee01) =
-      IClPool(params.pool).collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
+      IPancakePool(params.pool).collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
     (uint256 fee10, uint256 fee11) =
-      IClPool(params.pool).collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
+      IPancakePool(params.pool).collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
 
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
 
-    IERC20(IClPool(params.pool).token0()).transfer(msg.sender, fee0);
-    IERC20(IClPool(params.pool).token1()).transfer(msg.sender, fee1);
+    IERC20(IPancakePool(params.pool).token0()).transfer(msg.sender, fee0);
+    IERC20(IPancakePool(params.pool).token1()).transfer(msg.sender, fee1);
   }
 
   /// @inheritdoc ICLMMAdapter
   function graduated(address token) external view returns (bool) {
     LaunchTokenParams memory params = launchParams[IERC20(token)];
     if (params.pool == address(0)) return false;
-    (, int24 tick,,,,,) = IClPool(params.pool).slot0();
+    (, int24 tick,,,,,) = IPancakePool(params.pool).slot0();
     return tick >= params.tick1;
   }
 
-  function ramsesV2MintCallback(uint256 amount0, uint256, bytes calldata) external {
+  function pancakeV3MintCallback(uint256 amount0, uint256, bytes calldata) external {
     require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
     IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
   }

@@ -1,5 +1,5 @@
 {
-  "address": "0xDF90BcBe8D0512a27965491a7dc8b8555e3f49EB",
+  "address": "0xa5aaAdfdb285106c3bFB1621447caca2e97E158D",
   "abi": [
     {
       "inputs": [],
@@ -179,6 +179,17 @@
       "type": "error"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {
@@ -302,6 +313,67 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "contract ITokenTemplate",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "contract IERC20",
+          "name": "fundingToken",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "int24",
+          "name": "launchTick",
+          "type": "int24"
+        },
+        {
+          "indexed": false,
+          "internalType": "int24",
+          "name": "graduationTick",
+          "type": "int24"
+        },
+        {
+          "indexed": false,
+          "internalType": "int24",
+          "name": "upperMaxTick",
+          "type": "int24"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "limitPerWallet",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "metadata",
+          "type": "string"
+        }
+      ],
+      "name": "TokenLaunchParams",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "contract ITokenTemplate",
           "name": "token",
@@ -377,6 +449,19 @@
     },
     {
       "inputs": [],
+      "name": "ODOS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "adapter",
       "outputs": [
         {
@@ -423,6 +508,55 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_odosTokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_odosTokenInAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minOdosTokenOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minAmountOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_odosData",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyWithExactInputWithOdos",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -509,6 +643,11 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "payable",
@@ -592,6 +731,11 @@
         {
           "internalType": "address",
           "name": "_weth",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_odos",
           "type": "address"
         }
       ],
@@ -733,7 +877,7 @@
       "name": "referralDestination",
       "outputs": [
         {
-          "internalType": "address",
+          "internalType": "contract IReferralDistributor",
           "name": "",
           "type": "address"
         }
@@ -810,6 +954,55 @@
       "name": "safeTransferFrom",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_odosTokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "_tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenInAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minOdosTokenIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_minAmountOut",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_odosData",
+          "type": "bytes"
+        }
+      ],
+      "name": "sellWithExactInputWithOdos",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amountOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -1079,10 +1272,11 @@
     }
   ],
   "args": [
-    "0xBF459F3e75D232a8F658c75116EBA9AD52527F04",
-    "0x2157c2c478e9B240F94AC8347715255A24d62CF0",
+    "0xC5b78bFdD84BCd65E13cfC9EA643DdDE813b278c",
+    "0xBe4D31C938C03204faDad1281d25A41a0F1E9400",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
-    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
+    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+    "0x2d8879046f1559E53eb052E949e9544bCB72f414"
   ],
-  "numDeployments": 2
+  "numDeployments": 1
 }

@@ -16,26 +16,19 @@ pragma solidity ^0.8.0;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
-import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
+import {IPancakePool} from "contracts/interfaces/thirdparty/pancake/IPancakePool.sol";
 
 /// @title Concentrated Liquidity Market Maker Adapter Interface
 /// @notice Interface for interacting with concentrated liquidity pools
 /// @dev Implements single-sided liquidity provision and fee claiming
-interface ICLMMAdapter {
+interface IPancakeAdapter {
   struct LaunchTokenParams {
-    address pool;
+    IPancakePool pool;
     PoolKey poolKey;
     int24 tick0;
     int24 tick1;
     int24 tick2;
   }
-
-  /// @notice Initializes the adapter
-  /// @param _launchpad The address of the launchpad
-  /// @param _clPoolFactory The address of the CL pool factory
-  /// @param _swapRouter The address of the swap router
-  /// @param _WETH9 The address of the WETH9 token
-  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9) external;
 
   /// @notice Returns the address of the pool for a given token
   /// @param _token The token address
@@ -47,25 +40,25 @@ interface ICLMMAdapter {
   function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
     external;
 
-  /// @notice Swap a token with exact output
-  /// @param _tokenIn The token to swap
-  /// @param _tokenOut The token to receive
-  /// @param _amountOut The amount of tokens to swap
-  /// @param _maxAmountIn The maximum amount of tokens to receive
-  /// @return amountIn The amount of tokens received
-  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
-    external
-    returns (uint256 amountIn);
-
-  /// @notice Swap a token with exact input
-  /// @param _tokenIn The token to swap
-  /// @param _tokenOut The token to receive
+  /// @notice Swap for exact input
+  /// @param _tokenIn The token to swap from
+  /// @param _tokenOut The token to swap to
   /// @param _amountIn The amount of tokens to swap
   /// @param _minAmountOut The minimum amount of tokens to receive
   /// @return amountOut The amount of tokens received
-  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function swapForExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
     external
     returns (uint256 amountOut);
+
+  /// @notice Swap for exact output
+  /// @param _tokenIn The token to swap from
+  /// @param _tokenOut The token to swap to
+  /// @param _amountOut The amount of tokens to receive
+  /// @param _maxAmountIn The maximum amount of tokens to spend
+  /// @return amountIn The amount of tokens to spend
+  function swapForExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+    external
+    returns (uint256 amountIn);
 
   /// @notice Returns the address of the Launchpad contract
   /// @return launchpad The address of the Launchpad contract
