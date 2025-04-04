@@ -82,9 +82,7 @@ interface ITokenLaunchpad {
   /// @param _tokenImplementation The implementation contract for new tokens
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
-  /// @param _odos The ODOS contract address
-  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth, address _odos)
-    external;
+  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth) external;
 
   /// @notice Updates the referral settings
   /// @param _referralDestination The address to receive referrals
@@ -113,38 +111,4 @@ interface ITokenLaunchpad {
   /// @notice Claims accumulated fees for a specific token
   /// @param _token The token to claim fees for
   function claimFees(ITokenTemplate _token) external;
-
-  /// @notice Buys a token with exact input using ODOS
-  /// @param _odosTokenIn The ODOS token to receive
-  /// @param _tokenIn The token to buy
-  /// @param _tokenOut The token to receive
-  /// @param _odosTokenInAmount The amount of ODOS tokens to receive
-  /// @param _minOdosTokenOut The minimum amount of ODOS tokens to receive
-  /// @param _minAmountOut The minimum amount of tokens to receive
-  function buyWithExactInputWithOdos(
-    IERC20 _odosTokenIn,
-    IERC20 _tokenIn,
-    IERC20 _tokenOut,
-    uint256 _odosTokenInAmount,
-    uint256 _minOdosTokenOut,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) external payable returns (uint256 amountOut);
-
-  /// @notice Sells a token with exact input using ODOS
-  /// @param _tokenIn The token to sell
-  /// @param _odosTokenOut The ODOS token to receive
-  /// @param _tokenOut The token to receive
-  /// @param _tokenInAmount The amount of tokens to sell
-  /// @param _minOdosTokenIn The minimum amount of ODOS tokens to receive
-  /// @param _minAmountOut The minimum amount of tokens to receive
-  function sellWithExactInputWithOdos(
-    IERC20 _tokenIn,
-    IERC20 _odosTokenOut,
-    IERC20 _tokenOut,
-    uint256 _tokenInAmount,
-    uint256 _minOdosTokenIn,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) external payable returns (uint256 amountOut);
 }

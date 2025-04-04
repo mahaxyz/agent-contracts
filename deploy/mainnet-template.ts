@@ -34,7 +34,7 @@ export async function templateLaunchpad(
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [adapterD.address, tokenD.address, deployer, wethAddress, odosAddress],
+    [adapterD.address, tokenD.address, deployer, wethAddress],
     proxyAdmin,
     launchpadContract,
     deployer
@@ -53,6 +53,14 @@ export async function templateLaunchpad(
     adapterD.address
   );
 
+  const swappeD = await deployContract(
+    hre,
+    "Swapper",
+    [adapterD.address, wethAddress, odosAddress],
+    "Swapper"
+  );
+  const swapper = await hre.ethers.getContractAt("Swapper", swappeD.address);
+
   // initialize the contracts if they are not initialized
   if ((await tokenImpl.name()) !== "TEST") {
     await waitForTx(
@@ -70,6 +78,7 @@ export async function templateLaunchpad(
     adapter,
     launchpad,
     tokenImpl,
+    swapper,
   };
 }
 

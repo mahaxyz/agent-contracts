@@ -42,7 +42,7 @@ contract TokenLaunchpadBscForkTest is Test {
     _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth));
 
     // Initialize launchpad
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(0));
+    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth));
   }
 
   function test_Initialize() public view {

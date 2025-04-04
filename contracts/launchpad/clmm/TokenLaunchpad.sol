@@ -36,7 +36,6 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   IWETH9 public weth;
   uint256 public creationFee;
   uint256 public referralFee;
-  address public ODOS;
 
   mapping(ITokenTemplate token => CreateParams) public launchParams;
   mapping(ITokenTemplate token => uint256) public tokenToNftId;
@@ -44,14 +43,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
-  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth, address _odos)
+  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth)
     external
     initializer
   {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
     weth = IWETH9(_weth);
-    ODOS = _odos;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
@@ -206,72 +204,5 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     } else {
       _token.safeTransfer(msg.sender, remaining);
     }
-  }
-
-  /// @inheritdoc ITokenLaunchpad
-  function buyWithExactInputWithOdos(
-    IERC20 _odosTokenIn,
-    IERC20 _tokenIn,
-    IERC20 _tokenOut,
-    uint256 _odosTokenInAmount,
-    uint256 _minOdosTokenOut,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) public payable returns (uint256 amountOut) {
-    if (msg.value > 0) weth.deposit{value: msg.value}();
-    else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
-    _odosTokenIn.approve(address(adapter), type(uint256).max);
-
-    // call the odos contract to get the amount of tokens to buy
-    if (_odosData.length > 0) {
-      (bool success,) = ODOS.call(_odosData);
-      require(success, "!odos");
-    } else {
-      require(_odosTokenIn == _tokenOut, "!odosTokenIn");
-    }
-
-    // ensure that the odos has given us enough tokens to perform the raw swap
-    uint256 amountIn = _tokenIn.balanceOf(address(this));
-    require(amountIn >= _minOdosTokenOut, "!minAmountIn");
-
-    amountOut = adapter.swapWithExactInput(_tokenIn, _tokenOut, amountIn, _minAmountOut);
-
-    // send everything back
-    _refundTokens(_tokenIn);
-    _refundTokens(_tokenOut);
-    _refundTokens(_odosTokenIn);
-  }
-
-  /// @inheritdoc ITokenLaunchpad
-  function sellWithExactInputWithOdos(
-    IERC20 _tokenIn,
-    IERC20 _odosTokenOut,
-    IERC20 _tokenOut,
-    uint256 _tokenInAmount,
-    uint256 _minOdosTokenIn,
-    uint256 _minAmountOut,
-    bytes memory _odosData
-  ) public payable returns (uint256 amountOut) {
-    _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
-    _tokenIn.approve(address(adapter), type(uint256).max);
-
-    uint256 amountSwapOut = adapter.swapWithExactOutput(_tokenIn, _odosTokenOut, _tokenInAmount, _minOdosTokenIn);
-
-    if (_odosData.length > 0) {
-      _odosTokenOut.approve(ODOS, type(uint256).max);
-      (bool success,) = ODOS.call(_odosData);
-      require(success, "!odos");
-      amountOut = _tokenOut.balanceOf(address(this));
-    } else {
-      require(_odosTokenOut == _tokenOut, "!odosTokenOut");
-      amountOut = amountSwapOut;
-    }
-
-    require(amountOut >= _minAmountOut, "!minAmountOut");
-
-    // send everything back
-    _refundTokens(_tokenIn);
-    _refundTokens(_tokenOut);
-    _refundTokens(_odosTokenOut);
   }
 }
