@@ -23,12 +23,10 @@ interface ITokenTemplate is IERC20 {
   /// @param name The name of the token
   /// @param symbol The symbol of the token
   /// @param metadata Additional metadata about the token
-  /// @param adapter Address of the CLMM adapter contract
   struct InitParams {
     string name;
     string symbol;
     string metadata;
-    address adapter;
   }
 
   /// @notice Emitted when the token is unlocked for unrestricted transfers

@@ -101,7 +101,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     {
       ITokenTemplate.InitParams memory params =
-        ITokenTemplate.InitParams({name: p.name, symbol: p.symbol, metadata: p.metadata, adapter: address(adapter)});
+        ITokenTemplate.InitParams({name: p.name, symbol: p.symbol, metadata: p.metadata});
 
       bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
       token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));

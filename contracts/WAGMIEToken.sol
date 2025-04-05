@@ -21,7 +21,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 /// @title WAGMIEToken
@@ -30,8 +30,8 @@ contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
   /// @notice The metadata of the token
   string public metadata;
 
-  /// @notice The adapter contract
-  ICLMMAdapter public adapter;
+  /// @notice The launchpad contract
+  ITokenLaunchpad public launchpad;
 
   /// @dev counts the number of transactions to claim fees
   uint256 private txCount;
@@ -39,7 +39,7 @@ contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
   /// @inheritdoc ITokenTemplate
   function initialize(InitParams memory p) public initializer {
     metadata = p.metadata;
-    adapter = ICLMMAdapter(p.adapter);
+    launchpad = ITokenLaunchpad(msg.sender);
 
     __ERC20_init(p.name, p.symbol);
 
@@ -49,6 +49,12 @@ contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
   function _update(address _from, address _to, uint256 _value) internal override {
     super._update(_from, _to, _value);
     // automatically claim fees every 100 transactions
-    if (++txCount % 100 == 0) adapter.claimFees(address(this));
+    if (++txCount % 100 == 0) claimFees();
+  }
+
+  /// @notice Claims the fees for the token
+  /// @dev This function is called automatically every 100 transactions
+  function claimFees() public {
+    launchpad.claimFees(ITokenTemplate(address(this)));
   }
 }
