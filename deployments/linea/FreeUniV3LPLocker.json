@@ -1,0 +1,1208 @@
+{
+  "address": "0x1eC9A98615d4C24541e6AC9b71aa97D30f3c4314",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nftManager_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "nftManger",
+          "type": "address"
+        }
+      ],
+      "name": "OnAddNftManger",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        }
+      ],
+      "name": "OnDecreaseLiquidity",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        }
+      ],
+      "name": "OnIncreaseLiquidity",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "nftPositionManager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nftId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "OnLock",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OnLockPendingTransfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OnLockTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "OnRelock",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "collector",
+          "type": "address"
+        }
+      ],
+      "name": "OnSetCollector",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nftId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "unlockedTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "OnUnlock",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        }
+      ],
+      "name": "acceptLock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nftManager_",
+          "type": "address"
+        }
+      ],
+      "name": "addSupportedNftManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint128",
+          "name": "amount0Max_",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "amount1Max_",
+          "type": "uint128"
+        }
+      ],
+      "name": "collect",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount0",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount1",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint128",
+              "name": "liquidity",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount0Min",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount1Min",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct INonfungiblePositionManager.DecreaseLiquidityParams",
+          "name": "params",
+          "type": "tuple"
+        }
+      ],
+      "name": "decreaseLiquidity",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount0",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount1",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getUserLocks",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "lockIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount0Desired",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount1Desired",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount0Min",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount1Min",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct INonfungiblePositionManager.IncreaseLiquidityParams",
+          "name": "params",
+          "type": "tuple"
+        }
+      ],
+      "name": "increaseLiquidity",
+      "outputs": [
+        {
+          "internalType": "uint128",
+          "name": "liquidity",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount0",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount1",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC721",
+          "name": "nftManager_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nftId_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "collector_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime_",
+          "type": "uint256"
+        }
+      ],
+      "name": "lock",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        }
+      ],
+      "name": "locks",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "contract INonfungiblePositionManager",
+          "name": "nftPositionManager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "pendingOwner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "collector",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "pool",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nftId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextLockId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "endTime_",
+          "type": "uint256"
+        }
+      ],
+      "name": "relock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "collector_",
+          "type": "address"
+        }
+      ],
+      "name": "setCollectAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nftManager_",
+          "type": "address"
+        }
+      ],
+      "name": "supportedNftManager",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "newOwner_",
+          "type": "address"
+        }
+      ],
+      "name": "transferLock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId_",
+          "type": "uint256"
+        }
+      ],
+      "name": "unlock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x281c7cfc9d040bfc9d9b132d46be6c8320b7a14d55222d5e8db701de61259913",
+  "receipt": {
+    "to": null,
+    "from": "0xb0a8169d471051130cC458E4862b7fd0008cdF82",
+    "contractAddress": "0x1eC9A98615d4C24541e6AC9b71aa97D30f3c4314",
+    "transactionIndex": 1,
+    "gasUsed": "2412666",
+    "logsBloom": "0x00000000000000080000000000000000000000000000000000800001000000000000000000000000000000040000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000020000000000000000000040000000000000000000000000000000000000000000000",
+    "blockHash": "0xa7c5fd8d7b98eeb54b4debf5557b2d438594ef58dc461873763751a9db11f9ca",
+    "transactionHash": "0x281c7cfc9d040bfc9d9b132d46be6c8320b7a14d55222d5e8db701de61259913",
+    "logs": [
+      {
+        "transactionIndex": 1,
+        "blockNumber": 17748710,
+        "transactionHash": "0x281c7cfc9d040bfc9d9b132d46be6c8320b7a14d55222d5e8db701de61259913",
+        "address": "0x1eC9A98615d4C24541e6AC9b71aa97D30f3c4314",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x000000000000000000000000b0a8169d471051130cc458e4862b7fd0008cdf82"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0xa7c5fd8d7b98eeb54b4debf5557b2d438594ef58dc461873763751a9db11f9ca"
+      }
+    ],
+    "blockNumber": 17748710,
+    "cumulativeGasUsed": "2450435",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xAAA78E8C4241990B4ce159E105dA08129345946A"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "e35638c827b96053a187b87e9e6572fd",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nftManager_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"nftManger\",\"type\":\"address\"}],\"name\":\"OnAddNftManger\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"}],\"name\":\"OnDecreaseLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"}],\"name\":\"OnIncreaseLiquidity\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"nftPositionManager\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"nftId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"}],\"name\":\"OnLock\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OnLockPendingTransfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OnLockTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"}],\"name\":\"OnRelock\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"collector\",\"type\":\"address\"}],\"name\":\"OnSetCollector\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"nftId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"unlockedTime\",\"type\":\"uint256\"}],\"name\":\"OnUnlock\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"}],\"name\":\"acceptLock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nftManager_\",\"type\":\"address\"}],\"name\":\"addSupportedNftManager\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"recipient_\",\"type\":\"address\"},{\"internalType\":\"uint128\",\"name\":\"amount0Max_\",\"type\":\"uint128\"},{\"internalType\":\"uint128\",\"name\":\"amount1Max_\",\"type\":\"uint128\"}],\"name\":\"collect\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amount0\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint128\",\"name\":\"liquidity\",\"type\":\"uint128\"},{\"internalType\":\"uint256\",\"name\":\"amount0Min\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1Min\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"internalType\":\"struct INonfungiblePositionManager.DecreaseLiquidityParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"decreaseLiquidity\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amount0\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1\",\"type\":\"uint256\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getUserLocks\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"lockIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount0Desired\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1Desired\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount0Min\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1Min\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"internalType\":\"struct INonfungiblePositionManager.IncreaseLiquidityParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"increaseLiquidity\",\"outputs\":[{\"internalType\":\"uint128\",\"name\":\"liquidity\",\"type\":\"uint128\"},{\"internalType\":\"uint256\",\"name\":\"amount0\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount1\",\"type\":\"uint256\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC721\",\"name\":\"nftManager_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nftId_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"collector_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"endTime_\",\"type\":\"uint256\"}],\"name\":\"lock\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"}],\"name\":\"locks\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId\",\"type\":\"uint256\"},{\"internalType\":\"contract INonfungiblePositionManager\",\"name\":\"nftPositionManager\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"pendingOwner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"collector\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"pool\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nftId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTime\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nextLockId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC721Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTime_\",\"type\":\"uint256\"}],\"name\":\"relock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"collector_\",\"type\":\"address\"}],\"name\":\"setCollectAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nftManager_\",\"type\":\"address\"}],\"name\":\"supportedNftManager\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"newOwner_\",\"type\":\"address\"}],\"name\":\"transferLock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lockId_\",\"type\":\"uint256\"}],\"name\":\"unlock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Implements the IFreeUniV3LPLocker interface\",\"errors\":{\"OwnableInvalidOwner(address)\":[{\"details\":\"The owner is not a valid owner account. (eg. `address(0)`)\"}],\"OwnableUnauthorizedAccount(address)\":[{\"details\":\"The caller account is not authorized to perform an operation.\"}],\"ReentrancyGuardReentrantCall()\":[{\"details\":\"Unauthorized reentrant call.\"}],\"SafeERC20FailedOperation(address)\":[{\"details\":\"An operation with an ERC-20 token failed.\"}]},\"kind\":\"dev\",\"methods\":{\"acceptLock(uint256)\":{\"params\":{\"lockId_\":\"The ID of the lock to accept\"}},\"addSupportedNftManager(address)\":{\"params\":{\"nftManager_\":\"The address of the NFT position manager to add\"}},\"collect(uint256,address,uint128,uint128)\":{\"params\":{\"amount0Max_\":\"The maximum amount of token0 to collect\",\"amount1Max_\":\"The maximum amount of token1 to collect\",\"lockId_\":\"The ID of the lock\",\"recipient_\":\"The address to receive the fees\"},\"returns\":{\"amount0\":\"The amount of token0 collected\",\"amount1\":\"The amount of token1 collected\"}},\"constructor\":{\"params\":{\"nftManager_\":\"The address of the initial NFT position manager\"}},\"decreaseLiquidity(uint256,(uint256,uint128,uint256,uint256,uint256))\":{\"params\":{\"lockId_\":\"The ID of the lock\",\"params\":\"The parameters for decreasing liquidity\"},\"returns\":{\"amount0\":\"The amount of token0 received\",\"amount1\":\"The amount of token1 received\"}},\"getUserLocks(address)\":{\"params\":{\"user\":\"The address of the user\"},\"returns\":{\"lockIds\":\"An array of lock IDs\"}},\"increaseLiquidity(uint256,(uint256,uint256,uint256,uint256,uint256,uint256))\":{\"params\":{\"lockId_\":\"The ID of the lock\",\"params\":\"The parameters for increasing liquidity\"},\"returns\":{\"amount0\":\"The amount of token0 added\",\"amount1\":\"The amount of token1 added\",\"liquidity\":\"The amount of liquidity added\"}},\"lock(address,uint256,address,address,uint256)\":{\"params\":{\"collector_\":\"The address that can collect fees\",\"endTime_\":\"The timestamp when the lock expires\",\"nftId_\":\"The ID of the NFT position\",\"nftManager_\":\"The NFT position manager contract\",\"owner_\":\"The address that will own the locked position\"},\"returns\":{\"lockId\":\"The ID of the created lock\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"relock(uint256,uint256)\":{\"params\":{\"endTime_\":\"The new end time for the lock\",\"lockId_\":\"The ID of the lock\"}},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"setCollectAddress(uint256,address)\":{\"params\":{\"collector_\":\"The address that can collect fees\",\"lockId_\":\"The ID of the lock\"}},\"supportedNftManager(address)\":{\"params\":{\"nftManager_\":\"The address of the NFT position manager to check\"},\"returns\":{\"_0\":\"True if the manager is supported, false otherwise\"}},\"transferLock(uint256,address)\":{\"params\":{\"lockId_\":\"The ID of the lock to transfer\",\"newOwner_\":\"The address of the new owner\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"},\"unlock(uint256)\":{\"params\":{\"lockId_\":\"The ID of the lock to unlock\"}}},\"stateVariables\":{\"nextLockId\":{\"return\":\"The next lock ID\",\"returns\":{\"_0\":\"The next lock ID\"}}},\"title\":\"FreeUniV3LPLocker\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"acceptLock(uint256)\":{\"notice\":\"Accepts a lock transfer\"},\"addSupportedNftManager(address)\":{\"notice\":\"Adds a new supported NFT position manager\"},\"collect(uint256,address,uint128,uint128)\":{\"notice\":\"Collects fees from a locked position\"},\"constructor\":{\"notice\":\"Constructor\"},\"decreaseLiquidity(uint256,(uint256,uint128,uint256,uint256,uint256))\":{\"notice\":\"Decreases liquidity in a locked position\"},\"getUserLocks(address)\":{\"notice\":\"Returns all lock IDs owned by a user\"},\"increaseLiquidity(uint256,(uint256,uint256,uint256,uint256,uint256,uint256))\":{\"notice\":\"Increases liquidity in a locked position\"},\"lock(address,uint256,address,address,uint256)\":{\"notice\":\"Locks a Uniswap V3 LP position\"},\"locks(uint256)\":{\"notice\":\"lock details\"},\"nextLockId()\":{\"notice\":\"Returns the next available lock ID\"},\"relock(uint256,uint256)\":{\"notice\":\"Extends the lock period of a position\"},\"setCollectAddress(uint256,address)\":{\"notice\":\"Sets the address that can collect fees from a locked position\"},\"supportedNftManager(address)\":{\"notice\":\"Checks if an NFT position manager is supported\"},\"transferLock(uint256,address)\":{\"notice\":\"Transfers a lock to a new owner\"},\"unlock(uint256)\":{\"notice\":\"Unlocks a position after the lock period has ended\"}},\"notice\":\"Contract for locking Uniswap V3 LP positions\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/locker/FreeUniV3LPLocker.sol\":\"FreeUniV3LPLocker\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {Context} from \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * The initial owner is set to the address provided by the deployer. This can\\n * later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    /**\\n     * @dev The caller account is not authorized to perform an operation.\\n     */\\n    error OwnableUnauthorizedAccount(address account);\\n\\n    /**\\n     * @dev The owner is not a valid owner account. (eg. `address(0)`)\\n     */\\n    error OwnableInvalidOwner(address owner);\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the address provided by the deployer as the initial owner.\\n     */\\n    constructor(address initialOwner) {\\n        if (initialOwner == address(0)) {\\n            revert OwnableInvalidOwner(address(0));\\n        }\\n        _transferOwnership(initialOwner);\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        if (owner() != _msgSender()) {\\n            revert OwnableUnauthorizedAccount(_msgSender());\\n        }\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        if (newOwner == address(0)) {\\n            revert OwnableInvalidOwner(address(0));\\n        }\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n}\\n\",\"keccak256\":\"0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC1363.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (interfaces/IERC1363.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC20} from \\\"./IERC20.sol\\\";\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @title IERC1363\\n * @dev Interface of the ERC-1363 standard as defined in the https://eips.ethereum.org/EIPS/eip-1363[ERC-1363].\\n *\\n * Defines an extension interface for ERC-20 tokens that supports executing code on a recipient contract\\n * after `transfer` or `transferFrom`, or code on a spender contract after `approve`, in a single transaction.\\n */\\ninterface IERC1363 is IERC20, IERC165 {\\n    /*\\n     * Note: the ERC-165 identifier for this interface is 0xb0202a11.\\n     * 0xb0202a11 ===\\n     *   bytes4(keccak256('transferAndCall(address,uint256)')) ^\\n     *   bytes4(keccak256('transferAndCall(address,uint256,bytes)')) ^\\n     *   bytes4(keccak256('transferFromAndCall(address,address,uint256)')) ^\\n     *   bytes4(keccak256('transferFromAndCall(address,address,uint256,bytes)')) ^\\n     *   bytes4(keccak256('approveAndCall(address,uint256)')) ^\\n     *   bytes4(keccak256('approveAndCall(address,uint256,bytes)'))\\n     */\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferAndCall(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @param data Additional data with no specified format, sent in call to `to`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferAndCall(address to, uint256 value, bytes calldata data) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the allowance mechanism\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param from The address which you want to send tokens from.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferFromAndCall(address from, address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the allowance mechanism\\n     * and then calls {IERC1363Receiver-onTransferReceived} on `to`.\\n     * @param from The address which you want to send tokens from.\\n     * @param to The address which you want to transfer to.\\n     * @param value The amount of tokens to be transferred.\\n     * @param data Additional data with no specified format, sent in call to `to`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function transferFromAndCall(address from, address to, uint256 value, bytes calldata data) external returns (bool);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens and then calls {IERC1363Spender-onApprovalReceived} on `spender`.\\n     * @param spender The address which will spend the funds.\\n     * @param value The amount of tokens to be spent.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function approveAndCall(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens and then calls {IERC1363Spender-onApprovalReceived} on `spender`.\\n     * @param spender The address which will spend the funds.\\n     * @param value The amount of tokens to be spent.\\n     * @param data Additional data with no specified format, sent in call to `spender`.\\n     * @return A boolean value indicating whether the operation succeeded unless throwing.\\n     */\\n    function approveAndCall(address spender, uint256 value, bytes calldata data) external returns (bool);\\n}\\n\",\"keccak256\":\"0x9b6b3e7803bc5f2f8cd7ad57db8ac1def61a9930a5a3107df4882e028a9605d7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../utils/introspection/IERC165.sol\\\";\\n\",\"keccak256\":\"0xde7e9fd9aee8d4f40772f96bb3b58836cbc6dfc0227014a061947f8821ea9724\",\"license\":\"MIT\"},\"@openzeppelin/contracts/interfaces/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC20} from \\\"../token/ERC20/IERC20.sol\\\";\\n\",\"keccak256\":\"0xce41876e78d1badc0512229b4d14e4daf83bc1003d7f83978d18e0e56f965b9c\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-20 standard as defined in the ERC.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xe06a3f08a987af6ad2e1c1e774405d4fe08f1694b67517438b467cecf0da0ef7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.2.0) (token/ERC20/utils/SafeERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC20} from \\\"../IERC20.sol\\\";\\nimport {IERC1363} from \\\"../../../interfaces/IERC1363.sol\\\";\\n\\n/**\\n * @title SafeERC20\\n * @dev Wrappers around ERC-20 operations that throw on failure (when the token\\n * contract returns false). Tokens that return no value (and instead revert or\\n * throw on failure) are also supported, non-reverting calls are assumed to be\\n * successful.\\n * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,\\n * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.\\n */\\nlibrary SafeERC20 {\\n    /**\\n     * @dev An operation with an ERC-20 token failed.\\n     */\\n    error SafeERC20FailedOperation(address token);\\n\\n    /**\\n     * @dev Indicates a failed `decreaseAllowance` request.\\n     */\\n    error SafeERC20FailedDecreaseAllowance(address spender, uint256 currentAllowance, uint256 requestedDecrease);\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransfer(IERC20 token, address to, uint256 value) internal {\\n        _callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));\\n    }\\n\\n    /**\\n     * @dev Transfer `value` amount of `token` from `from` to `to`, spending the approval given by `from` to the\\n     * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.\\n     */\\n    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {\\n        _callOptionalReturn(token, abi.encodeCall(token.transferFrom, (from, to, value)));\\n    }\\n\\n    /**\\n     * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful.\\n     *\\n     * IMPORTANT: If the token implements ERC-7674 (ERC-20 with temporary allowance), and if the \\\"client\\\"\\n     * smart contract uses ERC-7674 to set temporary allowances, then the \\\"client\\\" smart contract should avoid using\\n     * this function. Performing a {safeIncreaseAllowance} or {safeDecreaseAllowance} operation on a token contract\\n     * that has a non-zero temporary allowance (for that particular owner-spender) will result in unexpected behavior.\\n     */\\n    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {\\n        uint256 oldAllowance = token.allowance(address(this), spender);\\n        forceApprove(token, spender, oldAllowance + value);\\n    }\\n\\n    /**\\n     * @dev Decrease the calling contract's allowance toward `spender` by `requestedDecrease`. If `token` returns no\\n     * value, non-reverting calls are assumed to be successful.\\n     *\\n     * IMPORTANT: If the token implements ERC-7674 (ERC-20 with temporary allowance), and if the \\\"client\\\"\\n     * smart contract uses ERC-7674 to set temporary allowances, then the \\\"client\\\" smart contract should avoid using\\n     * this function. Performing a {safeIncreaseAllowance} or {safeDecreaseAllowance} operation on a token contract\\n     * that has a non-zero temporary allowance (for that particular owner-spender) will result in unexpected behavior.\\n     */\\n    function safeDecreaseAllowance(IERC20 token, address spender, uint256 requestedDecrease) internal {\\n        unchecked {\\n            uint256 currentAllowance = token.allowance(address(this), spender);\\n            if (currentAllowance < requestedDecrease) {\\n                revert SafeERC20FailedDecreaseAllowance(spender, currentAllowance, requestedDecrease);\\n            }\\n            forceApprove(token, spender, currentAllowance - requestedDecrease);\\n        }\\n    }\\n\\n    /**\\n     * @dev Set the calling contract's allowance toward `spender` to `value`. If `token` returns no value,\\n     * non-reverting calls are assumed to be successful. Meant to be used with tokens that require the approval\\n     * to be set to zero before setting it to a non-zero value, such as USDT.\\n     *\\n     * NOTE: If the token implements ERC-7674, this function will not modify any temporary allowance. This function\\n     * only sets the \\\"standard\\\" allowance. Any temporary allowance will remain active, in addition to the value being\\n     * set here.\\n     */\\n    function forceApprove(IERC20 token, address spender, uint256 value) internal {\\n        bytes memory approvalCall = abi.encodeCall(token.approve, (spender, value));\\n\\n        if (!_callOptionalReturnBool(token, approvalCall)) {\\n            _callOptionalReturn(token, abi.encodeCall(token.approve, (spender, 0)));\\n            _callOptionalReturn(token, approvalCall);\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} transferAndCall, with a fallback to the simple {ERC20} transfer if the target has no\\n     * code. This can be used to implement an {ERC721}-like safe transfer that rely on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function transferAndCallRelaxed(IERC1363 token, address to, uint256 value, bytes memory data) internal {\\n        if (to.code.length == 0) {\\n            safeTransfer(token, to, value);\\n        } else if (!token.transferAndCall(to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} transferFromAndCall, with a fallback to the simple {ERC20} transferFrom if the target\\n     * has no code. This can be used to implement an {ERC721}-like safe transfer that rely on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function transferFromAndCallRelaxed(\\n        IERC1363 token,\\n        address from,\\n        address to,\\n        uint256 value,\\n        bytes memory data\\n    ) internal {\\n        if (to.code.length == 0) {\\n            safeTransferFrom(token, from, to, value);\\n        } else if (!token.transferFromAndCall(from, to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Performs an {ERC1363} approveAndCall, with a fallback to the simple {ERC20} approve if the target has no\\n     * code. This can be used to implement an {ERC721}-like safe transfer that rely on {ERC1363} checks when\\n     * targeting contracts.\\n     *\\n     * NOTE: When the recipient address (`to`) has no code (i.e. is an EOA), this function behaves as {forceApprove}.\\n     * Opposedly, when the recipient address (`to`) has code, this function only attempts to call {ERC1363-approveAndCall}\\n     * once without retrying, and relies on the returned value to be true.\\n     *\\n     * Reverts if the returned value is other than `true`.\\n     */\\n    function approveAndCallRelaxed(IERC1363 token, address to, uint256 value, bytes memory data) internal {\\n        if (to.code.length == 0) {\\n            forceApprove(token, to, value);\\n        } else if (!token.approveAndCall(to, value, data)) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement\\n     * on the return value: the return value is optional (but if data is returned, it must not be false).\\n     * @param token The token targeted by the call.\\n     * @param data The call data (encoded using abi.encode or one of its variants).\\n     *\\n     * This is a variant of {_callOptionalReturnBool} that reverts if call fails to meet the requirements.\\n     */\\n    function _callOptionalReturn(IERC20 token, bytes memory data) private {\\n        uint256 returnSize;\\n        uint256 returnValue;\\n        assembly (\\\"memory-safe\\\") {\\n            let success := call(gas(), token, 0, add(data, 0x20), mload(data), 0, 0x20)\\n            // bubble errors\\n            if iszero(success) {\\n                let ptr := mload(0x40)\\n                returndatacopy(ptr, 0, returndatasize())\\n                revert(ptr, returndatasize())\\n            }\\n            returnSize := returndatasize()\\n            returnValue := mload(0)\\n        }\\n\\n        if (returnSize == 0 ? address(token).code.length == 0 : returnValue != 1) {\\n            revert SafeERC20FailedOperation(address(token));\\n        }\\n    }\\n\\n    /**\\n     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement\\n     * on the return value: the return value is optional (but if data is returned, it must not be false).\\n     * @param token The token targeted by the call.\\n     * @param data The call data (encoded using abi.encode or one of its variants).\\n     *\\n     * This is a variant of {_callOptionalReturn} that silently catches all reverts and returns a bool instead.\\n     */\\n    function _callOptionalReturnBool(IERC20 token, bytes memory data) private returns (bool) {\\n        bool success;\\n        uint256 returnSize;\\n        uint256 returnValue;\\n        assembly (\\\"memory-safe\\\") {\\n            success := call(gas(), token, 0, add(data, 0x20), mload(data), 0, 0x20)\\n            returnSize := returndatasize()\\n            returnValue := mload(0)\\n        }\\n        return success && (returnSize == 0 ? address(token).code.length > 0 : returnValue == 1);\\n    }\\n}\\n\",\"keccak256\":\"0x4ea01544758fd2c7045961904686bfe232d2220a04ecaa2d6b08dac17827febf\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC-721 compliant contract.\\n */\\ninterface IERC721 is IERC165 {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC-721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or\\n     *   {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC-721\\n     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\\n     * understand this adds an external call which potentially creates a reentrancy vulnerability.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the address zero.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x5dc63d1c6a12fe1b17793e1745877b2fcbe1964c3edfd0a482fac21ca8f18261\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/IERC721Receiver.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @title ERC-721 token receiver interface\\n * @dev Interface for any contract that wants to support safeTransfers\\n * from ERC-721 asset contracts.\\n */\\ninterface IERC721Receiver {\\n    /**\\n     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}\\n     * by `operator` from `from`, this function is called.\\n     *\\n     * It must return its Solidity selector to confirm the token transfer.\\n     * If any other value is returned or the interface is not implemented by the recipient, the transfer will be\\n     * reverted.\\n     *\\n     * The selector can be obtained in Solidity with `IERC721Receiver.onERC721Received.selector`.\\n     */\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0xb5afb8e8eebc4d1c6404df2f5e1e6d2c3d24fd01e5dfc855314951ecfaae462d\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/ReentrancyGuard.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/ReentrancyGuard.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Contract module that helps prevent reentrant calls to a function.\\n *\\n * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\\n * available, which can be applied to functions to make sure there are no nested\\n * (reentrant) calls to them.\\n *\\n * Note that because there is a single `nonReentrant` guard, functions marked as\\n * `nonReentrant` may not call one another. This can be worked around by making\\n * those functions `private`, and then adding `external` `nonReentrant` entry\\n * points to them.\\n *\\n * TIP: If EIP-1153 (transient storage) is available on the chain you're deploying at,\\n * consider using {ReentrancyGuardTransient} instead.\\n *\\n * TIP: If you would like to learn more about reentrancy and alternative ways\\n * to protect against it, check out our blog post\\n * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].\\n */\\nabstract contract ReentrancyGuard {\\n    // Booleans are more expensive than uint256 or any type that takes up a full\\n    // word because each write operation emits an extra SLOAD to first read the\\n    // slot's contents, replace the bits taken up by the boolean, and then write\\n    // back. This is the compiler's defense against contract upgrades and\\n    // pointer aliasing, and it cannot be disabled.\\n\\n    // The values being non-zero value makes deployment a bit more expensive,\\n    // but in exchange the refund on every call to nonReentrant will be lower in\\n    // amount. Since refunds are capped to a percentage of the total\\n    // transaction's gas, it is best to keep them low in cases like this one, to\\n    // increase the likelihood of the full refund coming into effect.\\n    uint256 private constant NOT_ENTERED = 1;\\n    uint256 private constant ENTERED = 2;\\n\\n    uint256 private _status;\\n\\n    /**\\n     * @dev Unauthorized reentrant call.\\n     */\\n    error ReentrancyGuardReentrantCall();\\n\\n    constructor() {\\n        _status = NOT_ENTERED;\\n    }\\n\\n    /**\\n     * @dev Prevents a contract from calling itself, directly or indirectly.\\n     * Calling a `nonReentrant` function from another `nonReentrant`\\n     * function is not supported. It is possible to prevent this from happening\\n     * by making the `nonReentrant` function external, and making it call a\\n     * `private` function that does the actual work.\\n     */\\n    modifier nonReentrant() {\\n        _nonReentrantBefore();\\n        _;\\n        _nonReentrantAfter();\\n    }\\n\\n    function _nonReentrantBefore() private {\\n        // On the first call to nonReentrant, _status will be NOT_ENTERED\\n        if (_status == ENTERED) {\\n            revert ReentrancyGuardReentrantCall();\\n        }\\n\\n        // Any calls to nonReentrant after this point will fail\\n        _status = ENTERED;\\n    }\\n\\n    function _nonReentrantAfter() private {\\n        // By storing the original value once again, a refund is triggered (see\\n        // https://eips.ethereum.org/EIPS/eip-2200)\\n        _status = NOT_ENTERED;\\n    }\\n\\n    /**\\n     * @dev Returns true if the reentrancy guard is currently set to \\\"entered\\\", which indicates there is a\\n     * `nonReentrant` function in the call stack.\\n     */\\n    function _reentrancyGuardEntered() internal view returns (bool) {\\n        return _status == ENTERED;\\n    }\\n}\\n\",\"keccak256\":\"0x11a5a79827df29e915a12740caf62fe21ebe27c08c9ae3e09abe9ee3ba3866d3\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[ERC].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x79796192ec90263f21b464d5bc90b777a525971d3de8232be80d9c4f9fb353b8\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/structs/EnumerableSet.sol)\\n// This file was procedurally generated from scripts/generate/templates/EnumerableSet.js.\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Library for managing\\n * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive\\n * types.\\n *\\n * Sets have the following properties:\\n *\\n * - Elements are added, removed, and checked for existence in constant time\\n * (O(1)).\\n * - Elements are enumerated in O(n). No guarantees are made on the ordering.\\n *\\n * ```solidity\\n * contract Example {\\n *     // Add the library methods\\n *     using EnumerableSet for EnumerableSet.AddressSet;\\n *\\n *     // Declare a set state variable\\n *     EnumerableSet.AddressSet private mySet;\\n * }\\n * ```\\n *\\n * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)\\n * and `uint256` (`UintSet`) are supported.\\n *\\n * [WARNING]\\n * ====\\n * Trying to delete such a structure from storage will likely result in data corruption, rendering the structure\\n * unusable.\\n * See https://github.com/ethereum/solidity/pull/11843[ethereum/solidity#11843] for more info.\\n *\\n * In order to clean an EnumerableSet, you can either remove all elements one by one or create a fresh instance using an\\n * array of EnumerableSet.\\n * ====\\n */\\nlibrary EnumerableSet {\\n    // To implement this library for multiple types with as little code\\n    // repetition as possible, we write it in terms of a generic Set type with\\n    // bytes32 values.\\n    // The Set implementation uses private functions, and user-facing\\n    // implementations (such as AddressSet) are just wrappers around the\\n    // underlying Set.\\n    // This means that we can only create new EnumerableSets for types that fit\\n    // in bytes32.\\n\\n    struct Set {\\n        // Storage of set values\\n        bytes32[] _values;\\n        // Position is the index of the value in the `values` array plus 1.\\n        // Position 0 is used to mean a value is not in the set.\\n        mapping(bytes32 value => uint256) _positions;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function _add(Set storage set, bytes32 value) private returns (bool) {\\n        if (!_contains(set, value)) {\\n            set._values.push(value);\\n            // The value is stored at length-1, but we add 1 to all indexes\\n            // and use 0 as a sentinel value\\n            set._positions[value] = set._values.length;\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function _remove(Set storage set, bytes32 value) private returns (bool) {\\n        // We cache the value's position to prevent multiple reads from the same storage slot\\n        uint256 position = set._positions[value];\\n\\n        if (position != 0) {\\n            // Equivalent to contains(set, value)\\n            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in\\n            // the array, and then remove the last element (sometimes called as 'swap and pop').\\n            // This modifies the order of the array, as noted in {at}.\\n\\n            uint256 valueIndex = position - 1;\\n            uint256 lastIndex = set._values.length - 1;\\n\\n            if (valueIndex != lastIndex) {\\n                bytes32 lastValue = set._values[lastIndex];\\n\\n                // Move the lastValue to the index where the value to delete is\\n                set._values[valueIndex] = lastValue;\\n                // Update the tracked position of the lastValue (that was just moved)\\n                set._positions[lastValue] = position;\\n            }\\n\\n            // Delete the slot where the moved value was stored\\n            set._values.pop();\\n\\n            // Delete the tracked position for the deleted slot\\n            delete set._positions[value];\\n\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function _contains(Set storage set, bytes32 value) private view returns (bool) {\\n        return set._positions[value] != 0;\\n    }\\n\\n    /**\\n     * @dev Returns the number of values on the set. O(1).\\n     */\\n    function _length(Set storage set) private view returns (uint256) {\\n        return set._values.length;\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function _at(Set storage set, uint256 index) private view returns (bytes32) {\\n        return set._values[index];\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function _values(Set storage set) private view returns (bytes32[] memory) {\\n        return set._values;\\n    }\\n\\n    // Bytes32Set\\n\\n    struct Bytes32Set {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _add(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _remove(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {\\n        return _contains(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(Bytes32Set storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {\\n        return _at(set._inner, index);\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(Bytes32Set storage set) internal view returns (bytes32[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        bytes32[] memory result;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // AddressSet\\n\\n    struct AddressSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(AddressSet storage set, address value) internal returns (bool) {\\n        return _add(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(AddressSet storage set, address value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(AddressSet storage set, address value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(AddressSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(AddressSet storage set, uint256 index) internal view returns (address) {\\n        return address(uint160(uint256(_at(set._inner, index))));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(AddressSet storage set) internal view returns (address[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        address[] memory result;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n\\n    // UintSet\\n\\n    struct UintSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _add(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(UintSet storage set, uint256 value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(UintSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n    /**\\n     * @dev Returns the value stored at position `index` in the set. O(1).\\n     *\\n     * Note that there are no guarantees on the ordering of values inside the\\n     * array, and it may change when more values are added or removed.\\n     *\\n     * Requirements:\\n     *\\n     * - `index` must be strictly less than {length}.\\n     */\\n    function at(UintSet storage set, uint256 index) internal view returns (uint256) {\\n        return uint256(_at(set._inner, index));\\n    }\\n\\n    /**\\n     * @dev Return the entire set in an array\\n     *\\n     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed\\n     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that\\n     * this function has an unbounded cost, and using it as part of a state-changing function may render the function\\n     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.\\n     */\\n    function values(UintSet storage set) internal view returns (uint256[] memory) {\\n        bytes32[] memory store = _values(set._inner);\\n        uint256[] memory result;\\n\\n        assembly (\\\"memory-safe\\\") {\\n            result := store\\n        }\\n\\n        return result;\\n    }\\n}\\n\",\"keccak256\":\"0x9b161e97b8967d4bc0c08d25741889a30692cdda4b71910bf1b0e315f1962212\",\"license\":\"MIT\"},\"contracts/interfaces/IFreeUniV3LPLocker.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Telegram: https://t.me/mahaxyz\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\nimport {IERC721} from \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\nimport {IERC721Receiver} from \\\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\\\";\\nimport {INonfungiblePositionManager} from \\\"contracts/interfaces/thirdparty/INonfungiblePositionManager.sol\\\";\\n\\n/**\\n * @title IFreeUniV3LPLocker\\n * @notice Interface for locking Uniswap V3 LP positions\\n */\\ninterface IFreeUniV3LPLocker is IERC721Receiver {\\n  struct LockInfo {\\n    uint256 lockId;\\n    INonfungiblePositionManager nftPositionManager;\\n    address pendingOwner;\\n    address owner;\\n    address collector;\\n    address pool;\\n    uint256 nftId;\\n    uint256 startTime;\\n    uint256 endTime;\\n  }\\n\\n  /**\\n   * @notice Returns the next available lock ID\\n   * @return The next lock ID\\n   */\\n  function nextLockId() external view returns (uint256);\\n\\n  /**\\n   * @notice Checks if an NFT position manager is supported\\n   * @param nftManager_ The address of the NFT position manager to check\\n   * @return True if the manager is supported, false otherwise\\n   */\\n  function supportedNftManager(address nftManager_) external view returns (bool);\\n\\n  /**\\n   * @notice Returns all lock IDs owned by a user\\n   * @param user The address of the user\\n   * @return lockIds An array of lock IDs\\n   */\\n  function getUserLocks(address user) external view returns (uint256[] memory lockIds);\\n\\n  /**\\n   * @notice Adds a new supported NFT position manager\\n   * @param nftManager_ The address of the NFT position manager to add\\n   */\\n  function addSupportedNftManager(address nftManager_) external;\\n\\n  /**\\n   * @notice Locks a Uniswap V3 LP position\\n   * @param nftManager_ The NFT position manager contract\\n   * @param nftId_ The ID of the NFT position\\n   * @param owner_ The address that will own the locked position\\n   * @param collector_ The address that can collect fees\\n   * @param endTime_ The timestamp when the lock expires\\n   * @return lockId The ID of the created lock\\n   */\\n  function lock(IERC721 nftManager_, uint256 nftId_, address owner_, address collector_, uint256 endTime_)\\n    external\\n    returns (uint256 lockId);\\n\\n  /**\\n   * @notice Transfers a lock to a new owner\\n   * @param lockId_ The ID of the lock to transfer\\n   * @param newOwner_ The address of the new owner\\n   */\\n  function transferLock(uint256 lockId_, address newOwner_) external;\\n\\n  /**\\n   * @notice Accepts a lock transfer\\n   * @param lockId_ The ID of the lock to accept\\n   */\\n  function acceptLock(uint256 lockId_) external;\\n\\n  /**\\n   * @notice Increases liquidity in a locked position\\n   * @param lockId_ The ID of the lock\\n   * @param params The parameters for increasing liquidity\\n   * @return liquidity The amount of liquidity added\\n   * @return amount0 The amount of token0 added\\n   * @return amount1 The amount of token1 added\\n   */\\n  function increaseLiquidity(uint256 lockId_, INonfungiblePositionManager.IncreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    returns (uint128 liquidity, uint256 amount0, uint256 amount1);\\n\\n  /**\\n   * @notice Decreases liquidity in a locked position\\n   * @param lockId_ The ID of the lock\\n   * @param params The parameters for decreasing liquidity\\n   * @return amount0 The amount of token0 received\\n   * @return amount1 The amount of token1 received\\n   */\\n  function decreaseLiquidity(uint256 lockId_, INonfungiblePositionManager.DecreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    returns (uint256 amount0, uint256 amount1);\\n\\n  /**\\n   * @notice Unlocks a position after the lock period has ended\\n   * @param lockId_ The ID of the lock to unlock\\n   */\\n  function unlock(uint256 lockId_) external;\\n\\n  /**\\n   * @notice Extends the lock period of a position\\n   * @param lockId_ The ID of the lock\\n   * @param endTime_ The new end time for the lock\\n   */\\n  function relock(uint256 lockId_, uint256 endTime_) external;\\n\\n  /**\\n   * @notice Collects fees from a locked position\\n   * @param lockId_ The ID of the lock\\n   * @param recipient_ The address to receive the fees\\n   * @param amount0Max_ The maximum amount of token0 to collect\\n   * @param amount1Max_ The maximum amount of token1 to collect\\n   * @return amount0 The amount of token0 collected\\n   * @return amount1 The amount of token1 collected\\n   */\\n  function collect(uint256 lockId_, address recipient_, uint128 amount0Max_, uint128 amount1Max_)\\n    external\\n    returns (uint256 amount0, uint256 amount1);\\n\\n  /**\\n   * @notice Sets the address that can collect fees from a locked position\\n   * @param lockId_ The ID of the lock\\n   * @param collector_ The address that can collect fees\\n   */\\n  function setCollectAddress(uint256 lockId_, address collector_) external;\\n\\n  event OnLock(uint256 indexed lockId, address nftPositionManager, address owner, uint256 nftId, uint256 endTime);\\n  event OnUnlock(uint256 indexed lockId, address owner, uint256 nftId, uint256 unlockedTime);\\n  event OnLockPendingTransfer(uint256 indexed lockId, address previousOwner, address newOwner);\\n  event OnLockTransferred(uint256 indexed lockId, address previousOwner, address newOwner);\\n  event OnIncreaseLiquidity(uint256 indexed lockId);\\n  event OnDecreaseLiquidity(uint256 indexed lockId);\\n  event OnRelock(uint256 indexed lockId, uint256 endTime);\\n  event OnSetCollector(uint256 indexed lockId, address collector);\\n  event OnAddNftManger(address nftManger);\\n}\\n\",\"keccak256\":\"0x895e126971683b2490fd5bd2861c7198c45612f81f9ea36e84046b8210c389b0\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/thirdparty/IClPoolFactory.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Telegram: https://t.me/mahaxyz\\n// Twitter: https://twitter.com/mahaxyz\\n\\npragma solidity ^0.8.0;\\npragma abicoder v2;\\n\\n/// @title The interface for the CL Factory\\n/// @notice The CL Factory facilitates creation of CL pools and control over the protocol fees\\ninterface IClPoolFactory {\\n  /// @notice Emitted when the owner of the factory is changed\\n  /// @param oldOwner The owner before the owner was changed\\n  /// @param newOwner The owner after the owner was changed\\n  event OwnerChanged(address indexed oldOwner, address indexed newOwner);\\n\\n  /// @notice Emitted when a pool is created\\n  /// @param token0 The first token of the pool by address sort order\\n  /// @param token1 The second token of the pool by address sort order\\n  /// @param fee The fee collected upon every swap in the pool, denominated in hundredths of a bip\\n  /// @param tickSpacing The minimum number of ticks between initialized ticks\\n  /// @param pool The address of the created pool\\n  event PoolCreated(\\n    address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool\\n  );\\n\\n  /// @notice Emitted when a new fee amount is enabled for pool creation via the factory\\n  /// @param fee The enabled fee, denominated in hundredths of a bip\\n  /// @param tickSpacing The minimum number of ticks between initialized ticks for pools created with the given fee\\n  event FeeAmountEnabled(uint24 indexed fee, int24 indexed tickSpacing);\\n\\n  /// @notice Emitted when pairs implementation is changed\\n  /// @param oldImplementation The previous implementation\\n  /// @param newImplementation The new implementation\\n  event ImplementationChanged(address indexed oldImplementation, address indexed newImplementation);\\n\\n  /// @notice Emitted when the fee collector is changed\\n  /// @param oldFeeCollector The previous implementation\\n  /// @param newFeeCollector The new implementation\\n  event FeeCollectorChanged(address indexed oldFeeCollector, address indexed newFeeCollector);\\n\\n  /// @notice Emitted when the protocol fee is changed\\n  /// @param feeProtocol0Old The previous value of the token0 protocol fee\\n  /// @param feeProtocol1Old The previous value of the token1 protocol fee\\n  /// @param feeProtocol0New The updated value of the token0 protocol fee\\n  /// @param feeProtocol1New The updated value of the token1 protocol fee\\n  event SetFeeProtocol(uint8 feeProtocol0Old, uint8 feeProtocol1Old, uint8 feeProtocol0New, uint8 feeProtocol1New);\\n\\n  /// @notice Emitted when the protocol fee is changed\\n  /// @param pool The pool address\\n  /// @param feeProtocol0Old The previous value of the token0 protocol fee\\n  /// @param feeProtocol1Old The previous value of the token1 protocol fee\\n  /// @param feeProtocol0New The updated value of the token0 protocol fee\\n  /// @param feeProtocol1New The updated value of the token1 protocol fee\\n  event SetPoolFeeProtocol(\\n    address pool, uint8 feeProtocol0Old, uint8 feeProtocol1Old, uint8 feeProtocol0New, uint8 feeProtocol1New\\n  );\\n\\n  /// @notice Emitted when the feeSetter of the factory is changed\\n  /// @param oldSetter The feeSetter before the setter was changed\\n  /// @param newSetter The feeSetter after the setter was changed\\n  event FeeSetterChanged(address indexed oldSetter, address indexed newSetter);\\n\\n  /// @notice Returns the current owner of the factory\\n  /// @dev Can be changed by the current owner via setOwner\\n  /// @return The address of the factory owner\\n  function owner() external view returns (address);\\n\\n  /// @notice Returns the CL NFP Manager\\n  function nfpManager() external view returns (address);\\n\\n  /// @notice Returns the votingEscrow address\\n  function votingEscrow() external view returns (address);\\n\\n  /// @notice Returns Voter address\\n  function voter() external view returns (address);\\n\\n  /// @notice Returns the tick spacing for a given fee amount, if enabled, or 0 if not enabled\\n  /// @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context\\n  /// @param fee The enabled fee, denominated in hundredths of a bip. Returns 0 in case of unenabled fee\\n  /// @return The tick spacing\\n  function feeAmountTickSpacing(uint24 fee) external view returns (int24);\\n\\n  /// @notice Returns the pool address for a given pair of tokens and a fee, or address 0 if it does not exist\\n  /// @dev tokenA and tokenB may be passed in either token0/token1 or token1/token0 order\\n  /// @param tokenA The contract address of either token0 or token1\\n  /// @param tokenB The contract address of the other token\\n  /// @param fee The fee collected upon every swap in the pool, denominated in hundredths of a bip\\n  /// @return pool The pool address\\n  function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool);\\n\\n  /// @notice Returns the address of the fee collector contract\\n  /// @dev Fee collector decides where the protocol fees go (fee distributor, treasury, etc.)\\n  function feeCollector() external view returns (address);\\n\\n  /// @notice Creates a pool for the given two tokens and fee\\n  /// @param tokenA One of the two tokens in the desired pool\\n  /// @param tokenB The other of the two tokens in the desired pool\\n  /// @param fee The desired fee for the pool\\n  /// @param sqrtPriceX96 initial sqrtPriceX96 of the pool\\n  /// @dev tokenA and tokenB may be passed in either order: token0/token1 or token1/token0. tickSpacing is retrieved\\n  /// from the fee. The call will revert if the pool already exists, the fee is invalid, or the token arguments\\n  /// are invalid.\\n  /// @return pool The address of the newly created pool\\n  function createPool(address tokenA, address tokenB, uint24 fee, uint160 sqrtPriceX96) external returns (address pool);\\n\\n  /// @notice Updates the owner of the factory\\n  /// @dev Must be called by the current owner\\n  /// @param _owner The new owner of the factory\\n  function setOwner(address _owner) external;\\n\\n  /// @notice Enables a fee amount with the given tickSpacing\\n  /// @dev Fee amounts may never be removed once enabled\\n  /// @param fee The fee amount to enable, denominated in hundredths of a bip (i.e. 1e-6)\\n  /// @param tickSpacing The spacing between ticks to be enforced for all pools created with the given fee amount\\n  function enableFeeAmount(uint24 fee, int24 tickSpacing) external;\\n\\n  /// @notice returns the default protocol fee.\\n  function feeProtocol() external view returns (uint8);\\n\\n  /// @notice returns the protocol fee for both tokens of a pool.\\n  function poolFeeProtocol(address pool) external view returns (uint8);\\n\\n  /// @notice Sets the default protocol's % share of the fees\\n  /// @param _feeProtocol new default protocol fee for token0 and token1\\n  function setFeeProtocol(uint8 _feeProtocol) external;\\n\\n  /// @notice Sets the fee collector address\\n  /// @param _feeCollector the fee collector address\\n  function setFeeCollector(address _feeCollector) external;\\n\\n  function setFeeSetter(address _newFeeSetter) external;\\n\\n  function setFee(address _pool, uint24 _fee) external;\\n\\n  /// @notice Sets the default protocol's % share of the fees\\n  /// @param pool the pool address\\n  /// @param feeProtocol new protocol fee for the pool for token0 and token1\\n  function setPoolFeeProtocol(address pool, uint8 feeProtocol) external;\\n}\\n\",\"keccak256\":\"0x8520ff7b567b0aebc095c852fd23ff2bacfa866227ed7381133896606a29df13\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/thirdparty/INonfungiblePositionManager.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Telegram: https://t.me/mahaxyz\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\n// Importing from @uniswap doesnt work with @openzepplins latest release so this is refactored\\n// Source: https://github.com/Uniswap/v3-periphery/blob/main/contracts/interfaces/INonfungiblePositionManager.sol\\n\\nimport {IERC721} from \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\n\\ninterface INonfungiblePositionManager is IERC721 {\\n  function approve(address to, uint256 tokenId) external;\\n\\n  function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n  struct MintParams {\\n    address token0;\\n    address token1;\\n    uint24 fee;\\n    int24 tickLower;\\n    int24 tickUpper;\\n    uint256 amount0Desired;\\n    uint256 amount1Desired;\\n    uint256 amount0Min;\\n    uint256 amount1Min;\\n    address recipient;\\n    uint256 deadline;\\n    uint256 veNFTTokenId;\\n  }\\n\\n  function mint(MintParams calldata params)\\n    external\\n    payable\\n    returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1);\\n\\n  struct Position {\\n    uint96 nonce;\\n    address operator;\\n    address token0;\\n    address token1;\\n    uint24 fee;\\n    int24 tickLower;\\n    int24 tickUpper;\\n    uint128 liquidity;\\n    uint256 feeGrowthInside0LastX128;\\n    uint256 feeGrowthInside1LastX128;\\n    uint128 tokensOwed0;\\n    uint128 tokensOwed1;\\n  }\\n\\n  function positions(uint256 tokenId)\\n    external\\n    view\\n    returns (\\n      uint96 nonce,\\n      address operator,\\n      address token0,\\n      address token1,\\n      uint24 fee,\\n      int24 tickLower,\\n      int24 tickUpper,\\n      uint128 liquidity,\\n      uint256 feeGrowthInside0LastX128,\\n      uint256 feeGrowthInside1LastX128,\\n      uint128 tokensOwed0,\\n      uint128 tokensOwed1\\n    );\\n\\n  struct IncreaseLiquidityParams {\\n    uint256 tokenId;\\n    uint256 amount0Desired;\\n    uint256 amount1Desired;\\n    uint256 amount0Min;\\n    uint256 amount1Min;\\n    uint256 deadline;\\n  }\\n\\n  /// @notice Increases the amount of liquidity in a position, with tokens paid by the `msg.sender`\\n  /// @param params tokenId The ID of the token for which liquidity is being increased,\\n  /// amount0Desired The desired amount of token0 to be spent,\\n  /// amount1Desired The desired amount of token1 to be spent,\\n  /// amount0Min The minimum amount of token0 to spend, which serves as a slippage check,\\n  /// amount1Min The minimum amount of token1 to spend, which serves as a slippage check,\\n  /// deadline The time by which the transaction must be included to effect the change\\n  /// @return liquidity The new liquidity amount as a result of the increase\\n  /// @return amount0 The amount of token0 to acheive resulting liquidity\\n  /// @return amount1 The amount of token1 to acheive resulting liquidity\\n  function increaseLiquidity(IncreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    returns (uint128 liquidity, uint256 amount0, uint256 amount1);\\n\\n  struct DecreaseLiquidityParams {\\n    uint256 tokenId;\\n    uint128 liquidity;\\n    uint256 amount0Min;\\n    uint256 amount1Min;\\n    uint256 deadline;\\n  }\\n\\n  /// @notice Decreases the amount of liquidity in a position and accounts it to the position\\n  /// @param params tokenId The ID of the token for which liquidity is being decreased,\\n  /// amount The amount by which liquidity will be decreased,\\n  /// amount0Min The minimum amount of token0 that should be accounted for the burned liquidity,\\n  /// amount1Min The minimum amount of token1 that should be accounted for the burned liquidity,\\n  /// deadline The time by which the transaction must be included to effect the change\\n  /// @return amount0 The amount of token0 accounted to the position's tokens owed\\n  /// @return amount1 The amount of token1 accounted to the position's tokens owed\\n  function decreaseLiquidity(DecreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    returns (uint256 amount0, uint256 amount1);\\n\\n  struct CollectParams {\\n    uint256 tokenId;\\n    address recipient;\\n    uint128 amount0Max;\\n    uint128 amount1Max;\\n  }\\n\\n  function collect(CollectParams calldata params) external payable returns (uint256 amount0, uint256 amount1);\\n\\n  function factory() external view returns (address);\\n\\n  function burn(uint256 tokenId) external payable;\\n}\\n\",\"keccak256\":\"0x1ca5942090874312b21901de2b436bfa534719cd8497aab69033305c0669aba1\",\"license\":\"BUSL-1.1\"},\"contracts/locker/FreeUniV3LPLocker.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\n// \\u2588\\u2588\\u2588\\u2557   \\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2557  \\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2588\\u2588\\u2557 \\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2557\\n// \\u2588\\u2588\\u2554\\u2588\\u2588\\u2588\\u2588\\u2554\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551\\u255a\\u2588\\u2588\\u2554\\u255d\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\u2588\\u2588\\u2554\\u2550\\u2550\\u2588\\u2588\\u2551\\n// \\u2588\\u2588\\u2551 \\u255a\\u2550\\u255d \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\u2588\\u2588\\u2551  \\u2588\\u2588\\u2551\\n// \\u255a\\u2550\\u255d     \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\u255a\\u2550\\u255d  \\u255a\\u2550\\u255d\\n\\n// Website: https://maha.xyz\\n// Discord: https://discord.gg/mahadao\\n// Telegram: https://t.me/mahaxyz\\n// Twitter: https://twitter.com/mahaxyz_\\n\\npragma solidity ^0.8.0;\\n\\nimport {Ownable} from \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport {IERC20} from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport {SafeERC20} from \\\"@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\\\";\\nimport {ReentrancyGuard} from \\\"@openzeppelin/contracts/utils/ReentrancyGuard.sol\\\";\\nimport {EnumerableSet} from \\\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\\\";\\nimport {IERC721Receiver, IFreeUniV3LPLocker} from \\\"contracts/interfaces/IFreeUniV3LPLocker.sol\\\";\\nimport {IClPoolFactory} from \\\"contracts/interfaces/thirdparty/IClPoolFactory.sol\\\";\\nimport {IERC721, INonfungiblePositionManager} from \\\"contracts/interfaces/thirdparty/INonfungiblePositionManager.sol\\\";\\n\\n/// @title FreeUniV3LPLocker\\n/// @notice Contract for locking Uniswap V3 LP positions\\n/// @dev Implements the IFreeUniV3LPLocker interface\\ncontract FreeUniV3LPLocker is IFreeUniV3LPLocker, Ownable, ReentrancyGuard {\\n  using SafeERC20 for IERC20;\\n  using EnumerableSet for EnumerableSet.AddressSet;\\n  using EnumerableSet for EnumerableSet.UintSet;\\n\\n  uint256 public nextLockId = 1;\\n\\n  /// supported nftPositionMangers\\n  EnumerableSet.AddressSet private nftManagers;\\n\\n  /// lock details\\n  mapping(uint256 lockId => LockInfo) public locks;\\n\\n  /// List of lock ids for user\\n  mapping(address => EnumerableSet.UintSet) private userLocks;\\n\\n  /// @notice Modifier to check if the caller is the owner of a lock\\n  /// @param lockId The ID of the lock to check\\n  modifier validLockOwner(uint256 lockId) {\\n    require(lockId < nextLockId, \\\"Invalid lockId\\\");\\n    require(locks[lockId].owner == _msgSender(), \\\"Not lock owner\\\");\\n    _;\\n  }\\n\\n  /// @notice Constructor\\n  /// @param nftManager_ The address of the initial NFT position manager\\n  constructor(address nftManager_) Ownable(_msgSender()) {\\n    nftManagers.add(nftManager_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function addSupportedNftManager(address nftManager_) external onlyOwner {\\n    nftManagers.add(nftManager_);\\n    emit OnAddNftManger(nftManager_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function supportedNftManager(address nftManager_) public view returns (bool) {\\n    return nftManagers.contains(nftManager_);\\n  }\\n\\n  /// @notice Gets the pool address for a given NFT position\\n  /// @param nftManager_ The NFT position manager contract\\n  /// @param nftId_ The ID of the NFT position\\n  /// @return pool The address of the Uniswap V3 pool\\n  function _getPool(INonfungiblePositionManager nftManager_, uint256 nftId_) internal view returns (address pool) {\\n    (,, address token0, address token1, uint24 fee,,,,,,,) = nftManager_.positions(nftId_);\\n    IClPoolFactory factory = IClPoolFactory(nftManager_.factory());\\n    pool = factory.getPool(token0, token1, fee);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function lock(IERC721 nftManager_, uint256 nftId_, address owner_, address collector_, uint256 endTime_)\\n    external\\n    returns (uint256 lockId)\\n  {\\n    require(collector_ != address(0), \\\"CollectAddress invalid\\\");\\n    require(endTime_ > block.timestamp, \\\"EndTime <= currentTime\\\");\\n    require(supportedNftManager(address(nftManager_)), \\\"nftPositionManager not supported\\\");\\n\\n    nftManager_.safeTransferFrom(_msgSender(), address(this), nftId_);\\n    address pool = _getPool(INonfungiblePositionManager(address(nftManager_)), nftId_);\\n\\n    LockInfo memory newLock = LockInfo({\\n      lockId: nextLockId,\\n      nftPositionManager: INonfungiblePositionManager(address(nftManager_)),\\n      pendingOwner: address(0),\\n      owner: owner_,\\n      collector: collector_,\\n      pool: pool,\\n      nftId: nftId_,\\n      startTime: block.timestamp,\\n      endTime: endTime_\\n    });\\n    locks[newLock.lockId] = newLock;\\n    userLocks[owner_].add(newLock.lockId);\\n    nextLockId++;\\n\\n    emit OnLock(newLock.lockId, address(nftManager_), owner_, nftId_, endTime_);\\n    return newLock.lockId;\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function transferLock(uint256 lockId_, address newOwner_) external validLockOwner(lockId_) {\\n    locks[lockId_].pendingOwner = newOwner_;\\n    emit OnLockPendingTransfer(lockId_, _msgSender(), newOwner_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function acceptLock(uint256 lockId_) external {\\n    require(lockId_ < nextLockId, \\\"Invalid lockId\\\");\\n    address newOwner = _msgSender();\\n    /// check new owner\\n    require(newOwner == locks[lockId_].pendingOwner, \\\"Not pendingOwner\\\");\\n    /// emit event\\n    emit OnLockTransferred(lockId_, locks[lockId_].owner, newOwner);\\n    /// remove lockId from owner\\n    userLocks[locks[lockId_].owner].remove(lockId_);\\n    /// add lockId to new owner\\n    userLocks[newOwner].add(lockId_);\\n    /// set owner\\n    locks[lockId_].pendingOwner = address(0);\\n    locks[lockId_].owner = newOwner;\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function increaseLiquidity(uint256 lockId_, INonfungiblePositionManager.IncreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    nonReentrant\\n    returns (uint128 liquidity, uint256 amount0, uint256 amount1)\\n  {\\n    LockInfo memory userLock = locks[lockId_];\\n    require(userLock.nftId == params.tokenId, \\\"Invalid NFT_ID\\\");\\n\\n    (,, address token0, address token1,,,,,,,,) = userLock.nftPositionManager.positions(userLock.nftId);\\n\\n    uint256 balance0Before = IERC20(token0).balanceOf(address(this));\\n    uint256 balance1Before = IERC20(token1).balanceOf(address(this));\\n\\n    IERC20(token0).safeTransferFrom(_msgSender(), address(this), params.amount0Desired);\\n    IERC20(token1).safeTransferFrom(_msgSender(), address(this), params.amount1Desired);\\n    IERC20(token0).approve(address(userLock.nftPositionManager), params.amount0Desired);\\n    IERC20(token1).approve(address(userLock.nftPositionManager), params.amount1Desired);\\n\\n    (liquidity, amount0, amount1) = userLock.nftPositionManager.increaseLiquidity(params);\\n\\n    uint256 balance0diff = IERC20(token0).balanceOf(address(this)) - balance0Before;\\n    uint256 balance1diff = IERC20(token1).balanceOf(address(this)) - balance1Before;\\n    if (balance0diff > 0) IERC20(token0).safeTransfer(_msgSender(), balance0diff);\\n    if (balance1diff > 0) IERC20(token1).safeTransfer(_msgSender(), balance1diff);\\n\\n    emit OnIncreaseLiquidity(lockId_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function decreaseLiquidity(uint256 lockId_, INonfungiblePositionManager.DecreaseLiquidityParams calldata params)\\n    external\\n    payable\\n    validLockOwner(lockId_)\\n    nonReentrant\\n    returns (uint256 amount0, uint256 amount1)\\n  {\\n    LockInfo memory userLock = locks[lockId_];\\n    require(userLock.nftId == params.tokenId, \\\"Invalid NFT_ID\\\");\\n    require(userLock.endTime < block.timestamp, \\\"NOT YET\\\");\\n    _collect(lockId_, _msgSender(), type(uint128).max, type(uint128).max); // collect fees\\n    (amount0, amount1) = userLock.nftPositionManager.decreaseLiquidity(params);\\n    userLock.nftPositionManager.collect(\\n      INonfungiblePositionManager.CollectParams(userLock.nftId, userLock.owner, type(uint128).max, type(uint128).max)\\n    );\\n    emit OnDecreaseLiquidity(lockId_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function unlock(uint256 lockId_) external validLockOwner(lockId_) {\\n    LockInfo memory userLock = locks[lockId_];\\n    require(userLock.endTime < block.timestamp, \\\"Not yet\\\");\\n\\n    _collect(lockId_, userLock.owner, type(uint128).max, type(uint128).max);\\n\\n    userLock.nftPositionManager.safeTransferFrom(address(this), userLock.owner, userLock.nftId);\\n    userLocks[userLock.owner].remove(lockId_);\\n\\n    emit OnUnlock(lockId_, userLock.owner, userLock.nftId, block.timestamp);\\n\\n    delete locks[lockId_]; // clear the state for this lock (reset all values to zero)\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function relock(uint256 lockId_, uint256 endTime_) external validLockOwner(lockId_) nonReentrant {\\n    LockInfo storage userLock = locks[lockId_];\\n    require(endTime_ > userLock.endTime, \\\"EndTime <= currentEndTiem\\\");\\n    require(endTime_ > block.timestamp, \\\"EndTime <= now\\\");\\n    userLock.endTime = endTime_;\\n    emit OnRelock(lockId_, userLock.endTime);\\n  }\\n\\n  /// @notice Private collect function, wrap this in re-entrancy guard calls\\n  /// @param lockId_ The ID of the lock\\n  /// @param recipient_ The address to receive the fees\\n  /// @param amount0Max_ The maximum amount of token0 to collect\\n  /// @param amount1Max_ The maximum amount of token1 to collect\\n  /// @return amount0 The amount of token0 collected\\n  /// @return amount1 The amount of token1 collected\\n  function _collect(uint256 lockId_, address recipient_, uint128 amount0Max_, uint128 amount1Max_)\\n    private\\n    returns (uint256 amount0, uint256 amount1)\\n  {\\n    LockInfo memory userLock = locks[lockId_];\\n    require(userLock.owner == _msgSender() || userLock.collector == _msgSender(), \\\"Not owner\\\");\\n    (amount0, amount1) = userLock.nftPositionManager.collect(\\n      INonfungiblePositionManager.CollectParams(userLock.nftId, recipient_, amount0Max_, amount1Max_)\\n    );\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function collect(uint256 lockId_, address recipient_, uint128 amount0Max_, uint128 amount1Max_)\\n    external\\n    nonReentrant\\n    returns (uint256 amount0, uint256 amount1)\\n  {\\n    (amount0, amount1) = _collect(lockId_, recipient_, amount0Max_, amount1Max_);\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function setCollectAddress(uint256 lockId_, address collector_) external validLockOwner(lockId_) nonReentrant {\\n    require(collector_ != address(0), \\\"COLLECT_ADDR\\\");\\n    LockInfo storage userLock = locks[lockId_];\\n    userLock.collector = collector_;\\n    emit OnSetCollector(lockId_, collector_);\\n  }\\n\\n  /// @notice Returns just the liquidity value from a position\\n  /// @param nftPositionManager_ The NFT position manager contract\\n  /// @param tokenId_ The ID of the NFT position\\n  /// @return liquidity The amount of liquidity in the position\\n  function _getLiquidity(INonfungiblePositionManager nftPositionManager_, uint256 tokenId_)\\n    private\\n    view\\n    returns (uint128)\\n  {\\n    (,,,,,,, uint128 liquidity,,,,) = nftPositionManager_.positions(tokenId_);\\n    return liquidity;\\n  }\\n\\n  function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {\\n    return IERC721Receiver.onERC721Received.selector;\\n  }\\n\\n  /// @inheritdoc IFreeUniV3LPLocker\\n  function getUserLocks(address user) external view returns (uint256[] memory lockIds) {\\n    return userLocks[user].values();\\n  }\\n}\\n\",\"keccak256\":\"0xa5f8ae288dab1098c0b18443a003418f5fce700d5689c2c05e32042b9918e31e\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052600160025534801561001557600080fd5b506040516129b33803806129b383398101604081905261003491610137565b338061005a57604051631e4fbdf760e01b81526000600482015260240160405180910390fd5b6100638161007a565b50600180556100736003826100ca565b5050610167565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b60006100df836001600160a01b0384166100e8565b90505b92915050565b600081815260018301602052604081205461012f575081546001818101845560008481526020808220909301849055845484825282860190935260409020919091556100e2565b5060006100e2565b60006020828403121561014957600080fd5b81516001600160a01b038116811461016057600080fd5b9392505050565b61283d806101766000396000f3fe6080604052600436106101295760003560e01c8063715018a6116100a5578063b707a28811610074578063f11478f811610059578063f11478f8146103b6578063f2fde38b146103c9578063f4dadc61146103e957600080fd5b8063b707a28814610366578063f0582e141461038657600080fd5b8063715018a6146102e95780638da5cb5b146102fe578063b2fb30cb14610326578063b48dd3be1461034657600080fd5b806323a35de9116100fc57806359038b79116100e157806359038b79146102855780636198e339146102b35780636518a0b3146102d357600080fd5b806323a35de914610223578063260e12b01461025057600080fd5b806306f9b07a1461012e578063093cf39114610150578063150b7a021461017057806318694155146101eb575b600080fd5b34801561013a57600080fd5b5061014e6101493660046122ea565b6104ba565b005b34801561015c57600080fd5b5061014e61016b366004612307565b61050d565b34801561017c57600080fd5b506101b561018b366004612320565b7f150b7a020000000000000000000000000000000000000000000000000000000095945050505050565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020015b60405180910390f35b6101fe6101f93660046123c1565b6106b1565b604080516001600160801b0390941684526020840192909252908201526060016101e2565b34801561022f57600080fd5b5061024361023e3660046122ea565b610c57565b6040516101e291906123f9565b34801561025c57600080fd5b5061027061026b366004612451565b610c81565b604080519283526020830191909152016101e2565b34801561029157600080fd5b506102a56102a03660046124a4565b610caf565b6040519081526020016101e2565b3480156102bf57600080fd5b5061014e6102ce366004612307565b611091565b3480156102df57600080fd5b506102a560025481565b3480156102f557600080fd5b5061014e61138e565b34801561030a57600080fd5b506000546040516001600160a01b0390911681526020016101e2565b34801561033257600080fd5b5061014e6103413660046124ff565b6113a2565b34801561035257600080fd5b5061014e610361366004612521565b611543565b34801561037257600080fd5b5061014e610381366004612521565b611654565b34801561039257600080fd5b506103a66103a13660046122ea565b6117b1565b60405190151581526020016101e2565b6102706103c4366004612551565b6117be565b3480156103d557600080fd5b5061014e6103e43660046122ea565b611b1c565b3480156103f557600080fd5b50610462610404366004612307565b600560208190526000918252604090912080546001820154600283015460038401546004850154958501546006860154600787015460089097015495976001600160a01b039586169794861696938616959081169492169290919089565b60408051998a526001600160a01b0398891660208b0152968816968901969096529386166060880152918516608087015290931660a085015260c084019290925260e0830191909152610100820152610120016101e2565b6104c2611b73565b6104cd600382611bb9565b506040516001600160a01b03821681527fff6127f8243e336003b53caa06a61be0a98e6a527cfd0b071872424c5d916e4a9060200160405180910390a150565b60025481106105545760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b60448201526064015b60405180910390fd5b60008181526005602052604090206002015433906001600160a01b031681146105bf5760405162461bcd60e51b815260206004820152601060248201527f4e6f742070656e64696e674f776e657200000000000000000000000000000000604482015260640161054b565b6000828152600560209081526040918290206003015482516001600160a01b0391821681529084169181019190915283917f977f200b2646b170d74b50cb3968700a2cc1884b0f7918d49efdb96302cb1854910160405180910390a26000828152600560209081526040808320600301546001600160a01b031683526006909152902061064c9083611bd5565b506001600160a01b038116600090815260066020526040902061066f9083611be1565b506000918252600560205260409091206002810180546001600160a01b0319908116909155600390910180549091166001600160a01b03909216919091179055565b60008060006106be611bed565b6000858152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c08301819052600782015460e08401526008909101546101008301528535146107955760405162461bcd60e51b815260206004820152600e60248201527f496e76616c6964204e46545f4944000000000000000000000000000000000000604482015260640161054b565b60008082602001516001600160a01b03166399fbab888460c001516040518263ffffffff1660e01b81526004016107ce91815260200190565b61018060405180830381865afa1580156107ec573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061081091906125bb565b50506040516370a0823160e01b8152306004820152979b5095995060009850506001600160a01b038a1696506370a082319560240194506108519350505050565b602060405180830381865afa15801561086e573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610892919061269d565b6040516370a0823160e01b81523060048201529091506000906001600160a01b038416906370a0823190602401602060405180830381865afa1580156108dc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610900919061269d565b905061091b6001600160a01b038516333060208d0135611c30565b6109346001600160a01b038416333060408d0135611c30565b60208581015160405163095ea7b360e01b81526001600160a01b039182166004820152918b0135602483015285169063095ea7b3906044016020604051808303816000875af115801561098b573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109af91906126b6565b5060208501516040805163095ea7b360e01b81526001600160a01b039283166004820152908b013560248201529084169063095ea7b3906044016020604051808303816000875af1158015610a08573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610a2c91906126b6565b50602080860151604080517f219f5d170000000000000000000000000000000000000000000000000000000081528c356004820152928c013560248401528b0135604483015260608b0135606483015260808b0135608483015260a08b013560a48301526001600160a01b03169063219f5d179060c4016060604051808303816000875af1158015610ac2573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610ae691906126d8565b6040516370a0823160e01b8152306004820152929a50909850965060009083906001600160a01b038716906370a0823190602401602060405180830381865afa158015610b37573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b5b919061269d565b610b659190612725565b6040516370a0823160e01b815230600482015290915060009083906001600160a01b038716906370a0823190602401602060405180830381865afa158015610bb1573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610bd5919061269d565b610bdf9190612725565b90508115610bfb57610bfb6001600160a01b0387163384611cb2565b8015610c1557610c156001600160a01b0386163383611cb2565b6040518c907f94c501c466d590ed97ef3d786c5fa1a7a4a5227f599f2546df3ea86389b534f990600090a250505050505050610c5060018055565b9250925092565b6001600160a01b0381166000908152600660205260409020606090610c7b90611ce3565b92915050565b600080610c8c611bed565b610c9886868686611cf0565b9092509050610ca660018055565b94509492505050565b60006001600160a01b038316610d075760405162461bcd60e51b815260206004820152601660248201527f436f6c6c6563744164647265737320696e76616c696400000000000000000000604482015260640161054b565b428211610d565760405162461bcd60e51b815260206004820152601660248201527f456e6454696d65203c3d2063757272656e7454696d6500000000000000000000604482015260640161054b565b610d5f866117b1565b610dab5760405162461bcd60e51b815260206004820181905260248201527f6e6674506f736974696f6e4d616e61676572206e6f7420737570706f72746564604482015260640161054b565b6001600160a01b0386166342842e0e336040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101889052606401600060405180830381600087803b158015610e2157600080fd5b505af1158015610e35573d6000803e3d6000fd5b505050506000610e458787611ead565b905060006040518061012001604052806002548152602001896001600160a01b0316815260200160006001600160a01b03168152602001876001600160a01b03168152602001866001600160a01b03168152602001836001600160a01b031681526020018881526020014281526020018581525090508060056000836000015181526020019081526020016000206000820151816000015560208201518160010160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060408201518160020160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060608201518160030160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060808201518160040160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060a08201518160050160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060c0820151816006015560e08201518160070155610100820151816008015590505061101b816000015160066000896001600160a01b03166001600160a01b03168152602001908152602001600020611be190919063ffffffff16565b506002805490600061102c83612738565b90915550508051604080516001600160a01b03808c16825289166020820152908101899052606081018690527fc1d62c166ce7dbf25ddb2c2746bfe7d0a3a9c465f1190f5b2c1148177508b6619060800160405180910390a251979650505050505050565b8060025481106110d45760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461112e5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b6000828152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c0830152600781015460e083015260080154610100820181905242116112025760405162461bcd60e51b815260206004820152600760248201527f4e6f742079657400000000000000000000000000000000000000000000000000604482015260640161054b565b6112198382606001516001600160801b0380611cf0565b50506020810151606082015160c08301516040517f42842e0e0000000000000000000000000000000000000000000000000000000081523060048201526001600160a01b03928316602482015260448101919091529116906342842e0e90606401600060405180830381600087803b15801561129457600080fd5b505af11580156112a8573d6000803e3d6000fd5b50505060608201516001600160a01b031660009081526006602052604090206112d2915084611bd5565b5060608181015160c0830151604080516001600160a01b039093168352602083019190915242828201525185927f462608836dd129ef58f79f0a556fe285515f86287c758ea37a6d2f0a052e3f9d928290030190a25050600090815260056020819052604082208281556001810180546001600160a01b03199081169091556002820180548216905560038201805482169055600482018054821690559181018054909216909155600681018290556007810182905560080155565b611396611b73565b6113a0600061203b565b565b8160025481106113e55760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461143f5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b611447611bed565b6000838152600560205260409020600881015483116114a85760405162461bcd60e51b815260206004820152601960248201527f456e6454696d65203c3d2063757272656e74456e645469656d00000000000000604482015260640161054b565b4283116114f75760405162461bcd60e51b815260206004820152600e60248201527f456e6454696d65203c3d206e6f77000000000000000000000000000000000000604482015260640161054b565b6008810183905560405183815284907f34fc5c313b2fd97c2b528805434c6cb36ab482f72af6117a52208cf18874fdf4906020015b60405180910390a25061153e60018055565b505050565b8160025481106115865760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b031633146115e05760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b600083815260056020526040902060020180546001600160a01b0319166001600160a01b038416179055827f2ab916445cd7f71b7d22f037187a5e1b6086c455fa944619946ca72b62030ca233604080516001600160a01b03928316815291861660208301520160405180910390a2505050565b8160025481106116975760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b031633146116f15760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b6116f9611bed565b6001600160a01b03821661174f5760405162461bcd60e51b815260206004820152600c60248201527f434f4c4c4543545f414444520000000000000000000000000000000000000000604482015260640161054b565b6000838152600560209081526040918290206004810180546001600160a01b0319166001600160a01b03871690811790915592519283529185917fbf72678a283f17a2d52bd1bd823f5fcd1f921056005db4c2ac6e29f88da5b754910161152c565b6000610c7b60038361208b565b6000808360025481106118045760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461185e5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b611866611bed565b6000858152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c08301819052600782015460e084015260089091015461010083015285351461193d5760405162461bcd60e51b815260206004820152600e60248201527f496e76616c6964204e46545f4944000000000000000000000000000000000000604482015260640161054b565b42816101000151106119915760405162461bcd60e51b815260206004820152600760248201527f4e4f542059455400000000000000000000000000000000000000000000000000604482015260640161054b565b6119a486336001600160801b0380611cf0565b505080602001516001600160a01b0316630c49ccbe866040518263ffffffff1660e01b81526004016119d69190612751565b60408051808303816000875af11580156119f4573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611a18919061279a565b6020838101516040805160808101825260c087015181526060808801516001600160a01b039081169583019586526001600160801b03838501818152928401818152945163fc6f786560e01b8152935160048501529551811660248401529051851660448301529151909316606484015293975091955091169063fc6f78659060840160408051808303816000875af1158015611ab9573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611add919061279a565b505060405186907fabcec736cf7ffb1e2406a7d4f50174d68847773bd8bf43d6f9ee131a24121a7d90600090a250611b1460018055565b509250929050565b611b24611b73565b6001600160a01b038116611b67576040517f1e4fbdf70000000000000000000000000000000000000000000000000000000081526000600482015260240161054b565b611b708161203b565b50565b6000546001600160a01b031633146113a0576040517f118cdaa700000000000000000000000000000000000000000000000000000000815233600482015260240161054b565b6000611bce836001600160a01b0384166120ad565b9392505050565b6000611bce83836120fc565b6000611bce83836120ad565b600260015403611c29576040517f3ee5aeb500000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6002600155565b6040516001600160a01b038481166024830152838116604483015260648201839052611cac9186918216906323b872dd906084015b604051602081830303815290604052915060e01b6020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff83818316178352505050506121ef565b50505050565b6040516001600160a01b0383811660248301526044820183905261153e91859182169063a9059cbb90606401611c65565b60606000611bce83612279565b60008481526005602081815260408084208151610120810183528154815260018201546001600160a01b0390811694820194909452600282015484169281019290925260038101548316606083018190526004820154841660808401529381015490921660a0820152600682015460c0820152600782015460e08201526008909101546101008201528291331480611d94575060808101516001600160a01b031633145b611de05760405162461bcd60e51b815260206004820152600960248201527f4e6f74206f776e65720000000000000000000000000000000000000000000000604482015260640161054b565b6020808201516040805160808101825260c085015181526001600160a01b038a81169482019485526001600160801b03808b168385019081528a821660608501908152945163fc6f786560e01b81529351600485015295518216602484015294518516604483015291519093166064840152169063fc6f78659060840160408051808303816000875af1158015611e7b573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611e9f919061279a565b909890975095505050505050565b600080600080856001600160a01b03166399fbab88866040518263ffffffff1660e01b8152600401611ee191815260200190565b61018060405180830381865afa158015611eff573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611f2391906125bb565b5050505050505094509450945050506000866001600160a01b031663c45a01556040518163ffffffff1660e01b8152600401602060405180830381865afa158015611f72573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611f9691906127be565b6040517f1698ee820000000000000000000000000000000000000000000000000000000081526001600160a01b038681166004830152858116602483015262ffffff8516604483015291925090821690631698ee8290606401602060405180830381865afa15801561200c573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061203091906127be565b979650505050505050565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6001600160a01b03811660009081526001830160205260408120541515611bce565b60008181526001830160205260408120546120f457508154600181810184556000848152602080822090930184905584548482528286019093526040902091909155610c7b565b506000610c7b565b600081815260018301602052604081205480156121e5576000612120600183612725565b855490915060009061213490600190612725565b9050808214612199576000866000018281548110612154576121546127db565b9060005260206000200154905080876000018481548110612177576121776127db565b6000918252602080832090910192909255918252600188019052604090208390555b85548690806121aa576121aa6127f1565b600190038181906000526020600020016000905590558560010160008681526020019081526020016000206000905560019350505050610c7b565b6000915050610c7b565b600080602060008451602086016000885af180612212576040513d6000823e3d81fd5b50506000513d9150811561222a578060011415612237565b6001600160a01b0384163b155b15611cac576040517f5274afe70000000000000000000000000000000000000000000000000000000081526001600160a01b038516600482015260240161054b565b6060816000018054806020026020016040519081016040528092919081815260200182805480156122c957602002820191906000526020600020905b8154815260200190600101908083116122b5575b50505050509050919050565b6001600160a01b0381168114611b7057600080fd5b6000602082840312156122fc57600080fd5b8135611bce816122d5565b60006020828403121561231957600080fd5b5035919050565b60008060008060006080868803121561233857600080fd5b8535612343816122d5565b94506020860135612353816122d5565b935060408601359250606086013567ffffffffffffffff81111561237657600080fd5b8601601f8101881361238757600080fd5b803567ffffffffffffffff81111561239e57600080fd5b8860208284010111156123b057600080fd5b959894975092955050506020019190565b60008082840360e08112156123d557600080fd5b8335925060c0601f19820112156123eb57600080fd5b506020830190509250929050565b602080825282518282018190526000918401906040840190835b81811015612431578351835260209384019390920191600101612413565b509095945050505050565b6001600160801b0381168114611b7057600080fd5b6000806000806080858703121561246757600080fd5b843593506020850135612479816122d5565b925060408501356124898161243c565b915060608501356124998161243c565b939692955090935050565b600080600080600060a086880312156124bc57600080fd5b85356124c7816122d5565b94506020860135935060408601356124de816122d5565b925060608601356124ee816122d5565b949793965091946080013592915050565b6000806040838503121561251257600080fd5b50508035926020909101359150565b6000806040838503121561253457600080fd5b823591506020830135612546816122d5565b809150509250929050565b60008082840360c081121561256557600080fd5b8335925060a0601f19820112156123eb57600080fd5b8051612586816122d5565b919050565b805162ffffff8116811461258657600080fd5b8051600281900b811461258657600080fd5b80516125868161243c565b6000806000806000806000806000806000806101808d8f0312156125de57600080fd5b8c516bffffffffffffffffffffffff811681146125fa57600080fd5b9b5061260860208e0161257b565b9a5061261660408e0161257b565b995061262460608e0161257b565b985061263260808e0161258b565b975061264060a08e0161259e565b965061264e60c08e0161259e565b955061265c60e08e016125b0565b6101008e01516101208f01519196509450925061267c6101408e016125b0565b915061268b6101608e016125b0565b90509295989b509295989b509295989b565b6000602082840312156126af57600080fd5b5051919050565b6000602082840312156126c857600080fd5b81518015158114611bce57600080fd5b6000806000606084860312156126ed57600080fd5b83516126f88161243c565b602085015160409095015190969495509392505050565b634e487b7160e01b600052601160045260246000fd5b81810381811115610c7b57610c7b61270f565b60006001820161274a5761274a61270f565b5060010190565b8135815260a0810160208301356127678161243c565b6001600160801b031660208301526040838101359083015260608084013590830152608092830135929091019190915290565b600080604083850312156127ad57600080fd5b505080516020909101519092909150565b6000602082840312156127d057600080fd5b8151611bce816122d5565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fdfea2646970667358221220cc0ef972b4520a273bbca408dd31e9dc07b0a2b297edfe2f7ccba91dce2d7e1364736f6c634300081c0033",
+  "deployedBytecode": "0x6080604052600436106101295760003560e01c8063715018a6116100a5578063b707a28811610074578063f11478f811610059578063f11478f8146103b6578063f2fde38b146103c9578063f4dadc61146103e957600080fd5b8063b707a28814610366578063f0582e141461038657600080fd5b8063715018a6146102e95780638da5cb5b146102fe578063b2fb30cb14610326578063b48dd3be1461034657600080fd5b806323a35de9116100fc57806359038b79116100e157806359038b79146102855780636198e339146102b35780636518a0b3146102d357600080fd5b806323a35de914610223578063260e12b01461025057600080fd5b806306f9b07a1461012e578063093cf39114610150578063150b7a021461017057806318694155146101eb575b600080fd5b34801561013a57600080fd5b5061014e6101493660046122ea565b6104ba565b005b34801561015c57600080fd5b5061014e61016b366004612307565b61050d565b34801561017c57600080fd5b506101b561018b366004612320565b7f150b7a020000000000000000000000000000000000000000000000000000000095945050505050565b6040517fffffffff0000000000000000000000000000000000000000000000000000000090911681526020015b60405180910390f35b6101fe6101f93660046123c1565b6106b1565b604080516001600160801b0390941684526020840192909252908201526060016101e2565b34801561022f57600080fd5b5061024361023e3660046122ea565b610c57565b6040516101e291906123f9565b34801561025c57600080fd5b5061027061026b366004612451565b610c81565b604080519283526020830191909152016101e2565b34801561029157600080fd5b506102a56102a03660046124a4565b610caf565b6040519081526020016101e2565b3480156102bf57600080fd5b5061014e6102ce366004612307565b611091565b3480156102df57600080fd5b506102a560025481565b3480156102f557600080fd5b5061014e61138e565b34801561030a57600080fd5b506000546040516001600160a01b0390911681526020016101e2565b34801561033257600080fd5b5061014e6103413660046124ff565b6113a2565b34801561035257600080fd5b5061014e610361366004612521565b611543565b34801561037257600080fd5b5061014e610381366004612521565b611654565b34801561039257600080fd5b506103a66103a13660046122ea565b6117b1565b60405190151581526020016101e2565b6102706103c4366004612551565b6117be565b3480156103d557600080fd5b5061014e6103e43660046122ea565b611b1c565b3480156103f557600080fd5b50610462610404366004612307565b600560208190526000918252604090912080546001820154600283015460038401546004850154958501546006860154600787015460089097015495976001600160a01b039586169794861696938616959081169492169290919089565b60408051998a526001600160a01b0398891660208b0152968816968901969096529386166060880152918516608087015290931660a085015260c084019290925260e0830191909152610100820152610120016101e2565b6104c2611b73565b6104cd600382611bb9565b506040516001600160a01b03821681527fff6127f8243e336003b53caa06a61be0a98e6a527cfd0b071872424c5d916e4a9060200160405180910390a150565b60025481106105545760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b60448201526064015b60405180910390fd5b60008181526005602052604090206002015433906001600160a01b031681146105bf5760405162461bcd60e51b815260206004820152601060248201527f4e6f742070656e64696e674f776e657200000000000000000000000000000000604482015260640161054b565b6000828152600560209081526040918290206003015482516001600160a01b0391821681529084169181019190915283917f977f200b2646b170d74b50cb3968700a2cc1884b0f7918d49efdb96302cb1854910160405180910390a26000828152600560209081526040808320600301546001600160a01b031683526006909152902061064c9083611bd5565b506001600160a01b038116600090815260066020526040902061066f9083611be1565b506000918252600560205260409091206002810180546001600160a01b0319908116909155600390910180549091166001600160a01b03909216919091179055565b60008060006106be611bed565b6000858152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c08301819052600782015460e08401526008909101546101008301528535146107955760405162461bcd60e51b815260206004820152600e60248201527f496e76616c6964204e46545f4944000000000000000000000000000000000000604482015260640161054b565b60008082602001516001600160a01b03166399fbab888460c001516040518263ffffffff1660e01b81526004016107ce91815260200190565b61018060405180830381865afa1580156107ec573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061081091906125bb565b50506040516370a0823160e01b8152306004820152979b5095995060009850506001600160a01b038a1696506370a082319560240194506108519350505050565b602060405180830381865afa15801561086e573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610892919061269d565b6040516370a0823160e01b81523060048201529091506000906001600160a01b038416906370a0823190602401602060405180830381865afa1580156108dc573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610900919061269d565b905061091b6001600160a01b038516333060208d0135611c30565b6109346001600160a01b038416333060408d0135611c30565b60208581015160405163095ea7b360e01b81526001600160a01b039182166004820152918b0135602483015285169063095ea7b3906044016020604051808303816000875af115801561098b573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109af91906126b6565b5060208501516040805163095ea7b360e01b81526001600160a01b039283166004820152908b013560248201529084169063095ea7b3906044016020604051808303816000875af1158015610a08573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610a2c91906126b6565b50602080860151604080517f219f5d170000000000000000000000000000000000000000000000000000000081528c356004820152928c013560248401528b0135604483015260608b0135606483015260808b0135608483015260a08b013560a48301526001600160a01b03169063219f5d179060c4016060604051808303816000875af1158015610ac2573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610ae691906126d8565b6040516370a0823160e01b8152306004820152929a50909850965060009083906001600160a01b038716906370a0823190602401602060405180830381865afa158015610b37573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b5b919061269d565b610b659190612725565b6040516370a0823160e01b815230600482015290915060009083906001600160a01b038716906370a0823190602401602060405180830381865afa158015610bb1573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610bd5919061269d565b610bdf9190612725565b90508115610bfb57610bfb6001600160a01b0387163384611cb2565b8015610c1557610c156001600160a01b0386163383611cb2565b6040518c907f94c501c466d590ed97ef3d786c5fa1a7a4a5227f599f2546df3ea86389b534f990600090a250505050505050610c5060018055565b9250925092565b6001600160a01b0381166000908152600660205260409020606090610c7b90611ce3565b92915050565b600080610c8c611bed565b610c9886868686611cf0565b9092509050610ca660018055565b94509492505050565b60006001600160a01b038316610d075760405162461bcd60e51b815260206004820152601660248201527f436f6c6c6563744164647265737320696e76616c696400000000000000000000604482015260640161054b565b428211610d565760405162461bcd60e51b815260206004820152601660248201527f456e6454696d65203c3d2063757272656e7454696d6500000000000000000000604482015260640161054b565b610d5f866117b1565b610dab5760405162461bcd60e51b815260206004820181905260248201527f6e6674506f736974696f6e4d616e61676572206e6f7420737570706f72746564604482015260640161054b565b6001600160a01b0386166342842e0e336040517fffffffff0000000000000000000000000000000000000000000000000000000060e084901b1681526001600160a01b03909116600482015230602482015260448101889052606401600060405180830381600087803b158015610e2157600080fd5b505af1158015610e35573d6000803e3d6000fd5b505050506000610e458787611ead565b905060006040518061012001604052806002548152602001896001600160a01b0316815260200160006001600160a01b03168152602001876001600160a01b03168152602001866001600160a01b03168152602001836001600160a01b031681526020018881526020014281526020018581525090508060056000836000015181526020019081526020016000206000820151816000015560208201518160010160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060408201518160020160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060608201518160030160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060808201518160040160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060a08201518160050160006101000a8154816001600160a01b0302191690836001600160a01b0316021790555060c0820151816006015560e08201518160070155610100820151816008015590505061101b816000015160066000896001600160a01b03166001600160a01b03168152602001908152602001600020611be190919063ffffffff16565b506002805490600061102c83612738565b90915550508051604080516001600160a01b03808c16825289166020820152908101899052606081018690527fc1d62c166ce7dbf25ddb2c2746bfe7d0a3a9c465f1190f5b2c1148177508b6619060800160405180910390a251979650505050505050565b8060025481106110d45760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461112e5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b6000828152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c0830152600781015460e083015260080154610100820181905242116112025760405162461bcd60e51b815260206004820152600760248201527f4e6f742079657400000000000000000000000000000000000000000000000000604482015260640161054b565b6112198382606001516001600160801b0380611cf0565b50506020810151606082015160c08301516040517f42842e0e0000000000000000000000000000000000000000000000000000000081523060048201526001600160a01b03928316602482015260448101919091529116906342842e0e90606401600060405180830381600087803b15801561129457600080fd5b505af11580156112a8573d6000803e3d6000fd5b50505060608201516001600160a01b031660009081526006602052604090206112d2915084611bd5565b5060608181015160c0830151604080516001600160a01b039093168352602083019190915242828201525185927f462608836dd129ef58f79f0a556fe285515f86287c758ea37a6d2f0a052e3f9d928290030190a25050600090815260056020819052604082208281556001810180546001600160a01b03199081169091556002820180548216905560038201805482169055600482018054821690559181018054909216909155600681018290556007810182905560080155565b611396611b73565b6113a0600061203b565b565b8160025481106113e55760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461143f5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b611447611bed565b6000838152600560205260409020600881015483116114a85760405162461bcd60e51b815260206004820152601960248201527f456e6454696d65203c3d2063757272656e74456e645469656d00000000000000604482015260640161054b565b4283116114f75760405162461bcd60e51b815260206004820152600e60248201527f456e6454696d65203c3d206e6f77000000000000000000000000000000000000604482015260640161054b565b6008810183905560405183815284907f34fc5c313b2fd97c2b528805434c6cb36ab482f72af6117a52208cf18874fdf4906020015b60405180910390a25061153e60018055565b505050565b8160025481106115865760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b031633146115e05760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b600083815260056020526040902060020180546001600160a01b0319166001600160a01b038416179055827f2ab916445cd7f71b7d22f037187a5e1b6086c455fa944619946ca72b62030ca233604080516001600160a01b03928316815291861660208301520160405180910390a2505050565b8160025481106116975760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b031633146116f15760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b6116f9611bed565b6001600160a01b03821661174f5760405162461bcd60e51b815260206004820152600c60248201527f434f4c4c4543545f414444520000000000000000000000000000000000000000604482015260640161054b565b6000838152600560209081526040918290206004810180546001600160a01b0319166001600160a01b03871690811790915592519283529185917fbf72678a283f17a2d52bd1bd823f5fcd1f921056005db4c2ac6e29f88da5b754910161152c565b6000610c7b60038361208b565b6000808360025481106118045760405162461bcd60e51b815260206004820152600e60248201526d125b9d985b1a59081b1bd8dad25960921b604482015260640161054b565b6000818152600560205260409020600301546001600160a01b0316331461185e5760405162461bcd60e51b815260206004820152600e60248201526d2737ba103637b1b59037bbb732b960911b604482015260640161054b565b611866611bed565b6000858152600560208181526040928390208351610120810185528154815260018201546001600160a01b03908116938201939093526002820154831694810194909452600381015482166060850152600481015482166080850152918201541660a0830152600681015460c08301819052600782015460e084015260089091015461010083015285351461193d5760405162461bcd60e51b815260206004820152600e60248201527f496e76616c6964204e46545f4944000000000000000000000000000000000000604482015260640161054b565b42816101000151106119915760405162461bcd60e51b815260206004820152600760248201527f4e4f542059455400000000000000000000000000000000000000000000000000604482015260640161054b565b6119a486336001600160801b0380611cf0565b505080602001516001600160a01b0316630c49ccbe866040518263ffffffff1660e01b81526004016119d69190612751565b60408051808303816000875af11580156119f4573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611a18919061279a565b6020838101516040805160808101825260c087015181526060808801516001600160a01b039081169583019586526001600160801b03838501818152928401818152945163fc6f786560e01b8152935160048501529551811660248401529051851660448301529151909316606484015293975091955091169063fc6f78659060840160408051808303816000875af1158015611ab9573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611add919061279a565b505060405186907fabcec736cf7ffb1e2406a7d4f50174d68847773bd8bf43d6f9ee131a24121a7d90600090a250611b1460018055565b509250929050565b611b24611b73565b6001600160a01b038116611b67576040517f1e4fbdf70000000000000000000000000000000000000000000000000000000081526000600482015260240161054b565b611b708161203b565b50565b6000546001600160a01b031633146113a0576040517f118cdaa700000000000000000000000000000000000000000000000000000000815233600482015260240161054b565b6000611bce836001600160a01b0384166120ad565b9392505050565b6000611bce83836120fc565b6000611bce83836120ad565b600260015403611c29576040517f3ee5aeb500000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6002600155565b6040516001600160a01b038481166024830152838116604483015260648201839052611cac9186918216906323b872dd906084015b604051602081830303815290604052915060e01b6020820180517bffffffffffffffffffffffffffffffffffffffffffffffffffffffff83818316178352505050506121ef565b50505050565b6040516001600160a01b0383811660248301526044820183905261153e91859182169063a9059cbb90606401611c65565b60606000611bce83612279565b60008481526005602081815260408084208151610120810183528154815260018201546001600160a01b0390811694820194909452600282015484169281019290925260038101548316606083018190526004820154841660808401529381015490921660a0820152600682015460c0820152600782015460e08201526008909101546101008201528291331480611d94575060808101516001600160a01b031633145b611de05760405162461bcd60e51b815260206004820152600960248201527f4e6f74206f776e65720000000000000000000000000000000000000000000000604482015260640161054b565b6020808201516040805160808101825260c085015181526001600160a01b038a81169482019485526001600160801b03808b168385019081528a821660608501908152945163fc6f786560e01b81529351600485015295518216602484015294518516604483015291519093166064840152169063fc6f78659060840160408051808303816000875af1158015611e7b573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611e9f919061279a565b909890975095505050505050565b600080600080856001600160a01b03166399fbab88866040518263ffffffff1660e01b8152600401611ee191815260200190565b61018060405180830381865afa158015611eff573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611f2391906125bb565b5050505050505094509450945050506000866001600160a01b031663c45a01556040518163ffffffff1660e01b8152600401602060405180830381865afa158015611f72573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611f9691906127be565b6040517f1698ee820000000000000000000000000000000000000000000000000000000081526001600160a01b038681166004830152858116602483015262ffffff8516604483015291925090821690631698ee8290606401602060405180830381865afa15801561200c573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061203091906127be565b979650505050505050565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6001600160a01b03811660009081526001830160205260408120541515611bce565b60008181526001830160205260408120546120f457508154600181810184556000848152602080822090930184905584548482528286019093526040902091909155610c7b565b506000610c7b565b600081815260018301602052604081205480156121e5576000612120600183612725565b855490915060009061213490600190612725565b9050808214612199576000866000018281548110612154576121546127db565b9060005260206000200154905080876000018481548110612177576121776127db565b6000918252602080832090910192909255918252600188019052604090208390555b85548690806121aa576121aa6127f1565b600190038181906000526020600020016000905590558560010160008681526020019081526020016000206000905560019350505050610c7b565b6000915050610c7b565b600080602060008451602086016000885af180612212576040513d6000823e3d81fd5b50506000513d9150811561222a578060011415612237565b6001600160a01b0384163b155b15611cac576040517f5274afe70000000000000000000000000000000000000000000000000000000081526001600160a01b038516600482015260240161054b565b6060816000018054806020026020016040519081016040528092919081815260200182805480156122c957602002820191906000526020600020905b8154815260200190600101908083116122b5575b50505050509050919050565b6001600160a01b0381168114611b7057600080fd5b6000602082840312156122fc57600080fd5b8135611bce816122d5565b60006020828403121561231957600080fd5b5035919050565b60008060008060006080868803121561233857600080fd5b8535612343816122d5565b94506020860135612353816122d5565b935060408601359250606086013567ffffffffffffffff81111561237657600080fd5b8601601f8101881361238757600080fd5b803567ffffffffffffffff81111561239e57600080fd5b8860208284010111156123b057600080fd5b959894975092955050506020019190565b60008082840360e08112156123d557600080fd5b8335925060c0601f19820112156123eb57600080fd5b506020830190509250929050565b602080825282518282018190526000918401906040840190835b81811015612431578351835260209384019390920191600101612413565b509095945050505050565b6001600160801b0381168114611b7057600080fd5b6000806000806080858703121561246757600080fd5b843593506020850135612479816122d5565b925060408501356124898161243c565b915060608501356124998161243c565b939692955090935050565b600080600080600060a086880312156124bc57600080fd5b85356124c7816122d5565b94506020860135935060408601356124de816122d5565b925060608601356124ee816122d5565b949793965091946080013592915050565b6000806040838503121561251257600080fd5b50508035926020909101359150565b6000806040838503121561253457600080fd5b823591506020830135612546816122d5565b809150509250929050565b60008082840360c081121561256557600080fd5b8335925060a0601f19820112156123eb57600080fd5b8051612586816122d5565b919050565b805162ffffff8116811461258657600080fd5b8051600281900b811461258657600080fd5b80516125868161243c565b6000806000806000806000806000806000806101808d8f0312156125de57600080fd5b8c516bffffffffffffffffffffffff811681146125fa57600080fd5b9b5061260860208e0161257b565b9a5061261660408e0161257b565b995061262460608e0161257b565b985061263260808e0161258b565b975061264060a08e0161259e565b965061264e60c08e0161259e565b955061265c60e08e016125b0565b6101008e01516101208f01519196509450925061267c6101408e016125b0565b915061268b6101608e016125b0565b90509295989b509295989b509295989b565b6000602082840312156126af57600080fd5b5051919050565b6000602082840312156126c857600080fd5b81518015158114611bce57600080fd5b6000806000606084860312156126ed57600080fd5b83516126f88161243c565b602085015160409095015190969495509392505050565b634e487b7160e01b600052601160045260246000fd5b81810381811115610c7b57610c7b61270f565b60006001820161274a5761274a61270f565b5060010190565b8135815260a0810160208301356127678161243c565b6001600160801b031660208301526040838101359083015260608084013590830152608092830135929091019190915290565b600080604083850312156127ad57600080fd5b505080516020909101519092909150565b6000602082840312156127d057600080fd5b8151611bce816122d5565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fdfea2646970667358221220cc0ef972b4520a273bbca408dd31e9dc07b0a2b297edfe2f7ccba91dce2d7e1364736f6c634300081c0033",
+  "devdoc": {
+    "details": "Implements the IFreeUniV3LPLocker interface",
+    "errors": {
+      "OwnableInvalidOwner(address)": [
+        {
+          "details": "The owner is not a valid owner account. (eg. `address(0)`)"
+        }
+      ],
+      "OwnableUnauthorizedAccount(address)": [
+        {
+          "details": "The caller account is not authorized to perform an operation."
+        }
+      ],
+      "ReentrancyGuardReentrantCall()": [
+        {
+          "details": "Unauthorized reentrant call."
+        }
+      ],
+      "SafeERC20FailedOperation(address)": [
+        {
+          "details": "An operation with an ERC-20 token failed."
+        }
+      ]
+    },
+    "kind": "dev",
+    "methods": {
+      "acceptLock(uint256)": {
+        "params": {
+          "lockId_": "The ID of the lock to accept"
+        }
+      },
+      "addSupportedNftManager(address)": {
+        "params": {
+          "nftManager_": "The address of the NFT position manager to add"
+        }
+      },
+      "collect(uint256,address,uint128,uint128)": {
+        "params": {
+          "amount0Max_": "The maximum amount of token0 to collect",
+          "amount1Max_": "The maximum amount of token1 to collect",
+          "lockId_": "The ID of the lock",
+          "recipient_": "The address to receive the fees"
+        },
+        "returns": {
+          "amount0": "The amount of token0 collected",
+          "amount1": "The amount of token1 collected"
+        }
+      },
+      "constructor": {
+        "params": {
+          "nftManager_": "The address of the initial NFT position manager"
+        }
+      },
+      "decreaseLiquidity(uint256,(uint256,uint128,uint256,uint256,uint256))": {
+        "params": {
+          "lockId_": "The ID of the lock",
+          "params": "The parameters for decreasing liquidity"
+        },
+        "returns": {
+          "amount0": "The amount of token0 received",
+          "amount1": "The amount of token1 received"
+        }
+      },
+      "getUserLocks(address)": {
+        "params": {
+          "user": "The address of the user"
+        },
+        "returns": {
+          "lockIds": "An array of lock IDs"
+        }
+      },
+      "increaseLiquidity(uint256,(uint256,uint256,uint256,uint256,uint256,uint256))": {
+        "params": {
+          "lockId_": "The ID of the lock",
+          "params": "The parameters for increasing liquidity"
+        },
+        "returns": {
+          "amount0": "The amount of token0 added",
+          "amount1": "The amount of token1 added",
+          "liquidity": "The amount of liquidity added"
+        }
+      },
+      "lock(address,uint256,address,address,uint256)": {
+        "params": {
+          "collector_": "The address that can collect fees",
+          "endTime_": "The timestamp when the lock expires",
+          "nftId_": "The ID of the NFT position",
+          "nftManager_": "The NFT position manager contract",
+          "owner_": "The address that will own the locked position"
+        },
+        "returns": {
+          "lockId": "The ID of the created lock"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "relock(uint256,uint256)": {
+        "params": {
+          "endTime_": "The new end time for the lock",
+          "lockId_": "The ID of the lock"
+        }
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "setCollectAddress(uint256,address)": {
+        "params": {
+          "collector_": "The address that can collect fees",
+          "lockId_": "The ID of the lock"
+        }
+      },
+      "supportedNftManager(address)": {
+        "params": {
+          "nftManager_": "The address of the NFT position manager to check"
+        },
+        "returns": {
+          "_0": "True if the manager is supported, false otherwise"
+        }
+      },
+      "transferLock(uint256,address)": {
+        "params": {
+          "lockId_": "The ID of the lock to transfer",
+          "newOwner_": "The address of the new owner"
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      },
+      "unlock(uint256)": {
+        "params": {
+          "lockId_": "The ID of the lock to unlock"
+        }
+      }
+    },
+    "stateVariables": {
+      "nextLockId": {
+        "return": "The next lock ID",
+        "returns": {
+          "_0": "The next lock ID"
+        }
+      }
+    },
+    "title": "FreeUniV3LPLocker",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "acceptLock(uint256)": {
+        "notice": "Accepts a lock transfer"
+      },
+      "addSupportedNftManager(address)": {
+        "notice": "Adds a new supported NFT position manager"
+      },
+      "collect(uint256,address,uint128,uint128)": {
+        "notice": "Collects fees from a locked position"
+      },
+      "constructor": {
+        "notice": "Constructor"
+      },
+      "decreaseLiquidity(uint256,(uint256,uint128,uint256,uint256,uint256))": {
+        "notice": "Decreases liquidity in a locked position"
+      },
+      "getUserLocks(address)": {
+        "notice": "Returns all lock IDs owned by a user"
+      },
+      "increaseLiquidity(uint256,(uint256,uint256,uint256,uint256,uint256,uint256))": {
+        "notice": "Increases liquidity in a locked position"
+      },
+      "lock(address,uint256,address,address,uint256)": {
+        "notice": "Locks a Uniswap V3 LP position"
+      },
+      "locks(uint256)": {
+        "notice": "lock details"
+      },
+      "nextLockId()": {
+        "notice": "Returns the next available lock ID"
+      },
+      "relock(uint256,uint256)": {
+        "notice": "Extends the lock period of a position"
+      },
+      "setCollectAddress(uint256,address)": {
+        "notice": "Sets the address that can collect fees from a locked position"
+      },
+      "supportedNftManager(address)": {
+        "notice": "Checks if an NFT position manager is supported"
+      },
+      "transferLock(uint256,address)": {
+        "notice": "Transfers a lock to a new owner"
+      },
+      "unlock(uint256)": {
+        "notice": "Unlocks a position after the lock period has ended"
+      }
+    },
+    "notice": "Contract for locking Uniswap V3 LP positions",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 3165,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 6696,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "_status",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 22752,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "nextLockId",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 22756,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "nftManagers",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_struct(AddressSet)11955_storage"
+      },
+      {
+        "astId": 22762,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "locks",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_uint256,t_struct(LockInfo)18035_storage)"
+      },
+      {
+        "astId": 22768,
+        "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+        "label": "userLocks",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_mapping(t_address,t_struct(UintSet)12112_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_bytes32)dyn_storage": {
+        "base": "t_bytes32",
+        "encoding": "dynamic_array",
+        "label": "bytes32[]",
+        "numberOfBytes": "32"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_contract(INonfungiblePositionManager)19038": {
+        "encoding": "inplace",
+        "label": "contract INonfungiblePositionManager",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_struct(UintSet)12112_storage)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => struct EnumerableSet.UintSet)",
+        "numberOfBytes": "32",
+        "value": "t_struct(UintSet)12112_storage"
+      },
+      "t_mapping(t_bytes32,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_uint256,t_struct(LockInfo)18035_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => struct IFreeUniV3LPLocker.LockInfo)",
+        "numberOfBytes": "32",
+        "value": "t_struct(LockInfo)18035_storage"
+      },
+      "t_struct(AddressSet)11955_storage": {
+        "encoding": "inplace",
+        "label": "struct EnumerableSet.AddressSet",
+        "members": [
+          {
+            "astId": 11954,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "_inner",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(Set)11640_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(LockInfo)18035_storage": {
+        "encoding": "inplace",
+        "label": "struct IFreeUniV3LPLocker.LockInfo",
+        "members": [
+          {
+            "astId": 18017,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "lockId",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 18020,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "nftPositionManager",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(INonfungiblePositionManager)19038"
+          },
+          {
+            "astId": 18022,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "pendingOwner",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address"
+          },
+          {
+            "astId": 18024,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "owner",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address"
+          },
+          {
+            "astId": 18026,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "collector",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address"
+          },
+          {
+            "astId": 18028,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "pool",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address"
+          },
+          {
+            "astId": 18030,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "nftId",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 18032,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "startTime",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 18034,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "endTime",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "288"
+      },
+      "t_struct(Set)11640_storage": {
+        "encoding": "inplace",
+        "label": "struct EnumerableSet.Set",
+        "members": [
+          {
+            "astId": 11635,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "_values",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_array(t_bytes32)dyn_storage"
+          },
+          {
+            "astId": 11639,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "_positions",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_uint256)"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(UintSet)12112_storage": {
+        "encoding": "inplace",
+        "label": "struct EnumerableSet.UintSet",
+        "members": [
+          {
+            "astId": 12111,
+            "contract": "contracts/locker/FreeUniV3LPLocker.sol:FreeUniV3LPLocker",
+            "label": "_inner",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(Set)11640_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

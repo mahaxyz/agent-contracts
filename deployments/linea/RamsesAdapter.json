@@ -1,5 +1,5 @@
 {
-  "address": "0xC5b78bFdD84BCd65E13cfC9EA643DdDE813b278c",
+  "address": "0x6E4008AEf1767d10c0F6BA6Db8eB77A6d3c3D850",
   "abi": [
     {
       "inputs": [],
@@ -141,25 +141,6 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "token",
-          "type": "address"
-        }
-      ],
-      "name": "graduated",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
           "name": "_launchpad",
           "type": "address"
         },
@@ -176,6 +157,16 @@
         {
           "internalType": "address",
           "name": "_WETH9",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_locker",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_nftPositionManager",
           "type": "address"
         }
       ],
@@ -194,6 +185,16 @@
       ],
       "name": "launchParams",
       "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "tokenBase",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC20",
+          "name": "tokenQuote",
+          "type": "address"
+        },
         {
           "internalType": "address",
           "name": "pool",
@@ -283,26 +284,29 @@
       "type": "function"
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "locker",
+      "outputs": [
         {
-          "internalType": "uint256",
-          "name": "amount0",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
+          "internalType": "contract IFreeUniV3LPLocker",
           "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "",
-          "type": "bytes"
+          "type": "address"
         }
       ],
-      "name": "ramsesV2MintCallback",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nftPositionManager",
+      "outputs": [
+        {
+          "internalType": "contract IERC721",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -310,7 +314,7 @@
       "name": "swapRouter",
       "outputs": [
         {
-          "internalType": "contract IRamsesSwapRouter",
+          "internalType": "contract ICLSwapRouter",
           "name": "",
           "type": "address"
         }
@@ -384,6 +388,30 @@
         }
       ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenToLockId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lockId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {

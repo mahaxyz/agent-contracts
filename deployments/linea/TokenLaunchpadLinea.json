@@ -1,5 +1,5 @@
 {
-  "address": "0xa5aaAdfdb285106c3bFB1621447caca2e97E158D",
+  "address": "0x8b327e69344FE66e4D641A31418f6DAACfF9ae64",
   "abi": [
     {
       "inputs": [],
@@ -344,12 +344,6 @@
         },
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "limitPerWallet",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
           "internalType": "string",
           "name": "name",
           "type": "string"
@@ -403,11 +397,6 @@
               "type": "string"
             },
             {
-              "internalType": "uint256",
-              "name": "limitPerWallet",
-              "type": "uint256"
-            },
-            {
               "internalType": "address",
               "name": "adapter",
               "type": "address"
@@ -446,19 +435,6 @@
       ],
       "name": "Transfer",
       "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "ODOS",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     },
     {
       "inputs": [],
@@ -513,55 +489,6 @@
     {
       "inputs": [
         {
-          "internalType": "contract IERC20",
-          "name": "_odosTokenIn",
-          "type": "address"
-        },
-        {
-          "internalType": "contract IERC20",
-          "name": "_tokenIn",
-          "type": "address"
-        },
-        {
-          "internalType": "contract IERC20",
-          "name": "_tokenOut",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_odosTokenInAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_minOdosTokenOut",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_minAmountOut",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "_odosData",
-          "type": "bytes"
-        }
-      ],
-      "name": "buyWithExactInputWithOdos",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "amountOut",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "contract ITokenTemplate",
           "name": "_token",
           "type": "address"
@@ -597,11 +524,6 @@
               "type": "address"
             },
             {
-              "internalType": "uint256",
-              "name": "limitPerWallet",
-              "type": "uint256"
-            },
-            {
               "internalType": "bytes32",
               "name": "salt",
               "type": "bytes32"
@@ -620,6 +542,11 @@
               "internalType": "int24",
               "name": "upperMaxTick",
               "type": "int24"
+            },
+            {
+              "internalType": "bool",
+              "name": "isFeeDiscounted",
+              "type": "bool"
             }
           ],
           "internalType": "struct ITokenLaunchpad.CreateParams",
@@ -643,6 +570,11 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -672,6 +604,32 @@
       "outputs": [
         {
           "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feeDiscountAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feeDiscountToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
           "name": "",
           "type": "address"
         }
@@ -735,8 +693,13 @@
         },
         {
           "internalType": "address",
-          "name": "_odos",
+          "name": "_feeDiscountToken",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feeDiscountAmount",
+          "type": "uint256"
         }
       ],
       "name": "initialize",
@@ -799,11 +762,6 @@
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "limitPerWallet",
-          "type": "uint256"
-        },
-        {
           "internalType": "bytes32",
           "name": "salt",
           "type": "bytes32"
@@ -822,6 +780,11 @@
           "internalType": "int24",
           "name": "upperMaxTick",
           "type": "int24"
+        },
+        {
+          "internalType": "bool",
+          "name": "isFeeDiscounted",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -959,55 +922,6 @@
     {
       "inputs": [
         {
-          "internalType": "contract IERC20",
-          "name": "_tokenIn",
-          "type": "address"
-        },
-        {
-          "internalType": "contract IERC20",
-          "name": "_odosTokenOut",
-          "type": "address"
-        },
-        {
-          "internalType": "contract IERC20",
-          "name": "_tokenOut",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_tokenInAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_minOdosTokenIn",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_minAmountOut",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "_odosData",
-          "type": "bytes"
-        }
-      ],
-      "name": "sellWithExactInputWithOdos",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "amountOut",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "operator",
           "type": "address"
@@ -1033,6 +947,11 @@
         {
           "internalType": "uint256",
           "name": "_fee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feeDiscountAmount",
           "type": "uint256"
         }
       ],
@@ -1272,10 +1191,12 @@
     }
   ],
   "args": [
-    "0xC5b78bFdD84BCd65E13cfC9EA643DdDE813b278c",
-    "0xBe4D31C938C03204faDad1281d25A41a0F1E9400",
+    "0x6E4008AEf1767d10c0F6BA6Db8eB77A6d3c3D850",
+    "0x4986B63bDeA434189F6a0fFFc7E59dAdF63AB8A4",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
-    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"
+    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+    "0x6a661312938d22a2a0e27f585073e4406903990a",
+    "1000000000000000000000"
   ],
   "numDeployments": 3
 }
