@@ -20,14 +20,17 @@ contract TokenLaunchpadBSC is TokenLaunchpad {
     internal
     override
   {
-    address mahaTreasury = address(0); // TODO: change to BSC treasury
-
-    // 40% to MAHA treasury
-    // 60% to the owner
-
-    IERC20(_token0).transfer(mahaTreasury, _amount0 * 40 / 100);
-    IERC20(_token1).transfer(mahaTreasury, _amount1 * 40 / 100);
-    IERC20(_token0).transfer(_owner, _amount0 * 60 / 100);
-    IERC20(_token1).transfer(_owner, _amount1 * 60 / 100);
+    if (launchParams[_token0].isFeeDiscounted) {
+      // 100% to the owner if the fee is discounted
+      IERC20(_token0).transfer(_owner, _amount0);
+      IERC20(_token1).transfer(_owner, _amount1);
+    } else {
+      // 40% to MAHA treasury
+      // 60% to the owner
+      IERC20(_token0).transfer(feeDestination, _amount0 * 40 / 100);
+      IERC20(_token1).transfer(feeDestination, _amount1 * 40 / 100);
+      IERC20(_token0).transfer(_owner, _amount0 * 60 / 100);
+      IERC20(_token1).transfer(_owner, _amount1 * 60 / 100);
+    }
   }
 }

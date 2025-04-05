@@ -30,6 +30,7 @@ interface ITokenLaunchpad {
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
   /// @param upperMaxTick The maximum tick allowed
+  /// @param isFeeDiscounted Whether the fee is discounted
   struct CreateParams {
     string name;
     string symbol;
@@ -40,6 +41,7 @@ interface ITokenLaunchpad {
     int24 launchTick;
     int24 graduationTick;
     int24 upperMaxTick;
+    bool isFeeDiscounted;
   }
 
   /// @notice Emitted when fee settings are updated
@@ -82,7 +84,16 @@ interface ITokenLaunchpad {
   /// @param _tokenImplementation The implementation contract for new tokens
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
-  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth) external;
+  /// @param _feeDiscountToken The token used for fee discount
+  /// @param _feeDiscountAmount The amount of fee discount
+  function initialize(
+    address _adapter,
+    address _tokenImplementation,
+    address _owner,
+    address _weth,
+    address _feeDiscountToken,
+    uint256 _feeDiscountAmount
+  ) external;
 
   /// @notice Updates the referral settings
   /// @param _referralDestination The address to receive referrals

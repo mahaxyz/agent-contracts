@@ -31,10 +31,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   address public feeDestination;
   address public tokenImplementation;
   ICLMMAdapter public adapter;
+  IERC20 public feeDiscountToken;
   IERC20[] public tokens;
   IReferralDistributor public referralDestination;
   IWETH9 public weth;
   uint256 public creationFee;
+  uint256 public feeDiscountAmount;
   uint256 public referralFee;
 
   mapping(ITokenTemplate token => CreateParams) public launchParams;
@@ -43,13 +45,19 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
-  function initialize(address _adapter, address _tokenImplementation, address _owner, address _weth)
-    external
-    initializer
-  {
+  function initialize(
+    address _adapter,
+    address _tokenImplementation,
+    address _owner,
+    address _weth,
+    address _feeDiscountToken,
+    uint256 _feeDiscountAmount
+  ) external initializer {
     adapter = ICLMMAdapter(_adapter);
     tokenImplementation = _tokenImplementation;
     weth = IWETH9(_weth);
+    feeDiscountToken = IERC20(_feeDiscountToken);
+    feeDiscountAmount = _feeDiscountAmount;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
@@ -79,6 +87,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // wrap anything pending into weth
     if (address(this).balance > 0) weth.deposit{value: address(this).balance}();
+
+    if (p.isFeeDiscounted) {
+      feeDiscountToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
+    }
 
     // take any pending balance from the sender
     if (amount > 0) {
