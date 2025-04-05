@@ -139,7 +139,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // if the user wants to buy more tokens, they can do so
     uint256 received;
-    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0);
+    if (amount > 0 && amount > swapped) received = adapter.swapForExactInput(p.fundingToken, token, amount - swapped, 0);
 
     // refund any remaining tokens
     _refundTokens(token);
