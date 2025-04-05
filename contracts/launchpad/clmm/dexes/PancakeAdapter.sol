@@ -25,6 +25,7 @@ import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 import {IPancakeAdapter, PoolKey} from "contracts/interfaces/thirdparty/pancake/IPancakeAdapter.sol";
 
+import {IGoPlusLocker} from "contracts/interfaces/IGoPlusLocker.sol";
 import {IPancakeFactory} from "contracts/interfaces/thirdparty/pancake/IPancakeFactory.sol";
 import {IPancakePool} from "contracts/interfaces/thirdparty/pancake/IPancakePool.sol";
 import {IPancakeSwapRouter} from "contracts/interfaces/thirdparty/pancake/IPancakeSwapRouter.sol";
@@ -39,16 +40,24 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
   address public WETH9;
   IPancakePool private _transientClPool;
   IPancakeSwapRouter public swapRouter;
+  IGoPlusLocker public locker;
+  INonfungiblePositionManager public nftPositionManager;
 
-  function initialize(address _launchpad, address _poolFactory, address _swapRouter, address _WETH9)
-    external
-    initializer
-  {
+  function initialize(
+    address _launchpad,
+    address _poolFactory,
+    address _swapRouter,
+    address _WETH9,
+    address _locker,
+    address _nftPositionManager
+  ) external initializer {
     launchpad = _launchpad;
     poolFactory = IPancakeFactory(_poolFactory);
     swapRouter = IPancakeSwapRouter(_swapRouter);
     _me = address(this);
     WETH9 = _WETH9;
+    locker = IGoPlusLocker(_locker);
+    nftPositionManager = INonfungiblePositionManager(_nftPositionManager);
   }
 
   function launchedTokens(IERC20 _token) external view returns (bool launched) {
@@ -173,10 +182,6 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
   function pancakeV3MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
     require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
     IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
-  }
-
-  function pancakeV3SwapCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
-    require(msg.sender == address(_transientClPool), "!clPool");
   }
 
   receive() external payable {}
