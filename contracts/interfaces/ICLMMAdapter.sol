@@ -24,6 +24,8 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
   struct LaunchTokenParams {
+    IERC20 tokenBase;
+    IERC20 tokenQuote;
     address pool;
     PoolKey poolKey;
     int24 tick0;
@@ -36,7 +38,16 @@ interface ICLMMAdapter {
   /// @param _clPoolFactory The address of the CL pool factory
   /// @param _swapRouter The address of the swap router
   /// @param _WETH9 The address of the WETH9 token
-  function initialize(address _launchpad, address _clPoolFactory, address _swapRouter, address _WETH9) external;
+  /// @param _locker The address of the locker
+  /// @param _nftPositionManager The address of the NFT position manager
+  function initialize(
+    address _launchpad,
+    address _clPoolFactory,
+    address _swapRouter,
+    address _WETH9,
+    address _locker,
+    address _nftPositionManager
+  ) external;
 
   /// @notice Returns the address of the pool for a given token
   /// @param _token The token address

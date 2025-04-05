@@ -3,6 +3,7 @@ pragma solidity 0.8.26;
 
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
+import {FreeUniV3LPLocker} from "contracts/locker/FreeUniV3LPLocker.sol";
 
 import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
@@ -14,6 +15,7 @@ contract TokenLaunchpadLineaForkTest is Test {
   MockERC20 _weth;
   RamsesAdapter _adapter;
   WAGMIEToken _tokenImpl;
+  FreeUniV3LPLocker _locker;
 
   string LINEA_RPC_URL = vm.envString("LINEA_RPC_URL");
   address owner = makeAddr("owner");
@@ -25,10 +27,13 @@ contract TokenLaunchpadLineaForkTest is Test {
     uint256 lineaFork = vm.createFork(LINEA_RPC_URL);
     vm.selectFork(lineaFork);
 
+    address nftManager = address(0x0000000000000000000000000000000000000000);
+
     _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _tokenImpl = new WAGMIEToken();
+    _locker = new FreeUniV3LPLocker(nftManager);
 
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "nileAdapter");
@@ -42,7 +47,9 @@ contract TokenLaunchpadLineaForkTest is Test {
       address(_launchpad),
       address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42),
       address(0xAAAE99091Fbb28D400029052821653C1C752483B),
-      address(_weth)
+      address(_weth),
+      address(_locker),
+      address(0)
     );
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(0), 0);
   }

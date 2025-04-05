@@ -14,11 +14,9 @@
 
 pragma solidity ^0.8.0;
 
-import {IPancakeV3SwapCallback} from "contracts/interfaces/thirdparty/pancake/IPancakeV3SwapCallback.sol";
-
 /// @title Router token swapping functionality
-/// @notice Functions for swapping tokens via PancakeSwap V3
-interface IPancakeSwapRouter is IPancakeV3SwapCallback {
+/// @notice Functions for swapping tokens
+interface ICLSwapRouter {
   struct ExactInputSingleParams {
     address tokenIn;
     address tokenOut;

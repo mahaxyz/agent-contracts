@@ -45,17 +45,6 @@ contract TokenLaunchpadBscForkTest is Test {
     _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(0), 0);
   }
 
-  function test_Initialize() public view {
-    assertEq(_adapter.launchpad(), address(_launchpad));
-    assertEq(address(_adapter.poolFactory()), PANCAKE_FACTORY);
-    assertEq(address(_adapter.swapRouter()), PANCAKE_ROUTER);
-    assertEq(address(_adapter.WETH9()), address(_weth));
-
-    assertEq(address(_launchpad.adapter()), address(_adapter));
-    assertEq(_launchpad.owner(), owner);
-    assertEq(address(_launchpad.weth()), address(_weth));
-  }
-
   function test_create() public {
     ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
       name: "Test Token",

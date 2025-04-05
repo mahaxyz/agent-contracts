@@ -23,9 +23,9 @@ import {IERC721Receiver, IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUni
 import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
 import {IUniswapV3Factory} from "contracts/interfaces/thirdparty/IUniswapV3Factory.sol";
 
-// @title FreeUniV3LPLocker
-// @notice Contract for locking Uniswap V3 LP positions
-// @dev Implements the IFreeUniV3LPLocker interface
+/// @title FreeUniV3LPLocker
+/// @notice Contract for locking Uniswap V3 LP positions
+/// @dev Implements the IFreeUniV3LPLocker interface
 contract FreeUniV3LPLocker is IFreeUniV3LPLocker, Ownable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -91,9 +91,6 @@ contract FreeUniV3LPLocker is IFreeUniV3LPLocker, Ownable, ReentrancyGuard {
 
     nftManager_.safeTransferFrom(_msgSender(), address(this), nftId_);
     address pool = _getPool(nftManager_, nftId_);
-
-    /// collect fees for user
-    nftManager_.collect(INonfungiblePositionManager.CollectParams(nftId_, owner_, type(uint128).max, type(uint128).max));
 
     LockInfo memory newLock = LockInfo({
       lockId: nextLockId,
