@@ -14,6 +14,7 @@
 
 pragma solidity ^0.8.0;
 
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
 
@@ -69,13 +70,9 @@ interface IFreeUniV3LPLocker is IERC721Receiver {
    * @param endTime_ The timestamp when the lock expires
    * @return lockId The ID of the created lock
    */
-  function lock(
-    INonfungiblePositionManager nftManager_,
-    uint256 nftId_,
-    address owner_,
-    address collector_,
-    uint256 endTime_
-  ) external returns (uint256 lockId);
+  function lock(IERC721 nftManager_, uint256 nftId_, address owner_, address collector_, uint256 endTime_)
+    external
+    returns (uint256 lockId);
 
   /**
    * @notice Transfers a lock to a new owner

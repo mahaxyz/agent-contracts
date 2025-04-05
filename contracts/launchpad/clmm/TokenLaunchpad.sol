@@ -83,14 +83,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     returns (address, uint256, uint256)
   {
     // send any creation fee to the fee destination
-    if (creationFee > 0) payable(feeDestination).transfer(creationFee - msg.value);
+    if (creationFee > 0) payable(feeDestination).transfer(creationFee);
 
     // wrap anything pending into weth
     if (address(this).balance > 0) weth.deposit{value: address(this).balance}();
 
-    if (p.isFeeDiscounted) {
-      feeDiscountToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
-    }
+    if (p.isFeeDiscounted) feeDiscountToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
 
     // take any pending balance from the sender
     if (amount > 0) {
@@ -101,13 +99,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     ITokenTemplate token;
 
     {
-      ITokenTemplate.InitParams memory params = ITokenTemplate.InitParams({
-        name: p.name,
-        symbol: p.symbol,
-        metadata: p.metadata,
-        limitPerWallet: p.limitPerWallet,
-        adapter: address(adapter)
-      });
+      ITokenTemplate.InitParams memory params =
+        ITokenTemplate.InitParams({name: p.name, symbol: p.symbol, metadata: p.metadata, adapter: address(adapter)});
 
       bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
       token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));
@@ -129,15 +122,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     }
     {
       emit TokenLaunchParams(
-        token,
-        p.fundingToken,
-        p.launchTick,
-        p.graduationTick,
-        p.upperMaxTick,
-        p.limitPerWallet,
-        p.name,
-        p.symbol,
-        p.metadata
+        token, p.fundingToken, p.launchTick, p.graduationTick, p.upperMaxTick, p.name, p.symbol, p.metadata
       );
     }
 

@@ -21,7 +21,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IERC721Receiver, IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
-import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
+import {IERC721, INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
 
 /// @title FreeUniV3LPLocker
 /// @notice Contract for locking Uniswap V3 LP positions
@@ -78,23 +78,20 @@ contract FreeUniV3LPLocker is IFreeUniV3LPLocker, Ownable, ReentrancyGuard {
   }
 
   /// @inheritdoc IFreeUniV3LPLocker
-  function lock(
-    INonfungiblePositionManager nftManager_,
-    uint256 nftId_,
-    address owner_,
-    address collector_,
-    uint256 endTime_
-  ) external returns (uint256 lockId) {
+  function lock(IERC721 nftManager_, uint256 nftId_, address owner_, address collector_, uint256 endTime_)
+    external
+    returns (uint256 lockId)
+  {
     require(collector_ != address(0), "CollectAddress invalid");
     require(endTime_ > block.timestamp, "EndTime <= currentTime");
     require(supportedNftManager(address(nftManager_)), "nftPositionManager not supported");
 
     nftManager_.safeTransferFrom(_msgSender(), address(this), nftId_);
-    address pool = _getPool(nftManager_, nftId_);
+    address pool = _getPool(INonfungiblePositionManager(address(nftManager_)), nftId_);
 
     LockInfo memory newLock = LockInfo({
       lockId: nextLockId,
-      nftPositionManager: nftManager_,
+      nftPositionManager: INonfungiblePositionManager(address(nftManager_)),
       pendingOwner: address(0),
       owner: owner_,
       collector: collector_,

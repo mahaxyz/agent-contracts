@@ -39,19 +39,6 @@ interface INonfungiblePositionManager is IERC721 {
     uint256 veNFTTokenId;
   }
 
-  //   address token0;
-  // address token1;
-  // uint24 fee;
-  // int24 tickLower;
-  // int24 tickUpper;
-  // uint256 amount0Desired;
-  // uint256 amount1Desired;
-  // uint256 amount0Min;
-  // uint256 amount1Min;
-  // address recipient;
-  // uint256 deadline;
-  // uint256 veNFTTokenId;
-
   function mint(MintParams calldata params)
     external
     payable

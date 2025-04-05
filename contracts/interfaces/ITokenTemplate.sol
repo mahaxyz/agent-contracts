@@ -23,13 +23,11 @@ interface ITokenTemplate is IERC20 {
   /// @param name The name of the token
   /// @param symbol The symbol of the token
   /// @param metadata Additional metadata about the token
-  /// @param limitPerWallet Maximum tokens per wallet during presale
   /// @param adapter Address of the CLMM adapter contract
   struct InitParams {
     string name;
     string symbol;
     string metadata;
-    uint256 limitPerWallet;
     address adapter;
   }
 
@@ -43,17 +41,4 @@ interface ITokenTemplate is IERC20 {
   /// @notice Initializes the token with the given parameters
   /// @param p The initialization parameters
   function initialize(InitParams memory p) external;
-
-  /// @notice Returns whether the token is unlocked for unrestricted transfers
-  /// @return bool True if unlocked, false otherwise
-  function unlocked() external view returns (bool);
-
-  /// @notice Checks if an address is whitelisted
-  /// @param _address The address to check
-  /// @return bool True if whitelisted, false otherwise
-  function isWhitelisted(address _address) external view returns (bool);
-
-  /// @notice Adds an address to the whitelist
-  /// @param _address The address to whitelist
-  function whitelist(address _address) external;
 }

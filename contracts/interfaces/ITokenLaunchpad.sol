@@ -26,7 +26,6 @@ interface ITokenLaunchpad {
   /// @param metadata IPFS hash or other metadata about the token
   /// @param fundingToken The token used for funding the launch
   /// @param fee The fee tier for the liquidity pool (e.g. 3000 = 0.3%)
-  /// @param limitPerWallet Maximum amount a single wallet can participate
   /// @param salt Random value to ensure unique deployment address
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
@@ -37,7 +36,6 @@ interface ITokenLaunchpad {
     string symbol;
     string metadata;
     IERC20 fundingToken;
-    uint256 limitPerWallet;
     bytes32 salt;
     int24 launchTick;
     int24 graduationTick;
@@ -67,14 +65,12 @@ interface ITokenLaunchpad {
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
   /// @param upperMaxTick The maximum tick allowed
-  /// @param limitPerWallet The maximum amount a single wallet can participate
   event TokenLaunchParams(
     ITokenTemplate token,
     IERC20 fundingToken,
     int24 launchTick,
     int24 graduationTick,
     int24 upperMaxTick,
-    uint256 limitPerWallet,
     string name,
     string symbol,
     string metadata

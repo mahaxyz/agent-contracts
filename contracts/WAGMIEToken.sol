@@ -30,15 +30,6 @@ contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
   /// @notice The metadata of the token
   string public metadata;
 
-  /// @notice Whether the token is unlocked for transfers
-  bool public unlocked;
-
-  /// @notice The limit of tokens per wallet before the token is graduated
-  uint256 public limitPerWallet;
-
-  /// @notice The whitelist of addresses that can transfer tokens before the token is graduated
-  mapping(address => bool) public whitelisted;
-
   /// @notice The adapter contract
   ICLMMAdapter public adapter;
 
@@ -47,50 +38,17 @@ contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
 
   /// @inheritdoc ITokenTemplate
   function initialize(InitParams memory p) public initializer {
-    limitPerWallet = p.limitPerWallet;
     metadata = p.metadata;
-    unlocked = false;
     adapter = ICLMMAdapter(p.adapter);
 
     __ERC20_init(p.name, p.symbol);
 
-    whitelisted[msg.sender] = true;
-    whitelisted[address(adapter)] = true;
-    whitelisted[address(0)] = true;
     _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
   }
 
   function _update(address _from, address _to, uint256 _value) internal override {
     super._update(_from, _to, _value);
-    if (!unlocked) _checkLimitPerWallet(_to);
-
     // automatically claim fees every 100 transactions
     if (++txCount % 100 == 0) adapter.claimFees(address(this));
-  }
-
-  function _checkLimitPerWallet(address _to) internal {
-    if (!whitelisted[_to]) {
-      // buy tokens; limit to `limitPerWallet` per wallet
-      require(balanceOf(_to) <= limitPerWallet, "!limitPerWallet _to");
-    }
-
-    if (adapter.graduated(address(this))) {
-      // if the token is graduated, then allow transfers
-      unlocked = true;
-      emit Unlocked();
-      return;
-    }
-  }
-
-  /// @inheritdoc ITokenTemplate
-  function whitelist(address _address) external {
-    require(msg.sender == address(adapter), "!whitelist");
-    whitelisted[_address] = true;
-    emit Whitelisted(_address);
-  }
-
-  /// @inheritdoc ITokenTemplate
-  function isWhitelisted(address _address) external view override returns (bool) {
-    return whitelisted[_address];
   }
 }
