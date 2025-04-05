@@ -26,20 +26,16 @@ jobs:
           version: nightly
 
       - name: Show Forge version
-        run: |
-          forge --version
+        run: forge --version
 
       - name: Run Forge fmt
-        run: |
-          forge fmt --check
+        run: forge fmt --check
         id: fmt
 
       - name: Run Forge build
-        run: |
-          forge build --sizes
+        run: forge build --sizes
         id: build
 
       - name: Run Forge tests
-        run: |
-          forge test -vvv
+        run: LINEA_RPC_URL=https://rpc.linea.build BSC_RPC_URL=https://bsc-dataseed.binance.org forge test -vvv
         id: test
