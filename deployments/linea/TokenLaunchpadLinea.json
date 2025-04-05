@@ -1,5 +1,5 @@
 {
-  "address": "0x8b327e69344FE66e4D641A31418f6DAACfF9ae64",
+  "address": "0xa120B6791D5131A38FA8709a1d1BCe1A0aFfD4aB",
   "abi": [
     {
       "inputs": [],
@@ -395,11 +395,6 @@
               "internalType": "string",
               "name": "metadata",
               "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "adapter",
-              "type": "address"
             }
           ],
           "indexed": false,
@@ -1191,12 +1186,12 @@
     }
   ],
   "args": [
-    "0x6E4008AEf1767d10c0F6BA6Db8eB77A6d3c3D850",
-    "0x4986B63bDeA434189F6a0fFFc7E59dAdF63AB8A4",
+    "0xdb506d3a0612f9F262F36503A8D2D25975423De3",
+    "0x4DA4aD29a1eC96aE6fAA699Ad14CBf933682B805",
     "0xb0a8169d471051130cc458e4862b7fd0008cdf82",
     "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
     "0x6a661312938d22a2a0e27f585073e4406903990a",
     "1000000000000000000000"
   ],
-  "numDeployments": 3
+  "numDeployments": 1
 }
