@@ -12,13 +12,22 @@ export async function templateLaunchpad(
   adapterContract: string,
   launchpadContract: string,
   wethAddress: string,
-  odosAddress: string
+  odosAddress: string,
+  nftPositionManager: string,
+  mahaAddress: string,
+  feeDiscountAmount: bigint
 ) {
   const tokenD = await deployContract(
     hre,
     "WAGMIEToken",
     [],
     "TokenTemplateImpl"
+  );
+  const lockerD = await deployContract(
+    hre,
+    "FreeUniV3LPLocker",
+    [nftPositionManager],
+    "FreeUniV3LPLocker"
   );
 
   const adapterD = await deployProxy(
@@ -34,7 +43,14 @@ export async function templateLaunchpad(
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [adapterD.address, tokenD.address, deployer, wethAddress],
+    [
+      adapterD.address,
+      tokenD.address,
+      deployer,
+      wethAddress,
+      mahaAddress,
+      feeDiscountAmount,
+    ],
     proxyAdmin,
     launchpadContract,
     deployer
@@ -52,6 +68,10 @@ export async function templateLaunchpad(
     "ICLMMAdapter",
     adapterD.address
   );
+  const locker = await hre.ethers.getContractAt(
+    "FreeUniV3LPLocker",
+    lockerD.address
+  );
 
   const swappeD = await deployContract(
     hre,
@@ -68,7 +88,6 @@ export async function templateLaunchpad(
         name: "TEST", // string name;
         symbol: "TEST", // string symbol;
         metadata: "TEST", // string metadata;
-        limitPerWallet: 1000000000000000000n, // uint256 limitPerWallet;
         adapter: adapterD.address, // address adapter;
       })
     );
@@ -79,6 +98,7 @@ export async function templateLaunchpad(
     launchpad,
     tokenImpl,
     swapper,
+    locker,
   };
 }
 
@@ -90,7 +110,6 @@ export const deployToken = async (
   priceOfETHinUSD: number,
   tickSpacing: number,
   metadata: string,
-  limitPerWallet: bigint,
   startingMarketCapInUSD: number,
   endingMarketCapInUSD: number,
   fundingToken: string,
@@ -127,7 +146,6 @@ export const deployToken = async (
 
   const data = {
     fundingToken,
-    limitPerWallet,
     metadata,
     name,
     salt,
@@ -135,7 +153,10 @@ export const deployToken = async (
     launchTick,
     graduationTick,
     upperMaxTick,
+    isFeeDiscounted: false,
   };
+
+  const fee = await launchpad.creationFee();
 
   // create a launchpad token
   console.log("creating a launchpad token", data);
@@ -146,13 +167,13 @@ export const deployToken = async (
       computedAddress,
       amountToBuy,
       {
-        value: 100000000000000n,
+        value: fee,
       }
     )
   );
   await waitForTx(
     await launchpad.createAndBuy(data, computedAddress, amountToBuy, {
-      value: 100000000000000n,
+      value: fee,
     })
   );
 

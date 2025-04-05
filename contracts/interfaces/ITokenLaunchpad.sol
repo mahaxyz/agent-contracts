@@ -25,7 +25,6 @@ interface ITokenLaunchpad {
   /// @param symbol The symbol of the token
   /// @param metadata IPFS hash or other metadata about the token
   /// @param fundingToken The token used for funding the launch
-  /// @param fee The fee tier for the liquidity pool (e.g. 3000 = 0.3%)
   /// @param salt Random value to ensure unique deployment address
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
@@ -100,7 +99,8 @@ interface ITokenLaunchpad {
   /// @notice Updates the fee settings
   /// @param _feeDestination The address to receive fees
   /// @param _fee The new fee amount
-  function setFeeSettings(address _feeDestination, uint256 _fee) external;
+  /// @param _feeDiscountAmount The amount of fee discount
+  function setFeeSettings(address _feeDestination, uint256 _fee, uint256 _feeDiscountAmount) external;
 
   /// @notice Creates a new token launch
   /// @param p The parameters for the token launch

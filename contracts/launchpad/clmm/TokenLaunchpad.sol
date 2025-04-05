@@ -63,9 +63,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function setFeeSettings(address _feeDestination, uint256 _fee) external onlyOwner {
+  function setFeeSettings(address _feeDestination, uint256 _fee, uint256 _feeDiscountAmount) external onlyOwner {
     feeDestination = _feeDestination;
     creationFee = _fee;
+    feeDiscountAmount = _feeDiscountAmount;
     emit FeeUpdated(_feeDestination, _fee);
   }
 
