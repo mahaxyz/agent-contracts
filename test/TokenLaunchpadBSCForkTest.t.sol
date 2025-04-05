@@ -60,7 +60,7 @@ contract TokenLaunchpadBscForkTest is Test {
     });
 
     vm.deal(address(this), 100 ether);
-    (address tokenAddr,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
 
     assertTrue(tokenAddr != address(0), "Token address should not be zero");
 

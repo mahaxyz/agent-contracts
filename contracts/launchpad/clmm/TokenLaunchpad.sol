@@ -9,7 +9,6 @@
 
 // Website: https://maha.xyz
 // Discord: https://discord.gg/mahadao
-// Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 
 pragma solidity ^0.8.0;
@@ -81,7 +80,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   function createAndBuy(CreateParams memory p, address expected, uint256 amount)
     external
     payable
-    returns (address, uint256)
+    returns (address, uint256, uint256)
   {
     // send any creation fee to the fee destination
     if (creationFee > 0) payable(feeDestination).transfer(creationFee - msg.value);
@@ -159,7 +158,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     _refundTokens(p.fundingToken);
     _refundTokens(weth);
 
-    return (address(token), received);
+    return (address(token), received, swapped);
   }
 
   /// @inheritdoc ITokenLaunchpad

@@ -17,7 +17,9 @@ pragma solidity ^0.8.0;
 // Importing from @uniswap doesnt work with @openzepplins latest release so this is refactored
 // Source: https://github.com/Uniswap/v3-periphery/blob/main/contracts/interfaces/INonfungiblePositionManager.sol
 
-interface INonfungiblePositionManager {
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+interface INonfungiblePositionManager is IERC721 {
   function approve(address to, uint256 tokenId) external;
 
   function safeTransferFrom(address from, address to, uint256 tokenId) external;
@@ -34,7 +36,21 @@ interface INonfungiblePositionManager {
     uint256 amount1Min;
     address recipient;
     uint256 deadline;
+    uint256 veNFTTokenId;
   }
+
+  //   address token0;
+  // address token1;
+  // uint24 fee;
+  // int24 tickLower;
+  // int24 tickUpper;
+  // uint256 amount0Desired;
+  // uint256 amount1Desired;
+  // uint256 amount0Min;
+  // uint256 amount1Min;
+  // address recipient;
+  // uint256 deadline;
+  // uint256 veNFTTokenId;
 
   function mint(MintParams calldata params)
     external

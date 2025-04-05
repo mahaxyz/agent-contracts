@@ -68,6 +68,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     clPoolFactory = IClPoolFactory(_clPoolFactory);
     fee = _fee;
     tickSpacing = _tickSpacing;
+
+    nftPositionManager.setApprovalForAll(address(locker), true);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -132,12 +134,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     require(launchParams[_tokenBase].pool == address(0), "!launched");
 
     uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
-    uint160 sqrtPriceX960 = TickMath.getSqrtPriceAtTick(_tick0);
-    uint160 sqrtPriceX961 = TickMath.getSqrtPriceAtTick(_tick1);
-    uint160 sqrtPriceX962 = TickMath.getSqrtPriceAtTick(_tick2);
 
-    IClPool pool =
-      IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), 20_000, sqrtPriceX96Launch));
+    IClPool pool = IClPool(clPoolFactory.createPool(address(_tokenBase), address(_tokenQuote), fee, sqrtPriceX96Launch));
 
     {
       PoolKey memory poolKey = PoolKey({
@@ -159,18 +157,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     }
 
     // calculate and add liquidity for the various tick ranges
-    {
-      uint128 liquidityBeforeTick0 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, 600_000_000 ether);
-      uint256 lockId0 = _mint(_me, _tick0, _tick1, liquidityBeforeTick0);
-      tokenToLockId0[IERC20(_tokenBase)] = lockId0;
-    }
-    {
-      uint128 liquidityBeforeTick1 =
-        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, 400_000_000 ether);
-      uint256 lockId1 = _mint(_me, _tick1, _tick2, liquidityBeforeTick1);
-      tokenToLockId1[IERC20(_tokenBase)] = lockId1;
-    }
+    _mint(_tokenBase, _tokenQuote, _tick0, _tick1, 600_000_000 ether);
+    _mint(_tokenBase, _tokenQuote, _tick1, _tick2, 400_000_000 ether);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -208,34 +196,40 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   }
 
   /// @dev Mint a position and lock it forever
-  /// @param _token The token to mint the position for
+  /// @param _token0 The token to mint the position for
+  /// @param _token1 The token to mint the position for
   /// @param _tick0 The lower tick of the position
   /// @param _tick1 The upper tick of the position
-  /// @param _liquidityBeforeTick0 The liquidity before the tick0
+  /// @param _amount0 The amount of tokens to mint the position for
   /// @return lockId The lock id of the position
-  function _mint(address _token, int24 _tick0, int24 _tick1, uint256 _liquidityBeforeTick0)
+  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0)
     internal
     returns (uint256 lockId)
   {
+    _token0.safeTransferFrom(msg.sender, address(this), _amount0);
+    _token0.approve(address(nftPositionManager), _amount0);
+
     // mint the position
     INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-      token0: address(_token),
-      token1: address(_token),
-      fee: 10_000,
+      token0: address(_token0),
+      token1: address(_token1),
+      fee: fee,
       tickLower: _tick0,
       tickUpper: _tick1,
-      amount0Desired: _liquidityBeforeTick0,
+      amount0Desired: _amount0,
       amount1Desired: 0,
-      amount0Min: _liquidityBeforeTick0,
+      amount0Min: 0,
       amount1Min: 0,
       recipient: _me,
-      deadline: block.timestamp
+      deadline: block.timestamp,
+      veNFTTokenId: 0
     });
 
     (uint256 tokenId,,,) = nftPositionManager.mint(params);
 
     // lock the liquidity forever; allow this contract to collect fees
     lockId = locker.lock(nftPositionManager, tokenId, address(0), _me, type(uint256).max);
+    tokenToLockId0[IERC20(_token0)] = lockId;
   }
 
   receive() external payable {}

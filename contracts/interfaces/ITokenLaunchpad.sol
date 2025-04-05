@@ -111,10 +111,11 @@ interface ITokenLaunchpad {
   /// @param expected The expected address where token will be deployed
   /// @return token The address of the newly created token
   /// @return received The amount of tokens received if the user chooses to buy at launch
+  /// @return swapped The amount of tokens swapped if the user chooses to swap at launch
   function createAndBuy(CreateParams memory p, address expected, uint256 amount)
     external
     payable
-    returns (address token, uint256 received);
+    returns (address token, uint256 received, uint256 swapped);
 
   /// @notice Gets the total number of tokens launched
   /// @return totalTokens The total count of launched tokens
