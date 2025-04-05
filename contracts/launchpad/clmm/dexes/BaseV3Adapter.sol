@@ -16,19 +16,19 @@ pragma solidity ^0.8.0;
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
-import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol";
-
+import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
+import {ICLMMAdapter, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
 import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
 import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
+import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
+
 import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
 
 abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
@@ -175,9 +175,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
 
   /// @inheritdoc ICLMMAdapter
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
-    LaunchTokenParams memory params = launchParams[IERC20(_token)];
-    require(address(params.pool) != address(0), "!launched");
     require(msg.sender == launchpad, "!launchpad");
+    LaunchTokenParams memory params = launchParams[IERC20(_token)];
 
     uint256 lockId0 = tokenToLockId0[IERC20(_token)];
     uint256 lockId1 = tokenToLockId1[IERC20(_token)];

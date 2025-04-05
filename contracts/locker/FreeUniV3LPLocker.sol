@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT
 
 // ███╗   ███╗ █████╗ ██╗  ██╗ █████╗
 // ████╗ ████║██╔══██╗██║  ██║██╔══██╗
@@ -20,8 +20,8 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IERC721Receiver, IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
+import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
-import {IUniswapV3Factory} from "contracts/interfaces/thirdparty/IUniswapV3Factory.sol";
 
 /// @title FreeUniV3LPLocker
 /// @notice Contract for locking Uniswap V3 LP positions
@@ -73,7 +73,7 @@ contract FreeUniV3LPLocker is IFreeUniV3LPLocker, Ownable, ReentrancyGuard {
   /// @return pool The address of the Uniswap V3 pool
   function _getPool(INonfungiblePositionManager nftManager_, uint256 nftId_) internal view returns (address pool) {
     (,, address token0, address token1, uint24 fee,,,,,,,) = nftManager_.positions(nftId_);
-    IUniswapV3Factory factory = IUniswapV3Factory(nftManager_.factory());
+    IClPoolFactory factory = IClPoolFactory(nftManager_.factory());
     pool = factory.getPool(token0, token1, fee);
   }
 
