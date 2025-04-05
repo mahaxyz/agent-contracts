@@ -25,7 +25,8 @@ import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 import {IPancakeAdapter, PoolKey} from "contracts/interfaces/thirdparty/pancake/IPancakeAdapter.sol";
 
-import {IGoPlusLocker} from "contracts/interfaces/IGoPlusLocker.sol";
+import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
+import {INonfungiblePositionManager} from "contracts/interfaces/thirdparty/INonfungiblePositionManager.sol";
 import {IPancakeFactory} from "contracts/interfaces/thirdparty/pancake/IPancakeFactory.sol";
 import {IPancakePool} from "contracts/interfaces/thirdparty/pancake/IPancakePool.sol";
 import {IPancakeSwapRouter} from "contracts/interfaces/thirdparty/pancake/IPancakeSwapRouter.sol";
@@ -33,15 +34,18 @@ import {IPancakeSwapRouter} from "contracts/interfaces/thirdparty/pancake/IPanca
 contract PancakeAdapter is IPancakeAdapter, Initializable {
   using SafeERC20 for IERC20;
 
-  IPancakeFactory public poolFactory;
-  address public launchpad;
-  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
   address private _me;
+  address public launchpad;
   address public WETH9;
+  IFreeUniV3LPLocker public locker;
+  INonfungiblePositionManager public nftPositionManager;
+  IPancakeFactory public poolFactory;
   IPancakePool private _transientClPool;
   IPancakeSwapRouter public swapRouter;
-  IGoPlusLocker public locker;
-  INonfungiblePositionManager public nftPositionManager;
+
+  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
+  mapping(IERC20 token => uint256 lockId) public tokenToLockId0;
+  mapping(IERC20 token => uint256 lockId) public tokenToLockId1;
 
   function initialize(
     address _launchpad,
@@ -56,7 +60,7 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
     swapRouter = IPancakeSwapRouter(_swapRouter);
     _me = address(this);
     WETH9 = _WETH9;
-    locker = IGoPlusLocker(_locker);
+    locker = IFreeUniV3LPLocker(_locker);
     nftPositionManager = INonfungiblePositionManager(_nftPositionManager);
   }
 
@@ -97,17 +101,19 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
       ITokenTemplate(address(_tokenBase)).whitelist(address(pool));
     }
 
-    // calculate the liquidity for the various tick ranges
-    uint128 liquidityBeforeTick0 =
-      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, 600_000_000 ether);
-    uint128 liquidityBeforeTick1 =
-      LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, 400_000_000 ether);
-
-    // add liquidity to the various tick ranges
-    _transientClPool = pool;
-    pool.mint(_me, _tick0, _tick1, liquidityBeforeTick0, "");
-    pool.mint(_me, _tick1, _tick2, liquidityBeforeTick1, "");
-    delete _transientClPool;
+    // calculate and add liquidity for the various tick ranges
+    {
+      uint128 liquidityBeforeTick0 =
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX960, sqrtPriceX961, 600_000_000 ether);
+      uint256 lockId0 = _mint(_me, _tick0, _tick1, liquidityBeforeTick0);
+      tokenToLockId0[IERC20(_tokenBase)] = lockId0;
+    }
+    {
+      uint128 liquidityBeforeTick1 =
+        LiquidityAmounts.getLiquidityForAmount0(sqrtPriceX961, sqrtPriceX962, 400_000_000 ether);
+      uint256 lockId1 = _mint(_me, _tick1, _tick2, liquidityBeforeTick1);
+      tokenToLockId1[IERC20(_tokenBase)] = lockId1;
+    }
   }
 
   /// @inheritdoc IPancakeAdapter
@@ -158,11 +164,13 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     LaunchTokenParams memory params = launchParams[IERC20(_token)];
     require(address(params.pool) != address(0), "!launched");
+    require(msg.sender == launchpad, "!launchpad");
 
-    (uint256 fee00, uint256 fee01) =
-      params.pool.collect(_me, params.tick0, params.tick1, type(uint128).max, type(uint128).max);
-    (uint256 fee10, uint256 fee11) =
-      params.pool.collect(_me, params.tick1, params.tick2, type(uint128).max, type(uint128).max);
+    uint256 lockId0 = tokenToLockId0[IERC20(_token)];
+    uint256 lockId1 = tokenToLockId1[IERC20(_token)];
+
+    (uint256 fee00, uint256 fee01) = locker.collect(lockId0, _me, type(uint128).max, type(uint128).max);
+    (uint256 fee10, uint256 fee11) = locker.collect(lockId1, _me, type(uint128).max, type(uint128).max);
 
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
@@ -179,9 +187,35 @@ contract PancakeAdapter is IPancakeAdapter, Initializable {
     return tick >= params.tick1;
   }
 
-  function pancakeV3MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) external {
-    require(msg.sender == address(_transientClPool) && address(_transientClPool) != address(0), "!clPool");
-    IERC20(_transientClPool.token0()).transferFrom(launchpad, msg.sender, amount0);
+  /// @dev Mint a position and lock it forever
+  /// @param _token The token to mint the position for
+  /// @param _tick0 The lower tick of the position
+  /// @param _tick1 The upper tick of the position
+  /// @param _liquidityBeforeTick0 The liquidity before the tick0
+  /// @return lockId The lock id of the position
+  function _mint(address _token, int24 _tick0, int24 _tick1, uint256 _liquidityBeforeTick0)
+    internal
+    returns (uint256 lockId)
+  {
+    // mint the position
+    INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
+      token0: address(_token),
+      token1: address(_token),
+      fee: 10_000,
+      tickLower: _tick0,
+      tickUpper: _tick1,
+      amount0Desired: _liquidityBeforeTick0,
+      amount1Desired: 0,
+      amount0Min: _liquidityBeforeTick0,
+      amount1Min: 0,
+      recipient: _me,
+      deadline: block.timestamp
+    });
+
+    (uint256 tokenId,,,) = nftPositionManager.mint(params);
+
+    // lock the liquidity forever; allow this contract to collect fees
+    lockId = locker.lock(nftPositionManager, tokenId, address(0), _me, type(uint256).max);
   }
 
   receive() external payable {}

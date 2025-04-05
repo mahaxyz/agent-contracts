@@ -57,7 +57,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: bytes32(0),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     (address token,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
@@ -80,7 +81,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256(abi.encode(salt)),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
     vm.assume(true);
     (address token,) = _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 0);
@@ -119,7 +121,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256("test"),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     vm.prank(owner);
@@ -139,7 +142,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256("test"),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     vm.prank(owner);
@@ -157,7 +161,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256("test"),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     vm.prank(owner);
@@ -192,7 +197,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256("test"),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     vm.startPrank(owner);
@@ -211,7 +217,8 @@ contract TokenLaunchpadLineaForkTest is Test {
       salt: keccak256("test"),
       launchTick: -171_000,
       graduationTick: -170_000,
-      upperMaxTick: 887_000
+      upperMaxTick: 887_000,
+      isFeeDiscounted: false
     });
 
     vm.prank(owner);
