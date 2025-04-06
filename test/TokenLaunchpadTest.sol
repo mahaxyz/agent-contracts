@@ -6,7 +6,7 @@ import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpad} from "contracts/launchpad/clmm/TokenLaunchpad.sol";
 
-import {FreeUniV3LPLocker} from "contracts/locker/FreeUniV3LPLocker.sol";
+import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
 
@@ -15,7 +15,7 @@ contract TokenLaunchpadTest is Test {
   MockERC20 _maha;
   WAGMIEToken _tokenImpl;
   TokenLaunchpad _launchpad;
-  FreeUniV3LPLocker _locker;
+  IFreeUniV3LPLocker _locker;
 
   address owner = makeAddr("owner");
   address whale = makeAddr("whale");
@@ -25,6 +25,7 @@ contract TokenLaunchpadTest is Test {
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _maha = new MockERC20("Maha", "MAHA", 18);
     _tokenImpl = new WAGMIEToken();
+    _locker = IFreeUniV3LPLocker(0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db);
 
     vm.label(address(_weth), "weth");
     vm.label(address(_maha), "maha");

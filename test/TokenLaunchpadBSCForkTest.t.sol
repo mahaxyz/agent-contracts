@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {FreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
+import {IFreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/dexes/PancakeAdapter.sol";
@@ -25,7 +25,6 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     // Deploy contracts
     _launchpad = new TokenLaunchpadBSC();
     _adapter = new PancakeAdapter();
-    _locker = new FreeUniV3LPLocker(NFT_MANAGER);
 
     // Label contracts for better trace output
     vm.label(address(_launchpad), "launchpad");

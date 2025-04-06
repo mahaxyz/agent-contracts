@@ -5,7 +5,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
-import {FreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
+import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
@@ -25,7 +25,6 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
 
     _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
-    _locker = new FreeUniV3LPLocker(_nftManager);
 
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "nileAdapter");
@@ -122,7 +121,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
     vm.prank(owner);
     (address _token,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
     ITokenTemplate token = ITokenTemplate(_token);
-    vm.assertApproxEqAbs(token.balanceOf(owner), 255_952_913 ether, 1 ether);
+    vm.assertApproxEqAbs(token.balanceOf(owner), 257_291_080 ether, 1 ether);
   }
 
   function test_createAndBuy_and_graduated() public {
@@ -178,7 +177,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
     });
 
     vm.startPrank(owner);
-    _launchpad.setFeeSettings(address(this), 1 ether);
+    _launchpad.setFeeSettings(address(this), 1 ether, 1 ether);
 
     // should revert because the fee is not set
     vm.expectRevert();
