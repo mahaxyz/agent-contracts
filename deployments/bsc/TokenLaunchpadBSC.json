@@ -1,5 +1,5 @@
 {
-  "address": "0x98d7Cd6f6968f840Cf2eE40B540928F10389beb5",
+  "address": "0x5f6b998F5573F900c9e2382871c76261D5C48255",
   "abi": [
     {
       "inputs": [],
@@ -1177,11 +1177,11 @@
     }
   ],
   "args": [
-    "0x0c24DBF03f11E5493581118E813f6FFE87Fb9495",
+    "0x77CB6fA22335bF662BCB78278d65789cc0b2aB50",
     "0x1F09Ec21d7fd0A21879b919bf0f9C46e6b85CA8b",
-    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
     "0x6a661312938d22a2a0e27f585073e4406903990a",
     "1000000000000000000000"
   ],
-  "numDeployments": 6
+  "numDeployments": 4
 }

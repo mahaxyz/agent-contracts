@@ -1,5 +1,5 @@
 {
-  "address": "0x0c24DBF03f11E5493581118E813f6FFE87Fb9495",
+  "address": "0x77CB6fA22335bF662BCB78278d65789cc0b2aB50",
   "abi": [
     {
       "inputs": [],
@@ -146,7 +146,7 @@
         },
         {
           "internalType": "address",
-          "name": "_clPoolFactory",
+          "name": "_poolFactory",
           "type": "address"
         },
         {
@@ -420,5 +420,5 @@
     }
   ],
   "args": [],
-  "numDeployments": 7
+  "numDeployments": 5
 }

@@ -1,5 +1,3 @@
-import { computeTickPrice, roundTickToNearestTick } from "./utils";
-import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { RamsesAdapter } from "../types";
 import { deployToken, templateLaunchpad } from "./mainnet-template";
@@ -15,7 +13,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const e18 = 10n ** 18n;
   const feeDiscountAmount = 1000n * e18; // 100%
 
-  const { adapter, launchpad, tokenImpl, locker } = await templateLaunchpad(
+  const { adapter, launchpad } = await templateLaunchpad(
     hre,
     deployer,
     proxyAdmin,
@@ -27,6 +25,8 @@ async function main(hre: HardhatRuntimeEnvironment) {
     feeDiscountAmount
   );
 
+  const locker = "0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db";
+
   // initialize the contracts if they are not initialized
   const adapterNile = adapter as RamsesAdapter;
   if ((await adapterNile.launchpad()) !== launchpad.target) {
@@ -36,7 +36,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
         "0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42",
         "0xAAAE99091Fbb28D400029052821653C1C752483B",
         wethAddressOnLinea,
-        locker.target,
+        locker,
         nftPositionManager
       )
     );
@@ -62,53 +62,35 @@ async function main(hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  // const token1 = await deployToken(
-  //   hre,
-  //   deployer,
-  //   name,
-  //   symbol,
-  //   1800, // price of token in USD
-  //   tickSpacing,
-  //   metadata,
-  //   5000, // 5,000$ starting market cap
-  //   69000, // 69,000$ ending market cap
-  //   wethAddressOnLinea,
-  //   launchpad,
-  //   tokenImpl,
-  //   0n
-  // );
-  // console.log("Token deployed at", token1.target);
-
-  const shouldMock = false;
+  const shouldMock = true;
   if (shouldMock) {
-    const mahaD = await deployContract(
-      hre,
-      "MockERC20",
-      ["TEST MAHA", "TMAHA", 18],
-      "MAHA"
-    );
+    // const mahaD = await deployContract(
+    //   hre,
+    //   "MockERC20",
+    //   ["TEST MAHA", "TMAHA", 18],
+    //   "MAHA"
+    // );
 
-    const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
+    // const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
 
-    await waitForTx(await maha.mint(deployer, 1000000000000000000000000n));
-    await waitForTx(
-      await maha.approve(launchpad.target, 1000000000000000000000000n)
-    );
+    // await waitForTx(await maha.mint(deployer, 1000000000000000000000000n));
+    // await waitForTx(
+    //   await maha.approve(launchpad.target, 1000000000000000000000000n)
+    // );
 
     const token2 = await deployToken(
       hre,
       deployer,
       name,
       symbol,
-      1, // price of token in USD
+      1800, // price of token in USD
       tickSpacing,
       metadata,
       5000, // 5,000$ starting market cap
       69000, // 69,000$ ending market cap
-      mahaD.address,
+      wethAddressOnLinea,
       launchpad,
-      tokenImpl,
-      100000000000000000000n
+      0n
     );
 
     console.log("Token deployed at", token2.target);

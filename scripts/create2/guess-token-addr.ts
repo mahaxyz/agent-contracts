@@ -1,9 +1,8 @@
 import { AbiCoder, Addressable, ethers, keccak256 } from "ethers";
-import { getPredictedCloneAddress } from "./create2";
 
 export const guessTokenAddress = (
   deployingAddress: string | Addressable,
-  implementationAddress: string | Addressable,
+  implementationByteCode: string,
   quoteTokenAddress: string | Addressable,
   deployerAddress: string,
   name: string,
@@ -22,12 +21,20 @@ export const guessTokenAddress = (
       )
     );
 
-    // Calculate contract address
-    const computedAddress = getPredictedCloneAddress({
-      salt: saltHash,
-      implementation: implementationAddress as string,
-      deployer: deployingAddress as string,
-    });
+    // Get the creation bytecode for WAGMIEToken
+
+    // Encode constructor parameters
+    const encodedParams = abi.encode(["string", "string"], [name, symbol]);
+
+    // Combine bytecode and encoded constructor params
+    const initCode = implementationByteCode + encodedParams.slice(2);
+
+    // Calculate CREATE2 address
+    const computedAddress = ethers.getCreate2Address(
+      deployingAddress as string,
+      saltHash,
+      keccak256(initCode)
+    );
 
     if (computedAddress < quoteTokenAddress) {
       console.log("found the right salt hash");

@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
     },
     base: _network("https://mainnet.base.org"),
     linea: _network("https://rpc.linea.build", 100000000), // 0.1 gwei
-    bsc: _network("https://bsc-dataseed1.bnbchain.org"),
+    bsc: _network("https://bsc-dataseed1.bnbchain.org", 1000000000), // 1 gwei
   },
   namedAccounts: {
     deployer: 0,

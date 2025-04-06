@@ -3,7 +3,7 @@ import { deployContract, deployProxy, waitForTx } from "../scripts/utils";
 import { roundTickToNearestTick } from "./utils";
 import { computeTickPrice } from "./utils";
 import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
-import { TokenLaunchpad, WAGMIEToken } from "../types";
+import { TokenLaunchpad } from "../types";
 
 export async function templateLaunchpad(
   hre: HardhatRuntimeEnvironment,
@@ -16,13 +16,6 @@ export async function templateLaunchpad(
   mahaAddress: string,
   feeDiscountAmount: bigint
 ) {
-  const tokenD = await deployContract(
-    hre,
-    "WAGMIEToken",
-    [],
-    "TokenTemplateImpl"
-  );
-
   const adapterD = await deployProxy(
     hre,
     adapterContract,
@@ -36,14 +29,7 @@ export async function templateLaunchpad(
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [
-      adapterD.address,
-      tokenD.address,
-      deployer,
-      wethAddress,
-      mahaAddress,
-      feeDiscountAmount,
-    ],
+    [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
     proxyAdmin,
     launchpadContract,
     deployer
@@ -53,17 +39,10 @@ export async function templateLaunchpad(
     "TokenLaunchpad",
     launchpadD.address
   );
-  const tokenImpl = await hre.ethers.getContractAt(
-    "WAGMIEToken",
-    tokenD.address
-  );
+
   const adapter = await hre.ethers.getContractAt(
     "ICLMMAdapter",
     adapterD.address
-  );
-  const locker = await hre.ethers.getContractAt(
-    "IFreeUniV3LPLocker",
-    "0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db"
   );
 
   const swappeD = await deployContract(
@@ -74,23 +53,10 @@ export async function templateLaunchpad(
   );
   const swapper = await hre.ethers.getContractAt("Swapper", swappeD.address);
 
-  // initialize the contracts if they are not initialized
-  if ((await tokenImpl.name()) !== "TEST") {
-    await waitForTx(
-      await tokenImpl.initialize({
-        name: "TEST", // string name;
-        symbol: "TEST", // string symbol;
-        metadata: "TEST", // string metadata;
-      })
-    );
-  }
-
   return {
     adapter,
     launchpad,
-    tokenImpl,
     swapper,
-    locker,
   };
 }
 
@@ -106,7 +72,6 @@ export const deployToken = async (
   endingMarketCapInUSD: number,
   fundingToken: string,
   launchpad: TokenLaunchpad,
-  tokenImpl: WAGMIEToken,
   amountToBuy: bigint
 ) => {
   // calculate ticks
@@ -126,10 +91,13 @@ export const deployToken = async (
     _graduationTick == launchTick ? launchTick + tickSpacing : _graduationTick;
   const upperMaxTick = roundTickToNearestTick(887220, tickSpacing); // Maximum possible tick value
 
+  // get the bytecode for the WAGMIEToken
+  const wagmie = await hre.ethers.getContractFactory("WAGMIEToken");
+
   // guess the salt and computed address for the given token
   const { salt, computedAddress } = await guessTokenAddress(
     launchpad.target,
-    tokenImpl.target,
+    wagmie.bytecode, // tokenImpl.target,
     fundingToken,
     deployer,
     name,
@@ -142,13 +110,14 @@ export const deployToken = async (
     name,
     salt,
     symbol,
-    launchTick,
-    graduationTick,
-    upperMaxTick,
+    launchTick: -171_000,
+    graduationTick: -170_800,
+    upperMaxTick: 887_200,
     isFeeDiscounted: false,
   };
 
   const fee = await launchpad.creationFee();
+  const dust = 10000000000000n;
 
   // create a launchpad token
   console.log("creating a launchpad token", data);
@@ -159,13 +128,13 @@ export const deployToken = async (
       computedAddress,
       amountToBuy,
       {
-        value: fee,
+        value: fee + dust,
       }
     )
   );
   await waitForTx(
     await launchpad.createAndBuy(data, computedAddress, amountToBuy, {
-      value: fee,
+      value: fee + dust,
     })
   );
 
