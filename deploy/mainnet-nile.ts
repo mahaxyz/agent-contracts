@@ -6,7 +6,7 @@ import { deployToken, templateLaunchpad } from "./mainnet-template";
 import { deployContract, waitForTx } from "../scripts/utils";
 
 async function main(hre: HardhatRuntimeEnvironment) {
-  const deployer = "0xb0a8169d471051130cc458e4862b7fd0008cdf82";
+  const deployer = "0x1F09Ec21d7fd0A21879b919bf0f9C46e6b85CA8b";
   const proxyAdmin = "0x7202136d70026DA33628dD3f3eFccb43F62a2469";
   const wethAddressOnLinea = "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f";
   const odosAddressOnLinea = "0x2d8879046f1559E53eb052E949e9544bCB72f414";
@@ -23,7 +23,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "TokenLaunchpadLinea",
     wethAddressOnLinea,
     odosAddressOnLinea,
-    nftPositionManager,
     mahaAddress,
     feeDiscountAmount
   );
@@ -80,7 +79,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // );
   // console.log("Token deployed at", token1.target);
 
-  const shouldMock = true;
+  const shouldMock = false;
   if (shouldMock) {
     const mahaD = await deployContract(
       hre,

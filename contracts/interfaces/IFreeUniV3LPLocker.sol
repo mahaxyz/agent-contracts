@@ -1,16 +1,14 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-// ███╗   ███╗ █████╗ ██╗  ██╗ █████╗
-// ████╗ ████║██╔══██╗██║  ██║██╔══██╗
-// ██╔████╔██║███████║███████║███████║
-// ██║╚██╔╝██║██╔══██║██╔══██║██╔══██║
-// ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
-// ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+// ██╗      ██████╗  ██████╗██╗  ██╗███████╗██████╗     ██╗███╗   ██╗
+// ██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗    ██║████╗  ██║
+// ██║     ██║   ██║██║     █████╔╝ █████╗  ██║  ██║    ██║██╔██╗ ██║
+// ██║     ██║   ██║██║     ██╔═██╗ ██╔══╝  ██║  ██║    ██║██║╚██╗██║
+// ███████╗╚██████╔╝╚██████╗██║  ██╗███████╗██████╔╝    ██║██║ ╚████║
+// ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝╚═════╝     ╚═╝╚═╝  ╚═══╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
-// Telegram: https://t.me/mahaxyz
-// Twitter: https://twitter.com/mahaxyz_
+// Website: https://freelplocker.com
+// Twitter: https://x.com/vezuresxyz
 
 pragma solidity ^0.8.0;
 
@@ -42,37 +40,11 @@ interface IFreeUniV3LPLocker is IERC721Receiver {
   function nextLockId() external view returns (uint256);
 
   /**
-   * @notice Checks if an NFT position manager is supported
-   * @param nftManager_ The address of the NFT position manager to check
-   * @return True if the manager is supported, false otherwise
-   */
-  function supportedNftManager(address nftManager_) external view returns (bool);
-
-  /**
    * @notice Returns all lock IDs owned by a user
    * @param user The address of the user
    * @return lockIds An array of lock IDs
    */
   function getUserLocks(address user) external view returns (uint256[] memory lockIds);
-
-  /**
-   * @notice Adds a new supported NFT position manager
-   * @param nftManager_ The address of the NFT position manager to add
-   */
-  function addSupportedNftManager(address nftManager_) external;
-
-  /**
-   * @notice Locks a Uniswap V3 LP position
-   * @param nftManager_ The NFT position manager contract
-   * @param nftId_ The ID of the NFT position
-   * @param owner_ The address that will own the locked position
-   * @param collector_ The address that can collect fees
-   * @param endTime_ The timestamp when the lock expires
-   * @return lockId The ID of the created lock
-   */
-  function lock(IERC721 nftManager_, uint256 nftId_, address owner_, address collector_, uint256 endTime_)
-    external
-    returns (uint256 lockId);
 
   /**
    * @notice Transfers a lock to a new owner
@@ -153,5 +125,4 @@ interface IFreeUniV3LPLocker is IERC721Receiver {
   event OnDecreaseLiquidity(uint256 indexed lockId);
   event OnRelock(uint256 indexed lockId, uint256 endTime);
   event OnSetCollector(uint256 indexed lockId, address collector);
-  event OnAddNftManger(address nftManger);
 }

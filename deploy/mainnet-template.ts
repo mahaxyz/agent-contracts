@@ -13,7 +13,6 @@ export async function templateLaunchpad(
   launchpadContract: string,
   wethAddress: string,
   odosAddress: string,
-  nftPositionManager: string,
   mahaAddress: string,
   feeDiscountAmount: bigint
 ) {
@@ -22,12 +21,6 @@ export async function templateLaunchpad(
     "WAGMIEToken",
     [],
     "TokenTemplateImpl"
-  );
-  const lockerD = await deployContract(
-    hre,
-    "FreeUniV3LPLocker",
-    [nftPositionManager],
-    "FreeUniV3LPLocker"
   );
 
   const adapterD = await deployProxy(
@@ -69,8 +62,8 @@ export async function templateLaunchpad(
     adapterD.address
   );
   const locker = await hre.ethers.getContractAt(
-    "FreeUniV3LPLocker",
-    lockerD.address
+    "IFreeUniV3LPLocker",
+    "0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db"
   );
 
   const swappeD = await deployContract(
@@ -88,7 +81,6 @@ export async function templateLaunchpad(
         name: "TEST", // string name;
         symbol: "TEST", // string symbol;
         metadata: "TEST", // string metadata;
-        adapter: adapterD.address, // address adapter;
       })
     );
   }

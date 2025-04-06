@@ -152,8 +152,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     });
 
     // calculate and add liquidity for the various tick ranges
-    _mintAndLock(_tokenBase, _tokenQuote, _tick0, _tick1, 600_000_000 ether, 0);
-    _mintAndLock(_tokenBase, _tokenQuote, _tick1, _tick2, 400_000_000 ether, 1);
+    _mintAndLock(_tokenBase, _tokenQuote, _tick0, _tick1, 800_000_000 ether, 0);
+    _mintAndLock(_tokenBase, _tokenQuote, _tick1, _tick2, 200_000_000 ether, 1);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -197,7 +197,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
 
     // lock the liquidity forever; allow this contract to collect fees
-    lockId = locker.lock(nftPositionManager, tokenId, address(0), _me, type(uint256).max);
+    uint256 lockId = locker.nextLockId();
+    nftPositionManager.safeTransferFrom(address(this), address(locker), tokenId);
     tokenToLockId[IERC20(_token0)][_index] = lockId;
   }
 
