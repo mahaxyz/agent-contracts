@@ -7,54 +7,20 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
-// Twitter: https://twitter.com/mahaxyz_
+// Twitter: https://x.com/mahaxyz_
 
 pragma solidity ^0.8.0;
 
-import {ERC20BurnableUpgradeable} from
-  "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
-import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @title WAGMIEToken
 /// @notice A contract for creating and managing tokens with presale functionality
-contract WAGMIEToken is ITokenTemplate, ERC20BurnableUpgradeable {
-  /// @notice The metadata of the token
-  string public metadata;
-
-  /// @notice The launchpad contract
-  ITokenLaunchpad public launchpad;
-
-  /// @dev counts the number of transactions to claim fees
-  uint256 private txCount;
-
-  /// @inheritdoc ITokenTemplate
-  function initialize(InitParams memory p) public initializer {
-    metadata = p.metadata;
-    launchpad = ITokenLaunchpad(msg.sender);
-
-    __ERC20_init(p.name, p.symbol);
-
+contract WAGMIEToken is ERC20, Ownable {
+  constructor(string memory name, string memory symbol) ERC20(name, symbol) Ownable(msg.sender) {
     _mint(msg.sender, 1_000_000_000 * 1e18); // 1 bn supply
-  }
-
-  function _update(address _from, address _to, uint256 _value) internal override {
-    super._update(_from, _to, _value);
-    // automatically claim fees every 100 transactions
-    if (++txCount % 100 == 0) claimFees();
-  }
-
-  /// @notice Claims the fees for the token
-  /// @dev This function is called automatically every 100 transactions
-  function claimFees() public {
-    launchpad.claimFees(ITokenTemplate(address(this)));
+    _transferOwnership(address(0));
   }
 }

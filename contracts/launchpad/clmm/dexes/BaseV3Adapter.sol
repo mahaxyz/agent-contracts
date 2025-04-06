@@ -7,8 +7,7 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝    ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 
@@ -23,7 +22,6 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter, IClPool, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
-import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 
@@ -36,7 +34,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   address public launchpad;
   IClPoolFactory public clPoolFactory;
   ICLSwapRouter public swapRouter;
-  IFreeUniV3LPLocker public locker;
+  address public locker;
   IERC721 public nftPositionManager;
   int24 internal tickSpacing;
   IWETH9 public WETH9;
@@ -60,7 +58,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     clPoolFactory = IClPoolFactory(_clPoolFactory);
     fee = _fee;
     launchpad = _launchpad;
-    locker = IFreeUniV3LPLocker(_locker);
+    locker = _locker;
     nftPositionManager = IERC721(_nftPositionManager);
     swapRouter = ICLSwapRouter(_swapRouter);
     tickSpacing = _tickSpacing;
@@ -164,8 +162,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     uint256 lockId0 = tokenToLockId[IERC20(_token)][0];
     uint256 lockId1 = tokenToLockId[IERC20(_token)][1];
 
-    (uint256 fee00, uint256 fee01) = locker.collect(lockId0, _me, type(uint128).max, type(uint128).max);
-    (uint256 fee10, uint256 fee11) = locker.collect(lockId1, _me, type(uint128).max, type(uint128).max);
+    (uint256 fee00, uint256 fee01) = _collectFees(lockId0);
+    (uint256 fee10, uint256 fee11) = _collectFees(lockId1);
 
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
@@ -191,16 +189,10 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   /// @return lockId The lock id of the position
   function _mintAndLock(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0, uint256 _index)
     internal
-    returns (uint256 lockId)
-  {
-    // mint the position
-    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+    virtual
+    returns (uint256 lockId);
 
-    // lock the liquidity forever; allow this contract to collect fees
-    uint256 lockId = locker.nextLockId();
-    nftPositionManager.safeTransferFrom(address(this), address(locker), tokenId);
-    tokenToLockId[IERC20(_token0)][_index] = lockId;
-  }
+  function _collectFees(uint256 _lockId) internal virtual returns (uint256 fee0, uint256 fee1);
 
   /// @dev Mint a position
   /// @param _token0 The token to mint the position for

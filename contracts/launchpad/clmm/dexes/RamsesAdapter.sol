@@ -7,14 +7,14 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝    ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 
 pragma solidity ^0.8.0;
 
 import {BaseV3Adapter, IClPool, IERC20, SafeERC20} from "./BaseV3Adapter.sol";
+import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 
 interface INonfungiblePositionManagerRamses {
   struct MintParams {
@@ -85,6 +85,10 @@ contract RamsesAdapter is BaseV3Adapter {
     (tokenId,,,) = INonfungiblePositionManagerRamses(address(nftPositionManager)).mint(params);
   }
 
+  function _collectFees(uint256 _lockId) internal override returns (uint256 fee0, uint256 fee1) {
+    (fee0, fee1) = IFreeUniV3LPLocker(locker).collect(_lockId, address(this), type(uint128).max, type(uint128).max);
+  }
+
   function _createPool(IERC20 _token0, IERC20 _token1, uint24 _fee, uint160 _sqrtPriceX96Launch)
     internal
     virtual
@@ -93,5 +97,19 @@ contract RamsesAdapter is BaseV3Adapter {
   {
     address _pool = IRamsesPoolFactory(address(clPoolFactory)).createPool(_token0, _token1, _fee, _sqrtPriceX96Launch);
     pool = IClPool(_pool);
+  }
+
+  function _mintAndLock(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0, uint256 _index)
+    internal
+    override
+    returns (uint256 lockId)
+  {
+    // mint the position
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+
+    // lock the liquidity forever; allow this contract to collect fees
+    lockId = IFreeUniV3LPLocker(locker).nextLockId();
+    nftPositionManager.safeTransferFrom(address(this), locker, tokenId);
+    tokenToLockId[IERC20(_token0)][_index] = lockId;
   }
 }

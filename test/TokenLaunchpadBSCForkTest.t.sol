@@ -11,6 +11,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   address constant PANCAKE_FACTORY = 0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865;
   address constant PANCAKE_ROUTER = 0x1b81D678ffb9C0263b24A97847620C99d213eB14;
   address constant NFT_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
+  address constant LOCKER = 0x25c9C4B56E820e0DEA438b145284F02D9Ca9Bd52;
 
   PancakeAdapter _adapter;
 
@@ -33,12 +34,10 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     vm.label(PANCAKE_ROUTER, "pancakeRouter");
 
     // Initialize adapter
-    _adapter.initialize(
-      address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), address(_locker), NFT_MANAGER
-    );
+    _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
 
     // Initialize launchpad
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(address(_adapter), owner, address(_weth), address(_maha), 1000e18);
   }
 
   function test_create() public {

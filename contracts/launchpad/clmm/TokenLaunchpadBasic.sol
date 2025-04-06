@@ -7,8 +7,7 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝    ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 

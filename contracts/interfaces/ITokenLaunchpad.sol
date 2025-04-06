@@ -7,14 +7,12 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 
 pragma solidity ^0.8.0;
 
-import {ITokenTemplate} from "./ITokenTemplate.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title ITokenLaunchpad Interface
@@ -51,7 +49,7 @@ interface ITokenLaunchpad {
   /// @param token The token that was launched
   /// @param pool The address of the pool for the token
   /// @param params The parameters used to launch the token
-  event TokenLaunched(ITokenTemplate indexed token, address indexed pool, ITokenTemplate.InitParams params);
+  event TokenLaunched(IERC20 indexed token, address indexed pool, CreateParams params);
 
   /// @notice Emitted when referral settings are updated
   /// @param referralDestination The address where referrals will be sent
@@ -65,7 +63,7 @@ interface ITokenLaunchpad {
   /// @param graduationTick The tick that must be reached for graduation
   /// @param upperMaxTick The maximum tick allowed
   event TokenLaunchParams(
-    ITokenTemplate token,
+    IERC20 token,
     IERC20 fundingToken,
     int24 launchTick,
     int24 graduationTick,
@@ -77,14 +75,12 @@ interface ITokenLaunchpad {
 
   /// @notice Initializes the launchpad contract
   /// @param _adapter The DEX adapter contract address
-  /// @param _tokenImplementation The implementation contract for new tokens
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
   /// @param _feeDiscountToken The token used for fee discount
   /// @param _feeDiscountAmount The amount of fee discount
   function initialize(
     address _adapter,
-    address _tokenImplementation,
     address _owner,
     address _weth,
     address _feeDiscountToken,
@@ -119,5 +115,5 @@ interface ITokenLaunchpad {
 
   /// @notice Claims accumulated fees for a specific token
   /// @param _token The token to claim fees for
-  function claimFees(ITokenTemplate _token) external;
+  function claimFees(IERC20 _token) external;
 }

@@ -16,20 +16,19 @@ pragma solidity ^0.8.0;
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ERC721EnumerableUpgradeable} from
   "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
+
+import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
-import {ITokenTemplate} from "contracts/interfaces/ITokenTemplate.sol";
 
 abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721EnumerableUpgradeable {
   using SafeERC20 for IERC20;
 
   address public feeDestination;
-  address public tokenImplementation;
   ICLMMAdapter public adapter;
   IERC20 public feeDiscountToken;
   IERC20[] public tokens;
@@ -39,22 +38,20 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   uint256 public feeDiscountAmount;
   uint256 public referralFee;
 
-  mapping(ITokenTemplate token => CreateParams) public launchParams;
-  mapping(ITokenTemplate token => uint256) public tokenToNftId;
+  mapping(IERC20 token => CreateParams) public launchParams;
+  mapping(IERC20 token => uint256) public tokenToNftId;
 
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
   function initialize(
     address _adapter,
-    address _tokenImplementation,
     address _owner,
     address _weth,
     address _feeDiscountToken,
     uint256 _feeDiscountAmount
   ) external initializer {
     adapter = ICLMMAdapter(_adapter);
-    tokenImplementation = _tokenImplementation;
     weth = IWETH9(_weth);
     feeDiscountToken = IERC20(_feeDiscountToken);
     feeDiscountAmount = _feeDiscountAmount;
@@ -97,16 +94,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       if (currentBalance < amount) p.fundingToken.transferFrom(msg.sender, address(this), amount - currentBalance);
     }
 
-    ITokenTemplate token;
+    WAGMIEToken token;
 
     {
-      ITokenTemplate.InitParams memory params =
-        ITokenTemplate.InitParams({name: p.name, symbol: p.symbol, metadata: p.metadata});
-
       bytes32 salt = keccak256(abi.encode(p.salt, msg.sender, p.name, p.symbol));
-      token = ITokenTemplate(Clones.cloneDeterministic(tokenImplementation, salt));
+      token = new WAGMIEToken{salt: salt}(p.name, p.symbol);
       require(expected == address(0) || address(token) == expected, "Invalid token address");
-      token.initialize(params);
+
       tokenToNftId[token] = tokens.length;
       tokens.push(token);
       launchParams[token] = p;
@@ -119,7 +113,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
         p.graduationTick, // int24 _tick1,
         p.upperMaxTick // int24 _tick2
       );
-      emit TokenLaunched(token, adapter.getPool(token), params);
+      emit TokenLaunched(token, adapter.getPool(token), p);
     }
     {
       emit TokenLaunchParams(
@@ -153,7 +147,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function claimFees(ITokenTemplate _token) external {
+  function claimFees(IERC20 _token) external {
     address token1 = address(launchParams[_token].fundingToken);
     (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
 
@@ -187,8 +181,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     if (address(referralDestination) == address(0)) return;
     IERC20(_token0).approve(address(referralDestination), _amount0);
     IERC20(_token1).approve(address(referralDestination), _amount1);
-    IReferralDistributor distributor = referralDestination;
-    distributor.collectReferralFees(_token0, _token1, _amount0, _amount1);
+    referralDestination.collectReferralFees(_token0, _token1, _amount0, _amount1);
   }
 
   /// @dev Refund tokens to the owner

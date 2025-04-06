@@ -7,14 +7,14 @@
 // ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║
 // ╚═╝    ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 
-// Website: https://maha.xyz
-// Discord: https://discord.gg/mahadao
+// Website: https://wagmie.com
 // Telegram: https://t.me/mahaxyz
 // Twitter: https://twitter.com/mahaxyz_
 
 pragma solidity ^0.8.0;
 
 import {BaseV3Adapter, IClPool, IERC20, SafeERC20} from "./BaseV3Adapter.sol";
+import {IGoPlusLocker} from "contracts/interfaces/IGoPlusLocker.sol";
 
 interface INonfungiblePositionManagerPancake {
   struct MintParams {
@@ -53,6 +53,26 @@ contract PancakeAdapter is BaseV3Adapter {
     address _nftPositionManager
   ) external initializer {
     __BaseV3Adapter_init(_launchpad, _WETH9, _locker, _swapRouter, _nftPositionManager, _poolFactory, 10_000, 200);
+  }
+
+  function _mintAndLock(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0, uint256 _index)
+    internal
+    override
+    returns (uint256 lockId)
+  {
+    // mint the position
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+
+    // lock the liquidity forever; allow this contract to collect fees
+    lockId = IGoPlusLocker(locker).nextLockId();
+    IGoPlusLocker(locker).lock(
+      address(nftPositionManager), tokenId, address(this), address(this), type(uint256).max, "LVP"
+    );
+    tokenToLockId[IERC20(_token0)][_index] = lockId;
+  }
+
+  function _collectFees(uint256 _lockId) internal override returns (uint256 fee0, uint256 fee1) {
+    (fee0, fee1,,) = IGoPlusLocker(locker).collect(_lockId, address(this), type(uint128).max, type(uint128).max);
   }
 
   function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0)

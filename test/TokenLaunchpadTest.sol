@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
-import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpad} from "contracts/launchpad/clmm/TokenLaunchpad.sol";
 
 import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
@@ -15,7 +15,7 @@ contract TokenLaunchpadTest is Test {
   MockERC20 _maha;
   WAGMIEToken _tokenImpl;
   TokenLaunchpad _launchpad;
-  IFreeUniV3LPLocker _locker;
+  address _locker;
 
   address owner = makeAddr("owner");
   address whale = makeAddr("whale");
@@ -24,12 +24,9 @@ contract TokenLaunchpadTest is Test {
   function _setUpBase() internal {
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _maha = new MockERC20("Maha", "MAHA", 18);
-    _tokenImpl = new WAGMIEToken();
-    _locker = IFreeUniV3LPLocker(0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db);
 
     vm.label(address(_weth), "weth");
     vm.label(address(_maha), "maha");
-    vm.label(address(_tokenImpl), "tokenImpl");
     vm.deal(owner, 1000 ether);
     vm.deal(whale, 1000 ether);
     vm.deal(creator, 1000 ether);

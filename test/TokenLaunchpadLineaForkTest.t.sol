@@ -6,7 +6,7 @@ import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
-import {IERC20, ITokenLaunchpad, ITokenTemplate} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
@@ -22,6 +22,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
     _setUpBase();
 
     address _nftManager = address(0xAAA78E8C4241990B4ce159E105dA08129345946A);
+    address _locker = address(0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db);
 
     _launchpad = new TokenLaunchpadLinea();
     _adapter = new RamsesAdapter();
@@ -39,7 +40,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       address(_locker),
       address(_nftManager)
     );
-    _launchpad.initialize(address(_adapter), address(_tokenImpl), owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(address(_adapter), owner, address(_weth), address(_maha), 1000e18);
   }
 
   function test_create_basic() public {
@@ -120,7 +121,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
 
     vm.prank(owner);
     (address _token,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
-    ITokenTemplate token = ITokenTemplate(_token);
+    IERC20 token = IERC20(_token);
     vm.assertApproxEqAbs(token.balanceOf(owner), 257_291_080 ether, 1 ether);
   }
 
@@ -158,7 +159,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
 
     vm.startPrank(owner);
     (address token,,) = _launchpad.createAndBuy{value: 100.1 ether}(params, address(0), 1 ether);
-    _launchpad.claimFees(ITokenTemplate(token));
+    _launchpad.claimFees(IERC20(token));
     vm.stopPrank();
   }
 
