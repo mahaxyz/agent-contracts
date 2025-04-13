@@ -17,6 +17,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
 contract Swapper {
   using SafeERC20 for IERC20;
@@ -24,13 +25,15 @@ contract Swapper {
   ICLMMAdapter public immutable adapter;
   IWETH9 public immutable weth;
   address public immutable ODOS;
+  ITokenLaunchpad public immutable launchpad;
 
   receive() external payable {}
 
-  constructor(address _adapter, address _weth, address _odos) {
+  constructor(address _adapter, address _weth, address _odos, address _launchpad) {
     adapter = ICLMMAdapter(_adapter);
     weth = IWETH9(_weth);
     ODOS = _odos;
+    launchpad = ITokenLaunchpad(_launchpad);
   }
 
   /// @notice Buys a token with exact input using ODOS
@@ -72,6 +75,9 @@ contract Swapper {
     _refundTokens(_tokenIn);
     _refundTokens(_tokenOut);
     _refundTokens(_odosTokenIn);
+
+    // collect fees
+    launchpad.claimFees(_tokenOut);
   }
 
   /// @notice Sells a token with exact input using ODOS
@@ -112,6 +118,9 @@ contract Swapper {
     _refundTokens(_tokenIn);
     _refundTokens(_tokenOut);
     _refundTokens(_odosTokenOut);
+
+    // collect fees
+    launchpad.claimFees(_tokenIn);
   }
 
   /// @dev Refund tokens to the owner
