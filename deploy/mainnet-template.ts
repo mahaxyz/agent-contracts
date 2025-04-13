@@ -48,7 +48,7 @@ export async function templateLaunchpad(
   const swappeD = await deployContract(
     hre,
     "Swapper",
-    [adapterD.address, wethAddress, odosAddress],
+    [adapterD.address, wethAddress, odosAddress, launchpadD.address],
     "Swapper"
   );
   const swapper = await hre.ethers.getContractAt("Swapper", swappeD.address);

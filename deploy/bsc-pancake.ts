@@ -1,7 +1,7 @@
 import { deployToken, templateLaunchpad } from "./mainnet-template";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { PancakeAdapter } from "../types";
-import { waitForTx } from "../scripts/utils";
+import { deployContract, waitForTx } from "../scripts/utils";
 import assert from "assert";
 
 async function main(hre: HardhatRuntimeEnvironment) {
@@ -15,6 +15,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const odosAddressOnBsc = "0x89b8aa89fdd0507a99d334cbe3c808fafc7d850e";
   const nftPositionManager = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
   const mahaAddress = "0x6a661312938d22a2a0e27f585073e4406903990a";
+  const cakeAddress = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82";
   const locker = "0x25c9C4B56E820e0DEA438b145284F02D9Ca9Bd52";
   const e18 = 10n ** 18n;
   const feeDiscountAmount = 1000n * e18; // 100%
@@ -29,6 +30,13 @@ async function main(hre: HardhatRuntimeEnvironment) {
     odosAddressOnBsc,
     mahaAddress,
     feeDiscountAmount
+  );
+
+  await deployContract(
+    hre,
+    "FeeCollector",
+    [cakeAddress, mahaAddress, odosAddressOnBsc, wbnbAddressOnBsc],
+    "FeeCollector"
   );
 
   // initialize the contracts if they are not initialized
@@ -56,7 +64,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // await waitForTx(await launchpad.setFeeSettings(mahaTreasury, 0, 1000n * e18));
 
-  const shouldMock = true;
+  const shouldMock = false;
   if (shouldMock) {
     // const mahaD = await deployContract(
     //   hre,
