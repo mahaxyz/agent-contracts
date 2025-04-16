@@ -54,8 +54,17 @@ interface ICLMMAdapter {
 
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
-  function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
-    external;
+  function addSingleSidedLiquidity(
+    IERC20 _tokenBase,
+    IERC20 _tokenQuote,
+    int24 _tick0,
+    int24 _tick1,
+    int24 _tick2,
+    uint24 _fee,
+    int24 _tickSpacing,
+    uint256 _totalAmount,
+    uint256 _graduationAmount
+  ) external;
 
   /// @notice Swap a token with exact output
   /// @param _tokenIn The token to swap
@@ -63,7 +72,7 @@ interface ICLMMAdapter {
   /// @param _amountOut The amount of tokens to swap
   /// @param _maxAmountIn The maximum amount of tokens to receive
   /// @return amountIn The amount of tokens received
-  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn, uint24 _fee)
     external
     returns (uint256 amountIn);
 
@@ -73,7 +82,7 @@ interface ICLMMAdapter {
   /// @param _amountIn The amount of tokens to swap
   /// @param _minAmountOut The minimum amount of tokens to receive
   /// @return amountOut The amount of tokens received
-  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut, uint24 _fee)
     external
     returns (uint256 amountOut);
 

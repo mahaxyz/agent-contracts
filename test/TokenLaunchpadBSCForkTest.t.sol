@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {IFreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
-import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/dexes/PancakeAdapter.sol";
 
@@ -51,7 +51,12 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_800,
       upperMaxTick: 887_200,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.prank(creator);

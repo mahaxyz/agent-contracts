@@ -36,9 +36,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   ICLSwapRouter public swapRouter;
   address public locker;
   IERC721 public nftPositionManager;
-  int24 internal tickSpacing;
   IWETH9 public WETH9;
-  uint24 internal fee;
 
   mapping(IERC20 token => LaunchTokenParams params) public launchParams;
   mapping(IERC20 token => mapping(uint256 index => uint256 lockId)) public tokenToLockId;
@@ -49,19 +47,15 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     address _locker,
     address _swapRouter,
     address _nftPositionManager,
-    address _clPoolFactory,
-    uint24 _fee,
-    int24 _tickSpacing
+    address _clPoolFactory
   ) internal {
     _me = address(this);
 
     clPoolFactory = IClPoolFactory(_clPoolFactory);
-    fee = _fee;
     launchpad = _launchpad;
     locker = _locker;
     nftPositionManager = IERC721(_nftPositionManager);
     swapRouter = ICLSwapRouter(_swapRouter);
-    tickSpacing = _tickSpacing;
     WETH9 = IWETH9(_WETH9);
 
     nftPositionManager.setApprovalForAll(address(locker), true);
@@ -78,7 +72,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn, uint24 _fee)
     external
     returns (uint256 amountIn)
   {
@@ -91,7 +85,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
         amountOut: _amountOut,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: fee,
+        fee: _fee,
         amountInMaximum: _maxAmountIn,
         sqrtPriceLimitX96: 0
       })
@@ -100,7 +94,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut, uint24 _fee)
     external
     returns (uint256 amountOut)
   {
@@ -114,7 +108,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
         amountIn: _amountIn,
         recipient: msg.sender,
         deadline: block.timestamp,
-        fee: fee,
+        fee: _fee,
         amountOutMinimum: _minAmountOut,
         sqrtPriceLimitX96: 0
       })
@@ -122,21 +116,29 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
-    external
-  {
+  function addSingleSidedLiquidity(
+    IERC20 _tokenBase,
+    IERC20 _tokenQuote,
+    int24 _tick0,
+    int24 _tick1,
+    int24 _tick2,
+    uint24 _fee,
+    int24 _tickSpacing,
+    uint256 _totalAmount,
+    uint256 _graduationAmount
+  ) external {
     require(msg.sender == launchpad, "!launchpad");
     require(launchParams[_tokenBase].pool == address(0), "!launched");
 
     uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
 
-    IClPool pool = _createPool(_tokenBase, _tokenQuote, fee, sqrtPriceX96Launch);
+    IClPool pool = _createPool(_tokenBase, _tokenQuote, _fee, sqrtPriceX96Launch);
 
     PoolKey memory poolKey = PoolKey({
       currency0: Currency.wrap(address(_tokenBase)),
       currency1: Currency.wrap(address(_tokenQuote)),
-      fee: fee,
-      tickSpacing: tickSpacing,
+      fee: _fee,
+      tickSpacing: _tickSpacing,
       hooks: IHooks(address(0))
     });
     launchParams[_tokenBase] = LaunchTokenParams({
@@ -150,8 +152,9 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     });
 
     // calculate and add liquidity for the various tick ranges
-    _mintAndLock(_tokenBase, _tokenQuote, _tick0, _tick1, 800_000_000 ether, 0);
-    _mintAndLock(_tokenBase, _tokenQuote, _tick1, _tick2, 200_000_000 ether, 1);
+    _tokenBase.safeTransferFrom(msg.sender, address(this), _totalAmount);
+    _mintAndLock(_tokenBase, _tokenQuote, _tick0, _tick1, _fee, _graduationAmount, 0);
+    _mintAndLock(_tokenBase, _tokenQuote, _tick1, _tick2, _fee, _totalAmount - _graduationAmount, 1);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -185,12 +188,18 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   /// @param _token1 The token to mint the position for
   /// @param _tick0 The lower tick of the position
   /// @param _tick1 The upper tick of the position
+  /// @param _fee The fee of the pool
   /// @param _amount0 The amount of tokens to mint the position for
   /// @return lockId The lock id of the position
-  function _mintAndLock(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0, uint256 _index)
-    internal
-    virtual
-    returns (uint256 lockId);
+  function _mintAndLock(
+    IERC20 _token0,
+    IERC20 _token1,
+    int24 _tick0,
+    int24 _tick1,
+    uint24 _fee,
+    uint256 _amount0,
+    uint256 _index
+  ) internal virtual returns (uint256 lockId);
 
   function _collectFees(uint256 _lockId) internal virtual returns (uint256 fee0, uint256 fee1);
 
@@ -201,7 +210,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   /// @param _tick1 The upper tick of the position
   /// @param _amount0 The amount of tokens to mint the position for
   /// @return tokenId The token id of the position
-  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0)
+  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
     internal
     virtual
     returns (uint256 tokenId);

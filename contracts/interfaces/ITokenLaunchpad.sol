@@ -14,6 +14,7 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 
 /// @title ITokenLaunchpad Interface
 /// @notice Interface for the TokenLaunchpad contract that handles token launches
@@ -27,17 +28,25 @@ interface ITokenLaunchpad {
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
   /// @param upperMaxTick The maximum tick allowed
-  /// @param isFeeDiscounted Whether the fee is discounted
+  /// @param isPremium Whether the token is premium
+  /// @param graduationLiquidity The liquidity at graduation
+  /// @param launchPoolAllocations The launchpool allocations
+  /// @param fee The fee for the token liquidity pair
   struct CreateParams {
+    bool isPremium;
+    bytes32 salt;
+    IERC20 fundingToken;
+    int24 graduationTick;
+    int24 launchTick;
+    int24 upperMaxTick;
+    ILaunchpool[] launchPools;
+    uint256[] launchPoolAmounts;
+    string metadata;
     string name;
     string symbol;
-    string metadata;
-    IERC20 fundingToken;
-    bytes32 salt;
-    int24 launchTick;
-    int24 graduationTick;
-    int24 upperMaxTick;
-    bool isFeeDiscounted;
+    uint24 fee;
+    int24 tickSpacing;
+    uint256 graduationLiquidity;
   }
 
   /// @notice Emitted when fee settings are updated
@@ -77,13 +86,13 @@ interface ITokenLaunchpad {
   /// @param _adapter The DEX adapter contract address
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
-  /// @param _feeDiscountToken The token used for fee discount
+  /// @param _premiumToken The token used for fee discount
   /// @param _feeDiscountAmount The amount of fee discount
   function initialize(
     address _adapter,
     address _owner,
     address _weth,
-    address _feeDiscountToken,
+    address _premiumToken,
     uint256 _feeDiscountAmount
   ) external;
 

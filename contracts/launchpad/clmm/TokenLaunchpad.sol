@@ -22,6 +22,8 @@ import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+
+import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
@@ -30,7 +32,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   address public feeDestination;
   ICLMMAdapter public adapter;
-  IERC20 public feeDiscountToken;
+  IERC20 public premiumToken;
   IERC20[] public tokens;
   IReferralDistributor public referralDestination;
   IWETH9 public weth;
@@ -40,6 +42,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   mapping(IERC20 token => CreateParams) public launchParams;
   mapping(IERC20 token => uint256) public tokenToNftId;
+  mapping(address => bool whitelisted) public whitelisted;
 
   receive() external payable {}
 
@@ -48,12 +51,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     address _adapter,
     address _owner,
     address _weth,
-    address _feeDiscountToken,
+    address _premiumToken,
     uint256 _feeDiscountAmount
   ) external initializer {
     adapter = ICLMMAdapter(_adapter);
     weth = IWETH9(_weth);
-    feeDiscountToken = IERC20(_feeDiscountToken);
+    premiumToken = IERC20(_premiumToken);
     feeDiscountAmount = _feeDiscountAmount;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
@@ -66,6 +69,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     feeDiscountAmount = _feeDiscountAmount;
     emit FeeUpdated(_feeDestination, _fee);
   }
+
+  function toggleWhitelist(address _address) external onlyOwner {
+    whitelisted[_address] = !whitelisted[_address];
+    emit WhitelistUpdated(_address, whitelisted[_address]);
+  }
+
+  event WhitelistUpdated(address indexed _address, bool _whitelisted);
 
   /// @inheritdoc ITokenLaunchpad
   function setReferralSettings(address _referralDestination, uint256 _referralFee) external onlyOwner {
@@ -86,7 +96,16 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     // wrap anything pending into weth
     if (address(this).balance > 0) weth.deposit{value: address(this).balance}();
 
-    if (p.isFeeDiscounted) feeDiscountToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
+    if (p.isPremium) {
+      premiumToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
+    } else {
+      // non-premium tokens can't have launchpool allocations or graduation liquidity
+      require(p.launchPools.length == 0, "!premium-allocations");
+      // non-premium tokens must have 800M liquidity at graduation
+      require(p.graduationLiquidity == 800_000_000 ether, "!premium-grad");
+      // non-premium tokens must have a fee of 1000
+      require(p.fee == 1000, "!premium-fee");
+    }
 
     // take any pending balance from the sender
     if (amount > 0) {
@@ -104,15 +123,22 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       tokenToNftId[token] = tokens.length;
       tokens.push(token);
       launchParams[token] = p;
-
+      _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts);
+      uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
       token.approve(address(adapter), type(uint256).max);
-      adapter.addSingleSidedLiquidity(
-        token, // IERC20 _tokenBase,
-        p.fundingToken, // IERC20 _tokenQuote,
-        p.launchTick, // int24 _tick0,
-        p.graduationTick, // int24 _tick1,
-        p.upperMaxTick // int24 _tick2
-      );
+    }
+    {
+      // adapter.addSingleSidedLiquidity(
+      //   token, // IERC20 _tokenBase,
+      //   p.fundingToken, // IERC20 _tokenQuote,
+      //   p.launchTick, // int24 _tick0,
+      //   p.graduationTick, // int24 _tick1,
+      //   p.upperMaxTick, // int24 _tick2
+      //   p.fee, // uint24 _fee,
+      //   p.tickSpacing, // int24 _tickSpacing,
+      //   pendingBalance, // uint256 _totalAmount,
+      //   p.graduationLiquidity // uint256 _graduationAmount
+      // );
       emit TokenLaunched(token, adapter.getPool(token), p);
     }
     {
@@ -127,11 +153,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // buy a small amount of tokens to register the token on tools like dexscreener
     uint256 balance = p.fundingToken.balanceOf(address(this));
-    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance); // buy 1 token
+    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance, p.fee); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
     uint256 received;
-    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0);
+    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0, p.fee);
 
     // refund any remaining tokens
     _refundTokens(token);
@@ -194,6 +220,15 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       payable(msg.sender).transfer(remaining);
     } else {
       _token.safeTransfer(msg.sender, remaining);
+    }
+  }
+
+  function _fundLaunchPools(IERC20 _token, ILaunchpool[] memory _launchPools, uint256[] memory _launchPoolAmounts)
+    internal
+  {
+    for (uint256 i = 0; i < _launchPools.length; i++) {
+      _token.approve(address(_launchPools[i]), _launchPoolAmounts[i]);
+      _launchPools[i].fundReward(_token, _launchPoolAmounts[i]);
     }
   }
 }

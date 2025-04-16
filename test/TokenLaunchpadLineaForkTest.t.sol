@@ -6,7 +6,7 @@ import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
-import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
@@ -54,7 +54,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.prank(creator);
@@ -79,7 +84,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
@@ -116,7 +126,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.prank(owner);
@@ -136,7 +151,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.prank(owner);
@@ -154,7 +174,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.startPrank(owner);
@@ -174,7 +199,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_000,
       upperMaxTick: 887_000,
-      isFeeDiscounted: false
+      isPremium: false,
+      graduationLiquidity: 800_000_000 ether,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      fee: 1000,
+      tickSpacing: 20_000
     });
 
     vm.startPrank(owner);
