@@ -44,6 +44,18 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   mapping(IERC20 token => uint256) public tokenToNftId;
   mapping(address => bool whitelisted) public whitelisted;
 
+  // Default parameters for different funding tokens
+  struct DefaultParams {
+    int24 launchTick;
+    int24 graduationTick;
+    int24 upperMaxTick;
+    uint24 fee;
+    int24 tickSpacing;
+    uint256 graduationLiquidity;
+  }
+
+  mapping(IERC20 => DefaultParams) public defaultParams;
+
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
@@ -84,6 +96,25 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     emit ReferralUpdated(_referralDestination, _referralFee);
   }
 
+  /// @notice Set default parameters for a funding token
+  /// @param _token The funding token
+  /// @param _params The default parameters
+  function setDefaultParams(IERC20 _token, DefaultParams memory _params) external onlyOwner {
+    defaultParams[_token] = _params;
+  }
+
+  /// @notice Get default parameters for a funding token
+  /// @param _token The funding token
+  /// @return params The default parameters
+  function getDefaultParams(IERC20 _token) public view returns (DefaultParams memory params) {
+    params = defaultParams[_token];
+    // If no custom defaults set, use WETH defaults
+    if (params.launchTick == 0 && params.graduationTick == 0 && params.upperMaxTick == 0) {
+      params = defaultParams[weth];
+    }
+    return params;
+  }
+
   /// @inheritdoc ITokenLaunchpad
   function createAndBuy(CreateParams memory p, address expected, uint256 amount)
     external
@@ -99,12 +130,19 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     if (p.isPremium) {
       premiumToken.transferFrom(msg.sender, feeDestination, feeDiscountAmount);
     } else {
-      // non-premium tokens can't have launchpool allocations or graduation liquidity
+      // non-premium tokens can't have launchpool allocations
       require(p.launchPools.length == 0, "!premium-allocations");
-      // non-premium tokens must have 800M liquidity at graduation
-      require(p.graduationLiquidity == 800_000_000 ether, "!premium-grad");
-      // non-premium tokens must have a fee of 1000
-      require(p.fee == 1000, "!premium-fee");
+      
+      // Get default parameters for the funding token
+      DefaultParams memory defaults = getDefaultParams(p.fundingToken);
+      
+      // Override with default values if not premium
+      p.launchTick = defaults.launchTick;
+      p.graduationTick = defaults.graduationTick;
+      p.upperMaxTick = defaults.upperMaxTick;
+      p.fee = defaults.fee;
+      p.tickSpacing = defaults.tickSpacing;
+      p.graduationLiquidity = defaults.graduationLiquidity;
     }
 
     // take any pending balance from the sender
@@ -128,17 +166,17 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       token.approve(address(adapter), type(uint256).max);
     }
     {
-      // adapter.addSingleSidedLiquidity(
-      //   token, // IERC20 _tokenBase,
-      //   p.fundingToken, // IERC20 _tokenQuote,
-      //   p.launchTick, // int24 _tick0,
-      //   p.graduationTick, // int24 _tick1,
-      //   p.upperMaxTick, // int24 _tick2
-      //   p.fee, // uint24 _fee,
-      //   p.tickSpacing, // int24 _tickSpacing,
-      //   pendingBalance, // uint256 _totalAmount,
-      //   p.graduationLiquidity // uint256 _graduationAmount
-      // );
+      adapter.addSingleSidedLiquidity(
+        token, // IERC20 _tokenBase,
+        p.fundingToken, // IERC20 _tokenQuote,
+        p.launchTick, // int24 _tick0,
+        p.graduationTick, // int24 _tick1,
+        p.upperMaxTick, // int24 _tick2
+        p.fee, // uint24 _fee,
+        p.tickSpacing, // int24 _tickSpacing,
+        pendingBalance, // uint256 _totalAmount,
+        p.graduationLiquidity // uint256 _graduationAmount
+      );
       emit TokenLaunched(token, adapter.getPool(token), p);
     }
     {
