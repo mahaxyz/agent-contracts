@@ -31,19 +31,26 @@ interface ITokenLaunchpad {
   /// @param isPremium Whether the token is premium
   /// @param graduationLiquidity The liquidity at graduation
   /// @param launchPoolAllocations The launchpool allocations
+  /// @param creatorAllocation Percentage of total supply to allocate to creator (max 5%)
   /// @param fee The fee for the token liquidity pair
   struct CreateParams {
     bool isPremium;
     bytes32 salt;
     IERC20 fundingToken;
-    int24 graduationTick;
-    int24 launchTick;
-    int24 upperMaxTick;
+    ValueParams valueParams;
     ILaunchpool[] launchPools;
     uint256[] launchPoolAmounts;
     string metadata;
     string name;
     string symbol;
+    uint16 creatorAllocation;
+  }
+
+  // Contains numeric launch parameters
+  struct ValueParams {
+    int24 launchTick;
+    int24 graduationTick;
+    int24 upperMaxTick;
     uint24 fee;
     int24 tickSpacing;
     uint256 graduationLiquidity;
@@ -65,22 +72,11 @@ interface ITokenLaunchpad {
   /// @param referralFee The new referral fee amount
   event ReferralUpdated(address indexed referralDestination, uint256 referralFee);
 
-  /// @notice Emitted when a token is launched
+  /// @notice Emitted when tokens are allocated to the creator
   /// @param token The token that was launched
-  /// @param fundingToken The token used for funding the launch
-  /// @param launchTick The tick at which the token launches
-  /// @param graduationTick The tick that must be reached for graduation
-  /// @param upperMaxTick The maximum tick allowed
-  event TokenLaunchParams(
-    IERC20 token,
-    IERC20 fundingToken,
-    int24 launchTick,
-    int24 graduationTick,
-    int24 upperMaxTick,
-    string name,
-    string symbol,
-    string metadata
-  );
+  /// @param creator The address of the creator
+  /// @param amount The amount of tokens allocated to the creator
+  event CreatorAllocation(IERC20 indexed token, address indexed creator, uint256 amount);
 
   /// @notice Initializes the launchpad contract
   /// @param _adapter The DEX adapter contract address
