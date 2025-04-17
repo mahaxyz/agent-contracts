@@ -44,17 +44,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   mapping(IERC20 token => uint256) public tokenToNftId;
   mapping(address => bool whitelisted) public whitelisted;
 
-  // Default parameters for different funding tokens
-  struct DefaultParams {
-    int24 launchTick;
-    int24 graduationTick;
-    int24 upperMaxTick;
-    uint24 fee;
-    int24 tickSpacing;
-    uint256 graduationLiquidity;
-  }
+  mapping(IERC20 => ValueParams) public defaultParams;
 
-  mapping(IERC20 => DefaultParams) public defaultParams;
+  // Maximum allowed creator allocation percentage (5%)
+  uint16 public constant MAX_CREATOR_ALLOCATION = 500;
 
   receive() external payable {}
 
@@ -99,14 +92,14 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   /// @notice Set default parameters for a funding token
   /// @param _token The funding token
   /// @param _params The default parameters
-  function setDefaultParams(IERC20 _token, DefaultParams memory _params) external onlyOwner {
+  function setValueParams(IERC20 _token, ValueParams memory _params) external onlyOwner {
     defaultParams[_token] = _params;
   }
 
   /// @notice Get default parameters for a funding token
   /// @param _token The funding token
   /// @return params The default parameters
-  function getDefaultParams(IERC20 _token) public view returns (DefaultParams memory params) {
+  function getValueParams(IERC20 _token) public view returns (ValueParams memory params) {
     params = defaultParams[_token];
     // If no custom defaults set, use WETH defaults
     if (params.launchTick == 0 && params.graduationTick == 0 && params.upperMaxTick == 0) {
@@ -121,6 +114,9 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     payable
     returns (address, uint256, uint256)
   {
+    // Ensure creator allocation is within allowed limits
+    require(p.creatorAllocation <= MAX_CREATOR_ALLOCATION, "Creator allocation exceeds maximum");
+
     // send any creation fee to the fee destination
     if (creationFee > 0) payable(feeDestination).transfer(creationFee);
 
@@ -134,15 +130,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       require(p.launchPools.length == 0, "!premium-allocations");
       
       // Get default parameters for the funding token
-      DefaultParams memory defaults = getDefaultParams(p.fundingToken);
+      ValueParams memory defaults = getValueParams(p.fundingToken);
       
       // Override with default values if not premium
-      p.launchTick = defaults.launchTick;
-      p.graduationTick = defaults.graduationTick;
-      p.upperMaxTick = defaults.upperMaxTick;
-      p.fee = defaults.fee;
-      p.tickSpacing = defaults.tickSpacing;
-      p.graduationLiquidity = defaults.graduationLiquidity;
+      p.valueParams = defaults;
     }
 
     // take any pending balance from the sender
@@ -158,31 +149,39 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       token = new WAGMIEToken{salt: salt}(p.name, p.symbol);
       require(expected == address(0) || address(token) == expected, "Invalid token address");
 
+      // Calculate and transfer creator allocation if specified
+      if (p.creatorAllocation > 0) {
+        // Assuming WAGMIEToken has a total supply of 1 billion tokens
+        uint256 totalSupply = 1_000_000_000 * 1e18;
+        uint256 creatorAmount = (totalSupply * p.creatorAllocation) / 10000;
+        
+        // Transfer the allocated tokens to the creator
+        token.transfer(msg.sender, creatorAmount);
+        
+        // Emit event for the allocation
+        emit CreatorAllocation(token, msg.sender, creatorAmount);
+      }
+
       tokenToNftId[token] = tokens.length;
       tokens.push(token);
       launchParams[token] = p;
       _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts);
       uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
       token.approve(address(adapter), type(uint256).max);
-    }
-    {
       adapter.addSingleSidedLiquidity(
-        token, // IERC20 _tokenBase,
-        p.fundingToken, // IERC20 _tokenQuote,
-        p.launchTick, // int24 _tick0,
-        p.graduationTick, // int24 _tick1,
-        p.upperMaxTick, // int24 _tick2
-        p.fee, // uint24 _fee,
-        p.tickSpacing, // int24 _tickSpacing,
-        pendingBalance, // uint256 _totalAmount,
-        p.graduationLiquidity // uint256 _graduationAmount
+        ICLMMAdapter.AddLiquidityParams({
+          tokenBase: token, // IERC20 _tokenBase,  
+          tokenQuote: p.fundingToken, // IERC20 _tokenQuote,
+          tick0: p.valueParams.launchTick, // int24 _tick0,
+          tick1: p.valueParams.graduationTick, // int24 _tick1,
+          tick2: p.valueParams.upperMaxTick, // int24 _tick2
+          fee: p.valueParams.fee, // uint24 _fee,
+          tickSpacing: p.valueParams.tickSpacing, // int24 _tickSpacing,
+          totalAmount: pendingBalance, // uint256 _totalAmount,
+          graduationAmount: p.valueParams.graduationLiquidity // uint256 _graduationAmount
+        })
       );
       emit TokenLaunched(token, adapter.getPool(token), p);
-    }
-    {
-      emit TokenLaunchParams(
-        token, p.fundingToken, p.launchTick, p.graduationTick, p.upperMaxTick, p.name, p.symbol, p.metadata
-      );
     }
 
     _mint(msg.sender, tokenToNftId[token]);
@@ -191,11 +190,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
     // buy a small amount of tokens to register the token on tools like dexscreener
     uint256 balance = p.fundingToken.balanceOf(address(this));
-    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance, p.fee); // buy 1 token
+    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance, p.valueParams.fee); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
     uint256 received;
-    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0, p.fee);
+    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0, p.valueParams.fee);
 
     // refund any remaining tokens
     _refundTokens(token);
@@ -264,6 +263,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   function _fundLaunchPools(IERC20 _token, ILaunchpool[] memory _launchPools, uint256[] memory _launchPoolAmounts)
     internal
   {
+    require(_launchPools.length == _launchPoolAmounts.length && _launchPools.length > 0, "Array length mismatch");
+    
     for (uint256 i = 0; i < _launchPools.length; i++) {
       _token.approve(address(_launchPools[i]), _launchPoolAmounts[i]);
       _launchPools[i].fundReward(_token, _launchPoolAmounts[i]);
