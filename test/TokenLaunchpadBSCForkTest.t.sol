@@ -48,15 +48,18 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
       salt: salt,
-      launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200,
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_800,
+        upperMaxTick: 887_200,
+        fee: 1000,
+        tickSpacing: 20_000,
+        graduationLiquidity: 800_000_000 ether
+      }),
       isPremium: false,
-      graduationLiquidity: 800_000_000 ether,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      fee: 1000,
-      tickSpacing: 20_000
+      creatorAllocation: 0
     });
 
     vm.prank(creator);
