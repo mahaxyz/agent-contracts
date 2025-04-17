@@ -117,44 +117,36 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
 
   /// @inheritdoc ICLMMAdapter
   function addSingleSidedLiquidity(
-    IERC20 _tokenBase,
-    IERC20 _tokenQuote,
-    int24 _tick0,
-    int24 _tick1,
-    int24 _tick2,
-    uint24 _fee,
-    int24 _tickSpacing,
-    uint256 _totalAmount,
-    uint256 _graduationAmount
+    AddLiquidityParams memory _params
   ) external {
     require(msg.sender == launchpad, "!launchpad");
-    require(launchParams[_tokenBase].pool == address(0), "!launched");
+    require(launchParams[_params.tokenBase].pool == address(0), "!launched");
 
-    uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_tick0 - 1);
+    uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_params.tick0 - 1);
 
-    IClPool pool = _createPool(_tokenBase, _tokenQuote, _fee, sqrtPriceX96Launch);
+    IClPool pool = _createPool(_params.tokenBase, _params.tokenQuote, _params.fee, sqrtPriceX96Launch);
 
     PoolKey memory poolKey = PoolKey({
-      currency0: Currency.wrap(address(_tokenBase)),
-      currency1: Currency.wrap(address(_tokenQuote)),
-      fee: _fee,
-      tickSpacing: _tickSpacing,
+      currency0: Currency.wrap(address(_params.tokenBase)),
+      currency1: Currency.wrap(address(_params.tokenQuote)),
+      fee: _params.fee,
+      tickSpacing: _params.tickSpacing,
       hooks: IHooks(address(0))
     });
-    launchParams[_tokenBase] = LaunchTokenParams({
+    launchParams[_params.tokenBase] = LaunchTokenParams({
       pool: address(pool),
       poolKey: poolKey,
-      tick0: _tick0,
-      tick1: _tick1,
-      tick2: _tick2,
-      tokenBase: _tokenBase,
-      tokenQuote: _tokenQuote
+      tick0: _params.tick0,
+      tick1: _params.tick1,
+      tick2: _params.tick2,
+      tokenBase: _params.tokenBase,
+      tokenQuote: _params.tokenQuote
     });
 
     // calculate and add liquidity for the various tick ranges
-    _tokenBase.safeTransferFrom(msg.sender, address(this), _totalAmount);
-    _mintAndLock(_tokenBase, _tokenQuote, _tick0, _tick1, _fee, _graduationAmount, 0);
-    _mintAndLock(_tokenBase, _tokenQuote, _tick1, _tick2, _fee, _totalAmount - _graduationAmount, 1);
+    _params.tokenBase.safeTransferFrom(msg.sender, address(this), _params.totalAmount);
+    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0);
+    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, _params.totalAmount - _params.graduationAmount, 1);
   }
 
   /// @inheritdoc ICLMMAdapter
