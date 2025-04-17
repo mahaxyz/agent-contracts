@@ -31,6 +31,19 @@ interface ICLMMAdapter {
     int24 tick2;
   }
 
+  /// @notice Parameters for adding liquidity to a pool
+  struct AddLiquidityParams {
+    IERC20 tokenBase;
+    IERC20 tokenQuote;
+    int24 tick0;
+    int24 tick1;
+    int24 tick2;
+    uint24 fee;
+    int24 tickSpacing;
+    uint256 totalAmount;
+    uint256 graduationAmount;
+  }
+
   /// @notice Initializes the adapter
   /// @param _launchpad The address of the launchpad
   /// @param _clPoolFactory The address of the CL pool factory
@@ -55,15 +68,7 @@ interface ICLMMAdapter {
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
   function addSingleSidedLiquidity(
-    IERC20 _tokenBase,
-    IERC20 _tokenQuote,
-    int24 _tick0,
-    int24 _tick1,
-    int24 _tick2,
-    uint24 _fee,
-    int24 _tickSpacing,
-    uint256 _totalAmount,
-    uint256 _graduationAmount
+    AddLiquidityParams memory _params
   ) external;
 
   /// @notice Swap a token with exact output
