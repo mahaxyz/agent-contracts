@@ -49,17 +49,18 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Maximum allowed creator allocation percentage (5%)
   uint16 public constant MAX_CREATOR_ALLOCATION = 500;
 
+  // Mapping to track adapter addresses by type
+  mapping(AdapterType => ICLMMAdapter) public adapters;
+
   receive() external payable {}
 
   /// @inheritdoc ITokenLaunchpad
   function initialize(
-    address _adapter,
     address _owner,
     address _weth,
     address _premiumToken,
     uint256 _feeDiscountAmount
   ) external initializer {
-    adapter = ICLMMAdapter(_adapter);
     weth = IWETH9(_weth);
     premiumToken = IERC20(_premiumToken);
     feeDiscountAmount = _feeDiscountAmount;
@@ -89,6 +90,14 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     emit ReferralUpdated(_referralDestination, _referralFee);
   }
 
+  /// @notice Set the adapter for a specific type
+  /// @param _type The type of adapter
+  /// @param _adapter The adapter address
+  function setAdapter(AdapterType _type, ICLMMAdapter _adapter) external onlyOwner {
+    adapters[_type] = _adapter;
+    emit AdapterSet(_type, address(_adapter));
+  }
+
   /// @notice Set default parameters for a funding token
   /// @param _token The funding token
   /// @param _params The default parameters
@@ -116,6 +125,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   {
     // Ensure creator allocation is within allowed limits
     require(p.creatorAllocation <= MAX_CREATOR_ALLOCATION, "Creator allocation exceeds maximum");
+
+    // Get the appropriate adapter based on type
+    ICLMMAdapter selectedAdapter = adapters[p.adapterType];
+    require(address(selectedAdapter) != address(0), "Adapter not set for type");
 
     // send any creation fee to the fee destination
     if (creationFee > 0) payable(feeDestination).transfer(creationFee);
@@ -165,10 +178,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       tokenToNftId[token] = tokens.length;
       tokens.push(token);
       launchParams[token] = p;
-      _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts);
+      _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts, p.isPremium);
       uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
-      token.approve(address(adapter), type(uint256).max);
-      adapter.addSingleSidedLiquidity(
+      token.approve(address(selectedAdapter), type(uint256).max);
+      selectedAdapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({
           tokenBase: token, // IERC20 _tokenBase,  
           tokenQuote: p.fundingToken, // IERC20 _tokenQuote,
@@ -181,20 +194,20 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
           graduationAmount: p.valueParams.graduationLiquidity // uint256 _graduationAmount
         })
       );
-      emit TokenLaunched(token, adapter.getPool(token), p);
+      emit TokenLaunched(token, selectedAdapter.getPool(token), p);
     }
 
     _mint(msg.sender, tokenToNftId[token]);
 
-    p.fundingToken.approve(address(adapter), type(uint256).max);
+    p.fundingToken.approve(address(selectedAdapter), type(uint256).max);
 
     // buy a small amount of tokens to register the token on tools like dexscreener
     uint256 balance = p.fundingToken.balanceOf(address(this));
-    uint256 swapped = adapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance, p.valueParams.fee); // buy 1 token
+    uint256 swapped = selectedAdapter.swapWithExactOutput(p.fundingToken, token, 1 ether, balance, p.valueParams.fee); // buy 1 token
 
     // if the user wants to buy more tokens, they can do so
     uint256 received;
-    if (amount > 0) received = adapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0, p.valueParams.fee);
+    if (amount > 0) received = selectedAdapter.swapWithExactInput(p.fundingToken, token, amount - swapped, 0, p.valueParams.fee);
 
     // refund any remaining tokens
     _refundTokens(token);
@@ -212,7 +225,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   /// @inheritdoc ITokenLaunchpad
   function claimFees(IERC20 _token) external {
     address token1 = address(launchParams[_token].fundingToken);
-    (uint256 fee0, uint256 fee1) = adapter.claimFees(address(_token));
+    ICLMMAdapter selectedAdapter = adapters[launchParams[_token].adapterType];
+    require(address(selectedAdapter) != address(0), "Adapter not set for type");
+    
+    (uint256 fee0, uint256 fee1) = selectedAdapter.claimFees(address(_token));
 
     if (referralFee > 0) {
       uint256 referralFee0 = (fee0 * referralFee) / 100;
@@ -260,9 +276,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     }
   }
 
-  function _fundLaunchPools(IERC20 _token, ILaunchpool[] memory _launchPools, uint256[] memory _launchPoolAmounts)
+  function _fundLaunchPools(IERC20 _token, ILaunchpool[] memory _launchPools, uint256[] memory _launchPoolAmounts, bool _isPremium)
     internal
   {
+    if (!_isPremium) {
+      return;
+    }
     require(_launchPools.length == _launchPoolAmounts.length && _launchPools.length > 0, "Array length mismatch");
     
     for (uint256 i = 0; i < _launchPools.length; i++) {
