@@ -37,7 +37,19 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
 
     // Initialize launchpad
-    _launchpad.initialize(address(_adapter), owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
+    vm.startPrank(owner);
+    ITokenLaunchpad.ValueParams memory params = ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200,
+      fee: 2500,
+      tickSpacing: 20_000,
+      graduationLiquidity: 800_000_000 ether
+    });
+    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
+    _launchpad.setValueParams(_weth, params);
+    vm.stopPrank();
   }
 
   function test_create() public {
@@ -59,7 +71,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.prank(creator);
