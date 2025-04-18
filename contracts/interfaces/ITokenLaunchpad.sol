@@ -14,10 +14,18 @@
 pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
+import {ICLMMAdapter} from "./ICLMMAdapter.sol";
 
 /// @title ITokenLaunchpad Interface
 /// @notice Interface for the TokenLaunchpad contract that handles token launches
 interface ITokenLaunchpad {
+  /// @notice The type of adapter to use for the token launch
+  enum AdapterType {
+    PancakeSwap,
+    Thena
+  }
+
   /// @notice Parameters required to create a new token launch
   /// @param name The name of the token
   /// @param symbol The symbol of the token
@@ -27,17 +35,34 @@ interface ITokenLaunchpad {
   /// @param launchTick The tick at which the token launches
   /// @param graduationTick The tick that must be reached for graduation
   /// @param upperMaxTick The maximum tick allowed
-  /// @param isFeeDiscounted Whether the fee is discounted
+  /// @param isPremium Whether the token is premium
+  /// @param graduationLiquidity The liquidity at graduation
+  /// @param launchPoolAllocations The launchpool allocations
+  /// @param creatorAllocation Percentage of total supply to allocate to creator (max 5%)
+  /// @param fee The fee for the token liquidity pair
+  /// @param adapterType The type of adapter used for the token launch
   struct CreateParams {
+    bool isPremium;
+    bytes32 salt;
+    IERC20 fundingToken;
+    ValueParams valueParams;
+    ILaunchpool[] launchPools;
+    uint256[] launchPoolAmounts;
+    string metadata;
     string name;
     string symbol;
-    string metadata;
-    IERC20 fundingToken;
-    bytes32 salt;
+    uint16 creatorAllocation;
+    AdapterType adapterType;
+  }
+
+  // Contains numeric launch parameters
+  struct ValueParams {
     int24 launchTick;
     int24 graduationTick;
     int24 upperMaxTick;
-    bool isFeeDiscounted;
+    uint24 fee;
+    int24 tickSpacing;
+    uint256 graduationLiquidity;
   }
 
   /// @notice Emitted when fee settings are updated
@@ -56,34 +81,26 @@ interface ITokenLaunchpad {
   /// @param referralFee The new referral fee amount
   event ReferralUpdated(address indexed referralDestination, uint256 referralFee);
 
-  /// @notice Emitted when a token is launched
+  /// @notice Emitted when tokens are allocated to the creator
   /// @param token The token that was launched
-  /// @param fundingToken The token used for funding the launch
-  /// @param launchTick The tick at which the token launches
-  /// @param graduationTick The tick that must be reached for graduation
-  /// @param upperMaxTick The maximum tick allowed
-  event TokenLaunchParams(
-    IERC20 token,
-    IERC20 fundingToken,
-    int24 launchTick,
-    int24 graduationTick,
-    int24 upperMaxTick,
-    string name,
-    string symbol,
-    string metadata
-  );
+  /// @param creator The address of the creator
+  /// @param amount The amount of tokens allocated to the creator
+  event CreatorAllocation(IERC20 indexed token, address indexed creator, uint256 amount);
+
+  /// @notice Emitted when an adapter is set for a specific type
+  /// @param _type The type of adapter
+  /// @param _adapter The adapter address
+  event AdapterSet(AdapterType indexed _type, address indexed _adapter);
 
   /// @notice Initializes the launchpad contract
-  /// @param _adapter The DEX adapter contract address
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
-  /// @param _feeDiscountToken The token used for fee discount
+  /// @param _premiumToken The token used for fee discount
   /// @param _feeDiscountAmount The amount of fee discount
   function initialize(
-    address _adapter,
     address _owner,
     address _weth,
-    address _feeDiscountToken,
+    address _premiumToken,
     uint256 _feeDiscountAmount
   ) external;
 
@@ -116,4 +133,9 @@ interface ITokenLaunchpad {
   /// @notice Claims accumulated fees for a specific token
   /// @param _token The token to claim fees for
   function claimFees(IERC20 _token) external;
+
+  /// @notice Set the adapter for a specific type
+  /// @param _type The type of adapter
+  /// @param _adapter The adapter address
+  function setAdapter(AdapterType _type, ICLMMAdapter _adapter) external;
 }

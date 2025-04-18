@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /// @title ILaunchpool
 /// @notice Interface for the Launchpool contract that allows users to stake tokens and receive rewards
@@ -21,11 +21,11 @@ interface ILaunchpool {
   /// @notice Struct containing reward drop information
   /// @param rewardToken Address of the reward token
   /// @param totalReward Total amount of tokens to distribute as rewards
-  /// @param snapshotBlock Block number when the reward drop was created
+  /// @param snapshotIndex Index of when the reward drop was created
   struct RewardDrop {
     IERC20 rewardToken;
     uint256 totalReward;
-    uint32 snapshotBlock;
+    uint32 snapshotIndex;
   }
 
   /// @notice Emitted when a new reward is funded
@@ -49,10 +49,28 @@ interface ILaunchpool {
   /// @param amount Amount of rewards claimed
   event RewardClaimed(address indexed user, IERC20 indexed rewardToken, uint256 amount);
 
+  /// @notice Emitted when the contract is killed
+  event Killed();
+
+  /// @notice Emitted when a transfer occurs
+  /// @param from Address of the sender
+  /// @param to Address of the recipient
+  /// @param amount Amount of tokens transferred
+  event Transfer(address indexed from, address indexed to, uint256 amount);
+
   /// @notice Initializes the contract
   /// @param _stakingToken Address of the token that can be staked
   /// @param _launchpad Address of the launchpad contract
-  function initialize(address _stakingToken, address _launchpad) external;
+  /// @param _name Name of the token
+  /// @param _symbol Symbol of the token
+  /// @param _owner Owner of the contract
+  function initialize(
+    string memory _name,
+    string memory _symbol,
+    address _stakingToken,
+    address _owner,
+    address _launchpad
+  ) external;
 
   /// @notice Allows users to stake tokens
   /// @param amount Amount of tokens to stake
@@ -89,7 +107,7 @@ interface ILaunchpool {
   function hasClaimed(address user, IERC20 rewardToken) external view returns (bool);
 
   /// @notice The token that users can stake in this contract
-  function stakingToken() external view returns (IERC20);
+  function stakingToken() external view returns (IERC20Metadata);
 
   /// @notice Current staked amount for each user
   function currentStake(address user) external view returns (uint256);

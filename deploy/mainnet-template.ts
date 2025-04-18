@@ -11,6 +11,7 @@ export async function templateLaunchpad(
   proxyAdmin: string,
   adapterContract: string,
   launchpadContract: string,
+  launchpoolTokens: string[],
   wethAddress: string,
   odosAddress: string,
   mahaAddress: string,
@@ -29,6 +30,15 @@ export async function templateLaunchpad(
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
+    [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
+    proxyAdmin,
+    launchpadContract,
+    deployer
+  );
+
+  const launchpoolD = await deployProxy(
+    hre,
+    "Launchpool",
     [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
     proxyAdmin,
     launchpadContract,
