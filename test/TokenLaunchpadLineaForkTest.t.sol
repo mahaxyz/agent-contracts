@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
+
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
@@ -40,7 +39,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       address(_locker),
       address(_nftManager)
     );
-    _launchpad.initialize(address(_adapter), owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
   }
 
   function test_create_basic() public {
@@ -62,7 +62,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.prank(creator);
@@ -95,7 +96,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
@@ -140,7 +142,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.prank(owner);
@@ -168,7 +171,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.prank(owner);
@@ -194,7 +198,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.startPrank(owner);
@@ -222,7 +227,8 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       isPremium: false,
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
-      creatorAllocation: 0
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.startPrank(owner);
