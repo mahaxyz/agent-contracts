@@ -21,6 +21,8 @@ import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 
+// TODO add vesting
+
 /// @title Launchpool
 /// @notice A staking contract that allows users to stake tokens and receive rewards
 /// @dev Inherits from Initializable for proxy support

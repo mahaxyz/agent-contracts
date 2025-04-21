@@ -2,7 +2,7 @@
 pragma solidity 0.8.26;
 
 import {IFreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
-import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/dexes/PancakeAdapter.sol";
 
@@ -37,7 +37,19 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
 
     // Initialize launchpad
-    _launchpad.initialize(address(_adapter), owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
+    vm.startPrank(owner);
+    ITokenLaunchpad.ValueParams memory params = ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200,
+      fee: 2500,
+      tickSpacing: 20_000,
+      graduationLiquidity: 800_000_000 ether
+    });
+    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
+    _launchpad.setValueParams(_weth, params);
+    vm.stopPrank();
   }
 
   function test_create() public {
@@ -48,10 +60,19 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       metadata: "Test metadata",
       fundingToken: IERC20(address(_weth)),
       salt: salt,
-      launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_200,
-      isFeeDiscounted: false
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_800,
+        upperMaxTick: 887_200,
+        fee: 1000,
+        tickSpacing: 20_000,
+        graduationLiquidity: 800_000_000 ether
+      }),
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
     });
 
     vm.prank(creator);

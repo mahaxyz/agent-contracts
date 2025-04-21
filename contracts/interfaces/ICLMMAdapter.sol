@@ -31,6 +31,19 @@ interface ICLMMAdapter {
     int24 tick2;
   }
 
+  /// @notice Parameters for adding liquidity to a pool
+  struct AddLiquidityParams {
+    IERC20 tokenBase;
+    IERC20 tokenQuote;
+    int24 tick0;
+    int24 tick1;
+    int24 tick2;
+    uint24 fee;
+    int24 tickSpacing;
+    uint256 totalAmount;
+    uint256 graduationAmount;
+  }
+
   /// @notice Initializes the adapter
   /// @param _launchpad The address of the launchpad
   /// @param _clPoolFactory The address of the CL pool factory
@@ -54,8 +67,9 @@ interface ICLMMAdapter {
 
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
-  function addSingleSidedLiquidity(IERC20 _tokenBase, IERC20 _tokenQuote, int24 _tick0, int24 _tick1, int24 _tick2)
-    external;
+  function addSingleSidedLiquidity(
+    AddLiquidityParams memory _params
+  ) external;
 
   /// @notice Swap a token with exact output
   /// @param _tokenIn The token to swap
@@ -63,7 +77,7 @@ interface ICLMMAdapter {
   /// @param _amountOut The amount of tokens to swap
   /// @param _maxAmountIn The maximum amount of tokens to receive
   /// @return amountIn The amount of tokens received
-  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn)
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn, uint24 _fee)
     external
     returns (uint256 amountIn);
 
@@ -73,7 +87,7 @@ interface ICLMMAdapter {
   /// @param _amountIn The amount of tokens to swap
   /// @param _minAmountOut The minimum amount of tokens to receive
   /// @return amountOut The amount of tokens received
-  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut)
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut, uint24 _fee)
     external
     returns (uint256 amountOut);
 
