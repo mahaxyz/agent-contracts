@@ -55,10 +55,10 @@ contract RamsesAdapter is BaseV3Adapter {
     address _locker,
     address _nftPositionManager
   ) external initializer {
-    __BaseV3Adapter_init(_launchpad, _WETH9, _locker, _swapRouter, _nftPositionManager, _clPoolFactory, 20_000, 500);
+    __BaseV3Adapter_init(_launchpad, _WETH9, _locker, _swapRouter, _nftPositionManager, _clPoolFactory);
   }
 
-  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0)
+  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
     internal
     override
     returns (uint256 tokenId)
@@ -70,7 +70,7 @@ contract RamsesAdapter is BaseV3Adapter {
     INonfungiblePositionManagerRamses.MintParams memory params = INonfungiblePositionManagerRamses.MintParams({
       token0: address(_token0),
       token1: address(_token1),
-      fee: fee,
+      fee: _fee,
       tickLower: _tick0,
       tickUpper: _tick1,
       amount0Desired: _amount0,
@@ -99,13 +99,17 @@ contract RamsesAdapter is BaseV3Adapter {
     pool = IClPool(_pool);
   }
 
-  function _mintAndLock(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0, uint256 _index)
-    internal
-    override
-    returns (uint256 lockId)
-  {
+  function _mintAndLock(
+    IERC20 _token0,
+    IERC20 _token1,
+    int24 _tick0,
+    int24 _tick1,
+    uint24 _fee,
+    uint256 _amount0,
+    uint256 _index
+  ) internal override returns (uint256 lockId) {
     // mint the position
-    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _fee, _amount0);
 
     // lock the liquidity forever; allow this contract to collect fees
     lockId = IFreeUniV3LPLocker(locker).nextLockId();

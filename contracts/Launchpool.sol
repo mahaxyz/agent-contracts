@@ -13,21 +13,26 @@
 
 pragma solidity ^0.8.0;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 
+// TODO add vesting
+
 /// @title Launchpool
 /// @notice A staking contract that allows users to stake tokens and receive rewards
 /// @dev Inherits from Initializable for proxy support
-contract Launchpool is Initializable, ILaunchpool {
+contract Launchpool is OwnableUpgradeable, ILaunchpool {
   using Checkpoints for Checkpoints.Trace224;
+  using SafeERC20 for IERC20Metadata;
   using SafeERC20 for IERC20;
 
   /// @notice The token that users can stake in this contract
-  IERC20 public stakingToken;
+  IERC20Metadata public stakingToken;
 
   /// @notice Historical record of total staked amounts at different blocks
   Checkpoints.Trace224 private totalStakedHistory;
@@ -54,30 +59,59 @@ contract Launchpool is Initializable, ILaunchpool {
   /// @notice Index of the next block to be added to the history
   uint32 public historyIndex;
 
-  /// @dev Reserved storage space for future upgrades
-  uint256[45] private __gap;
+  /// @notice Whether the contract has been killed
+  bool public killed;
+
+  /// @notice The name of the token
+  string public name;
+
+  /// @notice The symbol of the token
+  string public symbol;
+
+  /// @notice The decimals of the token
+  uint8 public decimals;
 
   /// @notice Initializes the contract
   /// @param _stakingToken Address of the token that can be staked
   /// @param _launchpad Address of the launchpad contract
-  function initialize(address _stakingToken, address _launchpad) public initializer {
+  function initialize(
+    string memory _name,
+    string memory _symbol,
+    address _stakingToken,
+    address _owner,
+    address _launchpad
+  ) public initializer {
     require(_launchpad != address(0), "Invalid launchpad");
+    __Ownable_init(_owner);
 
-    stakingToken = IERC20(_stakingToken);
+    stakingToken = IERC20Metadata(_stakingToken);
     launchpad = _launchpad;
+    historyIndex = 1; // Start at 1 to avoid confusion with default value 0
+
+    name = _name;
+    symbol = _symbol;
+    decimals = stakingToken.decimals();
+
+    // emit a transfer event to allow explorers to index the contract
+    emit Transfer(address(0), address(this), 1 ether);
+    emit Transfer(address(this), address(0), 1 ether);
   }
 
   /// @inheritdoc ILaunchpool
   function stake(uint256 amount) external {
     require(amount > 0, "Zero stake");
+    require(!killed, "Killed");
 
     currentStake[msg.sender] += amount;
     stakingToken.safeTransferFrom(msg.sender, address(this), amount);
 
-    userStakedHistory[msg.sender].push(historyIndex++, uint224(currentStake[msg.sender]));
-    totalStakedHistory.push(historyIndex++, uint224(totalStakedHistory.latest() + amount));
+    // Use a single index for both updates
+    uint32 currentIndex = historyIndex++;
+    userStakedHistory[msg.sender].push(currentIndex, uint224(currentStake[msg.sender]));
+    totalStakedHistory.push(currentIndex, uint224(totalStakedHistory.latest() + amount));
 
     emit Stake(msg.sender, amount);
+    emit Transfer(address(0), msg.sender, amount);
   }
 
   /// @inheritdoc ILaunchpool
@@ -87,10 +121,15 @@ contract Launchpool is Initializable, ILaunchpool {
     currentStake[msg.sender] -= amount;
     stakingToken.safeTransfer(msg.sender, amount);
 
-    userStakedHistory[msg.sender].push(historyIndex++, uint224(currentStake[msg.sender]));
-    totalStakedHistory.push(historyIndex++, uint224(totalStakedHistory.latest() - amount));
+    // Use a single index for both updates
+    if (!killed) {
+      uint32 currentIndex = historyIndex++;
+      userStakedHistory[msg.sender].push(currentIndex, uint224(currentStake[msg.sender]));
+      totalStakedHistory.push(currentIndex, uint224(totalStakedHistory.latest() - amount));
+    }
 
     emit Withdraw(msg.sender, amount);
+    emit Transfer(msg.sender, address(0), amount);
   }
 
   /// @inheritdoc ILaunchpool
@@ -99,8 +138,7 @@ contract Launchpool is Initializable, ILaunchpool {
     require(msg.sender == launchpad, "Invalid caller");
     rewardToken.safeTransferFrom(msg.sender, address(this), amount);
 
-    RewardDrop memory drop =
-      RewardDrop({rewardToken: rewardToken, totalReward: amount, snapshotBlock: uint32(block.number)});
+    RewardDrop memory drop = RewardDrop({rewardToken: rewardToken, totalReward: amount, snapshotIndex: historyIndex});
     rewardDrops[rewardToken] = drop;
 
     emit RewardFunded(rewardToken, amount);
@@ -110,11 +148,10 @@ contract Launchpool is Initializable, ILaunchpool {
   function claim(IERC20 rewardToken) external {
     RewardDrop storage drop = rewardDrops[rewardToken];
     require(!claimed[rewardToken][msg.sender], "Already claimed");
-
     claimed[rewardToken][msg.sender] = true;
 
-    uint256 userBal = userStakedHistory[msg.sender].lowerLookup(drop.snapshotBlock);
-    uint256 totalBal = totalStakedHistory.lowerLookup(drop.snapshotBlock);
+    uint256 userBal = userStakedHistory[msg.sender].lowerLookup(drop.snapshotIndex);
+    uint256 totalBal = totalStakedHistory.lowerLookup(drop.snapshotIndex);
 
     require(userBal > 0 && totalBal > 0, "Not eligible");
 
@@ -137,5 +174,19 @@ contract Launchpool is Initializable, ILaunchpool {
   /// @inheritdoc ILaunchpool
   function hasClaimed(address user, IERC20 rewardToken) external view returns (bool) {
     return claimed[rewardToken][user];
+  }
+
+  function kill() external onlyOwner {
+    killed = true;
+    emit Killed();
+    _transferOwnership(address(0));
+  }
+
+  function totalSupply() external view returns (uint256) {
+    return totalStakedHistory.latest();
+  }
+
+  function balanceOf(address account) external view returns (uint256) {
+    return currentStake[account];
   }
 }
