@@ -25,8 +25,6 @@ import {ICLMMAdapter, IClPool, PoolKey} from "contracts/interfaces/ICLMMAdapter.
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 
-import "forge-std/console.sol";
-
 abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   using SafeERC20 for IERC20;
 
@@ -133,6 +131,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
       tickSpacing: _params.tickSpacing,
       hooks: IHooks(address(0))
     });
+
     launchParams[_params.tokenBase] = LaunchTokenParams({
       pool: address(pool),
       poolKey: poolKey,
@@ -144,7 +143,6 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     });
 
     // calculate and add liquidity for the various tick ranges
-    _params.tokenBase.safeTransferFrom(msg.sender, address(this), _params.totalAmount);
     _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0);
     _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, _params.totalAmount - _params.graduationAmount, 1);
   }
