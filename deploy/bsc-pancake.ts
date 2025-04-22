@@ -1,4 +1,8 @@
-import { deployToken, templateLaunchpad } from "./mainnet-template";
+import {
+  deployAdapter,
+  deployToken,
+  templateLaunchpad,
+} from "./mainnet-template";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { PancakeAdapter } from "../types";
 import { deployContract, waitForTx } from "../scripts/utils";
@@ -20,18 +24,24 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const e18 = 10n ** 18n;
   const feeDiscountAmount = 1000n * e18; // 100%
 
-  const { adapter, launchpad } = await templateLaunchpad(
+  const { launchpad } = await templateLaunchpad(
     hre,
     deployer,
     proxyAdmin,
-    "PancakeAdapter",
     "TokenLaunchpadBSC",
-    [],
     wbnbAddressOnBsc,
     odosAddressOnBsc,
     mahaAddress,
     feeDiscountAmount
   );
+
+  const adapterPCS = (await deployAdapter(
+    hre,
+    deployer,
+    proxyAdmin,
+    "PancakeAdapter",
+    launchpad
+  )) as PancakeAdapter;
 
   await deployContract(
     hre,
@@ -40,11 +50,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "FeeCollector"
   );
 
-  // initialize the contracts if they are not initialized
-  const adapterNile = adapter as PancakeAdapter;
-  if ((await adapterNile.launchpad()) !== launchpad.target) {
+  // initialize the PCS contracts if they are not initialized
+  if ((await adapterPCS.launchpad()) !== launchpad.target) {
     await waitForTx(
-      await adapterNile.initialize(
+      await adapterPCS.initialize(
         launchpad.target,
         "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
         "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
@@ -83,6 +92,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
     const token2 = await deployToken(
       hre,
+      adapterPCS,
       deployer,
       name,
       symbol,

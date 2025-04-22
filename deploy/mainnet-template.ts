@@ -3,33 +3,22 @@ import { deployContract, deployProxy, waitForTx } from "../scripts/utils";
 import { roundTickToNearestTick } from "./utils";
 import { computeTickPrice } from "./utils";
 import { guessTokenAddress } from "../scripts/create2/guess-token-addr";
-import { TokenLaunchpad } from "../types";
+import { ICLMMAdapter, ITokenLaunchpad, TokenLaunchpad } from "../types";
 
 export async function templateLaunchpad(
   hre: HardhatRuntimeEnvironment,
   deployer: string,
   proxyAdmin: string,
-  adapterContract: string,
   launchpadContract: string,
   wethAddress: string,
   odosAddress: string,
   mahaAddress: string,
   feeDiscountAmount: bigint
 ) {
-  const adapterD = await deployProxy(
-    hre,
-    adapterContract,
-    [],
-    proxyAdmin,
-    adapterContract,
-    deployer,
-    true // skip initialization
-  );
-
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
+    [deployer, wethAddress, mahaAddress, feeDiscountAmount],
     proxyAdmin,
     launchpadContract,
     deployer
@@ -40,28 +29,53 @@ export async function templateLaunchpad(
     launchpadD.address
   );
 
-  const adapter = await hre.ethers.getContractAt(
-    "ICLMMAdapter",
-    adapterD.address
-  );
-
   const swappeD = await deployContract(
     hre,
     "Swapper",
-    [adapterD.address, wethAddress, odosAddress, launchpadD.address],
+    [wethAddress, odosAddress, launchpadD.address],
     "Swapper"
   );
   const swapper = await hre.ethers.getContractAt("Swapper", swappeD.address);
 
   return {
-    adapter,
     launchpad,
     swapper,
   };
 }
 
+export async function deployAdapter(
+  hre: HardhatRuntimeEnvironment,
+  deployer: string,
+  proxyAdmin: string,
+  adapterContract: string,
+  launchpad: TokenLaunchpad
+) {
+  const adapterD = await deployProxy(
+    hre,
+    adapterContract,
+    [],
+    proxyAdmin,
+    adapterContract,
+    deployer,
+    true
+  );
+
+  const adapter = await hre.ethers.getContractAt(
+    "ICLMMAdapter",
+    adapterD.address
+  );
+
+  if (!(await launchpad.adapters(adapter))) {
+    console.log("whitelisting adapter");
+    await waitForTx(await launchpad.toggleAdapter(adapter));
+  }
+
+  return adapter;
+}
+
 export const deployToken = async (
   hre: HardhatRuntimeEnvironment,
+  adapter: ICLMMAdapter,
   deployer: string,
   name: string,
   symbol: string,
@@ -105,37 +119,26 @@ export const deployToken = async (
     symbol
   );
 
-  const data = {
-    fee,
+  const data: ITokenLaunchpad.CreateParamsStruct = {
+    adapter: adapter.target,
+    creatorAllocation: 0,
     fundingToken,
-    graduationLiquidity: 800000000n,
-    graduationTick,
     isPremium: false,
-    launchTick,
-    launchPools: [],
     launchPoolAmounts: [],
+    launchPools: [],
     metadata,
     name,
     salt,
     symbol,
-    tickSpacing,
-    upperMaxTick,
+    valueParams: {
+      fee,
+      graduationLiquidity: 800000000n,
+      graduationTick,
+      launchTick,
+      tickSpacing,
+      upperMaxTick,
+    },
   };
-
-  // fee: BigNumberish;
-  // fundingToken: AddressLike;
-  // graduationLiquidity: BigNumberish;
-  // graduationTick: BigNumberish;
-  // isPremium: boolean;
-  // launchPoolAmounts: BigNumberish[];
-  // launchPools: AddressLike[];
-  // launchTick: BigNumberish;
-  // metadata: string;
-  // name: string;
-  // salt: BytesLike;
-  // symbol: string;
-  // tickSpacing: BigNumberish;
-  // upperMaxTick: BigNumberish;
 
   const creationFee = await launchpad.creationFee();
   const dust = 10000000000000n;
