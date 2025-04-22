@@ -7,6 +7,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { PancakeAdapter } from "../types";
 import { deployContract, waitForTx } from "../scripts/utils";
 import assert from "assert";
+import { parseEther } from "ethers";
 
 async function main(hre: HardhatRuntimeEnvironment) {
   assert(hre.network.name === "bsc", "This script is only for BSC");
@@ -24,7 +25,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const e18 = 10n ** 18n;
   const feeDiscountAmount = 1000n * e18; // 100%
 
-  const { launchpad } = await templateLaunchpad(
+  const { launchpad, swapper } = await templateLaunchpad(
     hre,
     deployer,
     proxyAdmin,
@@ -50,6 +51,21 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "FeeCollector"
   );
 
+  // if ((await launchpad.getValueParams(wbnbAddressOnBsc)).fee !== 10000n) {
+  await waitForTx(
+    await launchpad.setValueParams(wbnbAddressOnBsc, {
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_000,
+      fee: 10000,
+      tickSpacing: 200,
+      graduationLiquidity: parseEther("800000000"),
+    })
+  );
+  // }
+
+  console.log("Value params", await launchpad.getValueParams(wbnbAddressOnBsc));
+
   // initialize the PCS contracts if they are not initialized
   if ((await adapterPCS.launchpad()) !== launchpad.target) {
     await waitForTx(
@@ -69,12 +85,12 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // setup parameters
   const name = "Test Token";
   const symbol = "TEST";
-  const tickSpacing = 500; // tick spacing for 2% fee
+  const tickSpacing = 200; // tick spacing for 1% fee
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
 
   // await waitForTx(await launchpad.setFeeSettings(mahaTreasury, 0, 1000n * e18));
 
-  const shouldMock = false;
+  const shouldMock = true;
   if (shouldMock) {
     // const mahaD = await deployContract(
     //   hre,
@@ -98,7 +114,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
       symbol,
       565, // price of token in USD
       tickSpacing,
-      1000n,
+      10000n,
       metadata,
       5000, // 5,000$ starting market cap
       69000, // 69,000$ ending market cap
@@ -108,6 +124,21 @@ async function main(hre: HardhatRuntimeEnvironment) {
     );
 
     console.log("Token deployed at", token2.target);
+
+    const value = 10000n;
+    const swapTx = await swapper.buyWithExactInputWithOdos(
+      wbnbAddressOnBsc,
+      wbnbAddressOnBsc,
+      token2.target,
+      value,
+      0,
+      0,
+      10000,
+      "",
+      { value }
+    );
+
+    console.log("Swap tx", swapTx);
   }
 }
 

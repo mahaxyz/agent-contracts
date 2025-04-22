@@ -133,10 +133,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       require(p.launchPools.length == 0, "!premium-allocations");
 
       // Get default parameters for the funding token
-      ValueParams memory defaults = getValueParams(p.fundingToken);
-
-      // Override with default values if not premium
-      p.valueParams = defaults;
+      p.valueParams = getValueParams(p.fundingToken);
     }
 
     // take any pending balance from the sender
@@ -152,18 +149,17 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       token = new WAGMIEToken{salt: salt}(p.name, p.symbol);
       require(expected == address(0) || address(token) == expected, "Invalid token address");
 
-      // Calculate and transfer creator allocation if specified
-      if (p.creatorAllocation > 0) {
-        // Assuming WAGMIEToken has a total supply of 1 billion tokens
-        uint256 totalSupply = 1_000_000_000 * 1e18;
-        uint256 creatorAmount = (totalSupply * p.creatorAllocation) / 10_000;
-
-        // Transfer the allocated tokens to the creator
-        token.transfer(msg.sender, creatorAmount);
-
-        // Emit event for the allocation
-        emit CreatorAllocation(token, msg.sender, creatorAmount);
-      }
+      // NOTE: ignore creator allocation for now
+      // // Calculate and transfer creator allocation if specified
+      // if (p.creatorAllocation > 0) {
+      //   // Assuming WAGMIEToken has a total supply of 1 billion tokens
+      //   uint256 totalSupply = 1_000_000_000 ether;
+      //   uint256 creatorAmount = (totalSupply * p.creatorAllocation) / 10_000;
+      //   // Transfer the allocated tokens to the creator
+      //   token.transfer(msg.sender, creatorAmount);
+      //   // Emit event for the allocation
+      //   emit CreatorAllocation(token, msg.sender, creatorAmount);
+      // }
 
       tokenToNftId[token] = tokens.length;
       tokens.push(token);

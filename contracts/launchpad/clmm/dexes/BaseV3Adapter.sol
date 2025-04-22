@@ -142,19 +142,8 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
     });
 
     // calculate and add liquidity for the various tick ranges
-    _params.tokenBase.safeTransferFrom(msg.sender, address(this), _params.totalAmount);
-    _mintAndLock(
-      _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0
-    );
-    _mintAndLock(
-      _params.tokenBase,
-      _params.tokenQuote,
-      _params.tick1,
-      _params.tick2,
-      _params.fee,
-      _params.totalAmount - _params.graduationAmount,
-      1
-    );
+    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, 800_000_000 ether, 0);
+    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, 200_000_000 ether, 1);
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -190,6 +179,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   /// @param _tick1 The upper tick of the position
   /// @param _fee The fee of the pool
   /// @param _amount0 The amount of tokens to mint the position for
+  /// @param _index The index of the position
   /// @return lockId The lock id of the position
   function _mintAndLock(
     IERC20 _token0,

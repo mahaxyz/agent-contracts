@@ -6,6 +6,8 @@ import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenL
 import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/dexes/PancakeAdapter.sol";
 
+import "forge-std/console.sol";
+
 contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   // BSC Mainnet addresses
   address constant PANCAKE_FACTORY = 0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865;
@@ -31,6 +33,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapter), "pancakeAdapter");
     vm.label(PANCAKE_FACTORY, "pancakeFactory");
+    vm.label(LOCKER, "locker");
+    vm.label(NFT_MANAGER, "nftManager");
     vm.label(PANCAKE_ROUTER, "pancakeRouter");
 
     // Initialize adapter
@@ -44,7 +48,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       graduationTick: -170_800,
       upperMaxTick: 887_200,
       fee: 2500,
-      tickSpacing: 20_000,
+      tickSpacing: 50,
       graduationLiquidity: 800_000_000 ether
     });
     _launchpad.toggleAdapter(_adapter);
@@ -74,6 +78,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       creatorAllocation: 0,
       adapter: _adapter
     });
+
+    console.log("Creating token", address(_weth));
 
     vm.prank(creator);
     (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
