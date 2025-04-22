@@ -19,7 +19,7 @@ contract TokenLaunchpadTest is Test {
 
   address owner = makeAddr("owner");
   address whale = makeAddr("whale");
-  address creator = makeAddr("creator");
+  address creator = makeAddr("create");
 
   function _setUpBase() internal {
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);

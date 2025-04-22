@@ -64,7 +64,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
         launchTick: -171_000,
         graduationTick: -170_800,
         upperMaxTick: 887_200,
-        fee: 1000,
+        fee: 500,
         tickSpacing: 20_000,
         graduationLiquidity: 800_000_000 ether
       }),

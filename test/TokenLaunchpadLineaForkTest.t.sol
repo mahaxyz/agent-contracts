@@ -39,11 +39,23 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       address(_locker),
       address(_nftManager)
     );
+    
     _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
-    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
+    vm.startPrank(owner);
+    ITokenLaunchpad.ValueParams memory params = ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_000,
+      upperMaxTick: 887_000,
+      fee: 500,
+      tickSpacing: 20_000,
+      graduationLiquidity: 800_000_000 ether
+    });
+    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.Ramses, _adapter);
+    _launchpad.setValueParams(_weth, params);
+    vm.stopPrank();
   }
 
-  function test_create_basic() public {
+  function test_create_linea() public {
     bytes32 salt = findValidTokenHash("Test Token", "TEST", creator, _weth);
     ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
       name: "Test Token",
@@ -55,7 +67,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
         launchTick: -171_000,
         graduationTick: -170_000,
         upperMaxTick: 887_000,
-        fee: 1000,
+        fee: 500,
         tickSpacing: 20_000,
         graduationLiquidity: 800_000_000 ether
       }),
@@ -63,7 +75,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapterType: ITokenLaunchpad.AdapterType.Ramses
     });
 
     vm.prank(creator);
