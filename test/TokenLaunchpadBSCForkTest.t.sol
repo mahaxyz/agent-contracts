@@ -3,6 +3,8 @@ pragma solidity 0.8.26;
 
 import {IFreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
+
+import {Swapper} from "contracts/launchpad/clmm/Swapper.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/clmm/TokenLaunchpadBSC.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/dexes/PancakeAdapter.sol";
 
@@ -16,6 +18,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   address constant LOCKER = 0x25c9C4B56E820e0DEA438b145284F02D9Ca9Bd52;
 
   PancakeAdapter _adapter;
+  Swapper _swapper;
 
   string BSC_RPC_URL = vm.envString("BSC_RPC_URL");
 
@@ -40,6 +43,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     // Initialize adapter
     _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
 
+    _swapper = new Swapper(address(_weth), address(0), address(_launchpad));
+
     // Initialize launchpad
     _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
     vm.startPrank(owner);
@@ -47,10 +52,11 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchTick: -171_000,
       graduationTick: -170_800,
       upperMaxTick: 887_200,
-      fee: 2500,
-      tickSpacing: 50,
+      fee: 10_000,
+      tickSpacing: 200,
       graduationLiquidity: 800_000_000 ether
     });
+    _launchpad.setFeeSettings(address(0x123), 0, 1000e18);
     _launchpad.toggleAdapter(_adapter);
     _launchpad.setValueParams(_weth, params);
     vm.stopPrank();
@@ -68,8 +74,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
         launchTick: -171_000,
         graduationTick: -170_800,
         upperMaxTick: 887_200,
-        fee: 1000,
-        tickSpacing: 20_000,
+        fee: 10_000,
+        tickSpacing: 200,
         graduationLiquidity: 800_000_000 ether
       }),
       isPremium: false,
@@ -85,5 +91,45 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
 
     assertTrue(tokenAddr != address(0), "Token address should not be zero");
+  }
+
+  function test_swap() public {
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", creator, _weth);
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_800,
+        upperMaxTick: 887_200,
+        fee: 10_000,
+        tickSpacing: 200,
+        graduationLiquidity: 800_000_000 ether
+      }),
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapter
+    });
+
+    vm.prank(creator);
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+
+    assertTrue(tokenAddr != address(0), "Token address should not be zero");
+
+    // Swap 100 WETH for the token
+    _swapper.buyWithExactInputWithOdos{value: 100 ether}(
+      IERC20(_weth), IERC20(_weth), IERC20(tokenAddr), 100 ether, 0, 0, "0x"
+    );
+
+    // Swap 1 token for the weth
+    IERC20(tokenAddr).approve(address(_swapper), 1 ether);
+    _swapper.sellWithExactInputWithOdos(IERC20(tokenAddr), IERC20(tokenAddr), IERC20(_weth), 1 ether, 0, 0, "0x");
+
+    console.log("Token amount", IERC20(tokenAddr).balanceOf(address(_swapper)));
   }
 }

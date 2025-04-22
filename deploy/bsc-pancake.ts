@@ -44,27 +44,33 @@ async function main(hre: HardhatRuntimeEnvironment) {
     launchpad
   )) as PancakeAdapter;
 
-  await deployContract(
+  const feeCollector = await deployContract(
     hre,
     "FeeCollector",
     [cakeAddress, mahaAddress, odosAddressOnBsc, wbnbAddressOnBsc],
     "FeeCollector"
   );
 
-  // if ((await launchpad.getValueParams(wbnbAddressOnBsc)).fee !== 10000n) {
-  await waitForTx(
-    await launchpad.setValueParams(wbnbAddressOnBsc, {
-      launchTick: -171_000,
-      graduationTick: -170_800,
-      upperMaxTick: 887_000,
-      fee: 10000,
-      tickSpacing: 200,
-      graduationLiquidity: parseEther("800000000"),
-    })
-  );
-  // }
+  if ((await launchpad.getValueParams(wbnbAddressOnBsc)).fee !== 10000n) {
+    await waitForTx(
+      await launchpad.setValueParams(wbnbAddressOnBsc, {
+        launchTick: -171_000,
+        graduationTick: -170_800,
+        upperMaxTick: 887_000,
+        fee: 10000,
+        tickSpacing: 200,
+        graduationLiquidity: parseEther("800000000"),
+      })
+    );
+  }
 
   console.log("Value params", await launchpad.getValueParams(wbnbAddressOnBsc));
+
+  if ((await launchpad.feeDestination()) != feeCollector.address) {
+    await waitForTx(
+      await launchpad.setFeeSettings(feeCollector.address, 0, 1000n * e18)
+    );
+  }
 
   // initialize the PCS contracts if they are not initialized
   if ((await adapterPCS.launchpad()) !== launchpad.target) {
@@ -125,16 +131,16 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
     console.log("Token deployed at", token2.target);
 
-    const value = 10000n;
+    const value = 10000000n;
+
     const swapTx = await swapper.buyWithExactInputWithOdos(
       wbnbAddressOnBsc,
       wbnbAddressOnBsc,
-      token2.target,
+      "0x9215380C8Bf8f56CeBd43508B72b77a4cA42afC4",
       value,
       0,
       0,
-      10000,
-      "",
+      "0x",
       { value }
     );
 

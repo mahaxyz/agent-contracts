@@ -49,17 +49,17 @@ contract Swapper {
     uint256 _odosTokenInAmount,
     uint256 _minOdosTokenOut,
     uint256 _minAmountOut,
-    uint24 _fee,
     bytes memory _odosData
   ) public payable returns (uint256 amountOut) {
     if (msg.value > 0) weth.deposit{value: msg.value}();
     else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
 
-    ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenIn);
-    _odosTokenIn.approve(address(adapter), type(uint256).max);
+    uint24 fee = launchpad.getTokenFee(_tokenOut);
+    ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenOut);
 
     // call the odos contract to get the amount of tokens to buy
     if (_odosData.length > 0) {
+      _odosTokenIn.approve(address(ODOS), type(uint256).max);
       (bool success,) = ODOS.call(_odosData);
       require(success, "!odos");
     } else {
@@ -70,7 +70,8 @@ contract Swapper {
     uint256 amountIn = _tokenIn.balanceOf(address(this));
     require(amountIn >= _minOdosTokenOut, "!minAmountIn");
 
-    amountOut = adapter.swapWithExactInput(_tokenIn, _tokenOut, amountIn, _minAmountOut, _fee);
+    _tokenIn.approve(address(adapter), type(uint256).max);
+    amountOut = adapter.swapWithExactInput(_tokenIn, _tokenOut, amountIn, _minAmountOut, fee);
 
     // send everything back
     _refundTokens(_tokenIn);
@@ -96,15 +97,15 @@ contract Swapper {
     uint256 _tokenInAmount,
     uint256 _minOdosTokenIn,
     uint256 _minAmountOut,
-    uint24 _fee,
     bytes memory _odosData
   ) public payable returns (uint256 amountOut) {
     ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenIn);
+    uint24 fee = launchpad.getTokenFee(_tokenIn);
 
     _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
     _tokenIn.approve(address(adapter), type(uint256).max);
 
-    uint256 amountSwapOut = adapter.swapWithExactInput(_tokenIn, _odosTokenOut, _tokenInAmount, _minOdosTokenIn, _fee);
+    uint256 amountSwapOut = adapter.swapWithExactInput(_tokenIn, _odosTokenOut, _tokenInAmount, _minOdosTokenIn, fee);
 
     if (_odosData.length > 0) {
       _odosTokenOut.approve(ODOS, type(uint256).max);

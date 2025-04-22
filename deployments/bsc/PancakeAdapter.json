@@ -1,5 +1,5 @@
 {
-  "address": "0x70AFf501f3464A66B07EeA9E9dD6378Ecb13bff6",
+  "address": "0x3a7b708E71Ff72506afA674Ea14881E39CE9fdE2",
   "abi": [
     {
       "inputs": [],
@@ -51,29 +51,56 @@
     {
       "inputs": [
         {
-          "internalType": "contract IERC20",
-          "name": "_tokenBase",
-          "type": "address"
-        },
-        {
-          "internalType": "contract IERC20",
-          "name": "_tokenQuote",
-          "type": "address"
-        },
-        {
-          "internalType": "int24",
-          "name": "_tick0",
-          "type": "int24"
-        },
-        {
-          "internalType": "int24",
-          "name": "_tick1",
-          "type": "int24"
-        },
-        {
-          "internalType": "int24",
-          "name": "_tick2",
-          "type": "int24"
+          "components": [
+            {
+              "internalType": "contract IERC20",
+              "name": "tokenBase",
+              "type": "address"
+            },
+            {
+              "internalType": "contract IERC20",
+              "name": "tokenQuote",
+              "type": "address"
+            },
+            {
+              "internalType": "int24",
+              "name": "tick0",
+              "type": "int24"
+            },
+            {
+              "internalType": "int24",
+              "name": "tick1",
+              "type": "int24"
+            },
+            {
+              "internalType": "int24",
+              "name": "tick2",
+              "type": "int24"
+            },
+            {
+              "internalType": "uint24",
+              "name": "fee",
+              "type": "uint24"
+            },
+            {
+              "internalType": "int24",
+              "name": "tickSpacing",
+              "type": "int24"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "graduationAmount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ICLMMAdapter.AddLiquidityParams",
+          "name": "_params",
+          "type": "tuple"
         }
       ],
       "name": "addSingleSidedLiquidity",
@@ -343,6 +370,11 @@
           "internalType": "uint256",
           "name": "_minAmountOut",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint24",
+          "name": "_fee",
+          "type": "uint24"
         }
       ],
       "name": "swapWithExactInput",
@@ -377,6 +409,11 @@
           "internalType": "uint256",
           "name": "_maxAmountIn",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint24",
+          "name": "_fee",
+          "type": "uint24"
         }
       ],
       "name": "swapWithExactOutput",
@@ -420,5 +457,5 @@
     }
   ],
   "args": [],
-  "numDeployments": 7
+  "numDeployments": 5
 }

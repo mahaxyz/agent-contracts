@@ -67,6 +67,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
+  function getTokenFee(IERC20 _token) external view returns (uint24 fee) {
+    return launchParams[_token].valueParams.fee;
+  }
+
+  /// @inheritdoc ITokenLaunchpad
   function setFeeSettings(address _feeDestination, uint256 _fee, uint256 _feeDiscountAmount) external onlyOwner {
     feeDestination = _feeDestination;
     creationFee = _fee;

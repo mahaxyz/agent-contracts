@@ -117,6 +117,11 @@ interface ITokenLaunchpad {
   /// @return adapter The adapter for the token
   function getTokenAdapter(IERC20 _token) external view returns (ICLMMAdapter);
 
+  /// @notice Gets the fee for a token
+  /// @param _token The token to get the fee for
+  /// @return fee The fee for the token
+  function getTokenFee(IERC20 _token) external view returns (uint24 fee);
+
   /// @notice Updates the referral settings
   /// @param _referralDestination The address to receive referrals
   /// @param _referralFee The new referral fee amount
