@@ -86,12 +86,36 @@ interface ITokenLaunchpad {
   /// @param _enabled Whether the adapter is enabled
   event AdapterSet(address indexed _adapter, bool _enabled);
 
+  /// @notice Emitted when a whitelist is updated
+  /// @param _address The address that was updated
+  /// @param _whitelisted Whether the address is whitelisted
+  event WhitelistUpdated(address indexed _address, bool _whitelisted);
+
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
   /// @param _premiumToken The token used for fee discount
   /// @param _feeDiscountAmount The amount of fee discount
   function initialize(address _owner, address _weth, address _premiumToken, uint256 _feeDiscountAmount) external;
+
+  /// @notice Toggles the whitelist for an address
+  /// @param _address The address to toggle the whitelist for
+  function toggleWhitelist(address _address) external;
+
+  /// @notice Sets the value parameters for a token
+  /// @param _token The token to set the value parameters for
+  /// @param _params The value parameters to set
+  function setValueParams(IERC20 _token, ValueParams memory _params) external;
+
+  /// @notice Gets the value parameters for a token
+  /// @param _token The token to get the value parameters for
+  /// @return params The value parameters for the token
+  function getValueParams(IERC20 _token) external view returns (ValueParams memory params);
+
+  /// @notice Gets the adapter for a token
+  /// @param _token The token to get the adapter for
+  /// @return adapter The adapter for the token
+  function getTokenAdapter(IERC20 _token) external view returns (ICLMMAdapter);
 
   /// @notice Updates the referral settings
   /// @param _referralDestination The address to receive referrals

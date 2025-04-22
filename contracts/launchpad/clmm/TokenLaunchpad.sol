@@ -74,12 +74,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     emit FeeUpdated(_feeDestination, _fee);
   }
 
+  /// @inheritdoc ITokenLaunchpad
   function toggleWhitelist(address _address) external onlyOwner {
     whitelisted[_address] = !whitelisted[_address];
     emit WhitelistUpdated(_address, whitelisted[_address]);
   }
-
-  event WhitelistUpdated(address indexed _address, bool _whitelisted);
 
   /// @inheritdoc ITokenLaunchpad
   function setReferralSettings(address _referralDestination, uint256 _referralFee) external onlyOwner {
@@ -88,30 +87,25 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     emit ReferralUpdated(_referralDestination, _referralFee);
   }
 
-  /// @notice Toggle an adapter
-  /// @param _adapter The adapter address
+  /// @inheritdoc ITokenLaunchpad
   function toggleAdapter(ICLMMAdapter _adapter) external onlyOwner {
     adapters[_adapter] = !adapters[_adapter];
     emit AdapterSet(address(_adapter), adapters[_adapter]);
   }
 
-  /// @notice Set default parameters for a funding token
-  /// @param _token The funding token
-  /// @param _params The default parameters
+  /// @inheritdoc ITokenLaunchpad
   function setValueParams(IERC20 _token, ValueParams memory _params) external onlyOwner {
     defaultParams[_token] = _params;
   }
 
-  /// @notice Get default parameters for a funding token
-  /// @param _token The funding token
-  /// @return params The default parameters
+  /// @inheritdoc ITokenLaunchpad
   function getValueParams(IERC20 _token) public view returns (ValueParams memory params) {
-    params = defaultParams[_token];
-    // If no custom defaults set, use WETH defaults
-    if (params.launchTick == 0 && params.graduationTick == 0 && params.upperMaxTick == 0) {
-      params = defaultParams[weth];
-    }
-    return params;
+    return defaultParams[_token];
+  }
+
+  /// @inheritdoc ITokenLaunchpad
+  function getTokenAdapter(IERC20 _token) public view returns (ICLMMAdapter) {
+    return launchParams[_token].adapter;
   }
 
   /// @inheritdoc ITokenLaunchpad

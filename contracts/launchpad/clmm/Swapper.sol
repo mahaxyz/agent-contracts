@@ -22,15 +22,13 @@ import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 contract Swapper {
   using SafeERC20 for IERC20;
 
-  ICLMMAdapter public immutable adapter;
   IWETH9 public immutable weth;
   address public immutable ODOS;
   ITokenLaunchpad public immutable launchpad;
 
   receive() external payable {}
 
-  constructor(address _adapter, address _weth, address _odos, address _launchpad) {
-    adapter = ICLMMAdapter(_adapter);
+  constructor(address _weth, address _odos, address _launchpad) {
     weth = IWETH9(_weth);
     ODOS = _odos;
     launchpad = ITokenLaunchpad(_launchpad);
@@ -56,6 +54,8 @@ contract Swapper {
   ) public payable returns (uint256 amountOut) {
     if (msg.value > 0) weth.deposit{value: msg.value}();
     else _odosTokenIn.safeTransferFrom(msg.sender, address(this), _odosTokenInAmount);
+
+    ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenIn);
     _odosTokenIn.approve(address(adapter), type(uint256).max);
 
     // call the odos contract to get the amount of tokens to buy
@@ -99,6 +99,8 @@ contract Swapper {
     uint24 _fee,
     bytes memory _odosData
   ) public payable returns (uint256 amountOut) {
+    ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenIn);
+
     _tokenIn.safeTransferFrom(msg.sender, address(this), _tokenInAmount);
     _tokenIn.approve(address(adapter), type(uint256).max);
 
