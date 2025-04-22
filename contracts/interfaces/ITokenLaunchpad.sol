@@ -23,7 +23,8 @@ interface ITokenLaunchpad {
   /// @notice The type of adapter to use for the token launch
   enum AdapterType {
     PancakeSwap,
-    Thena
+    Thena,
+    Ramses
   }
 
   /// @notice Parameters required to create a new token launch
