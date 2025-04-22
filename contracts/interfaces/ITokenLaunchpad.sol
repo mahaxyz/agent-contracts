@@ -13,19 +13,13 @@
 
 pragma solidity ^0.8.0;
 
+import {ICLMMAdapter} from "./ICLMMAdapter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
-import {ICLMMAdapter} from "./ICLMMAdapter.sol";
 
 /// @title ITokenLaunchpad Interface
 /// @notice Interface for the TokenLaunchpad contract that handles token launches
 interface ITokenLaunchpad {
-  /// @notice The type of adapter to use for the token launch
-  enum AdapterType {
-    PancakeSwap,
-    Thena
-  }
-
   /// @notice Parameters required to create a new token launch
   /// @param name The name of the token
   /// @param symbol The symbol of the token
@@ -40,19 +34,19 @@ interface ITokenLaunchpad {
   /// @param launchPoolAllocations The launchpool allocations
   /// @param creatorAllocation Percentage of total supply to allocate to creator (max 5%)
   /// @param fee The fee for the token liquidity pair
-  /// @param adapterType The type of adapter used for the token launch
+  /// @param adapter The adapter used for the token launch
   struct CreateParams {
     bool isPremium;
     bytes32 salt;
+    ICLMMAdapter adapter;
     IERC20 fundingToken;
-    ValueParams valueParams;
     ILaunchpool[] launchPools;
-    uint256[] launchPoolAmounts;
     string metadata;
     string name;
     string symbol;
     uint16 creatorAllocation;
-    AdapterType adapterType;
+    uint256[] launchPoolAmounts;
+    ValueParams valueParams;
   }
 
   // Contains numeric launch parameters
@@ -87,22 +81,17 @@ interface ITokenLaunchpad {
   /// @param amount The amount of tokens allocated to the creator
   event CreatorAllocation(IERC20 indexed token, address indexed creator, uint256 amount);
 
-  /// @notice Emitted when an adapter is set for a specific type
-  /// @param _type The type of adapter
+  /// @notice Emitted when an adapter is set
   /// @param _adapter The adapter address
-  event AdapterSet(AdapterType indexed _type, address indexed _adapter);
+  /// @param _enabled Whether the adapter is enabled
+  event AdapterSet(address indexed _adapter, bool _enabled);
 
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
   /// @param _premiumToken The token used for fee discount
   /// @param _feeDiscountAmount The amount of fee discount
-  function initialize(
-    address _owner,
-    address _weth,
-    address _premiumToken,
-    uint256 _feeDiscountAmount
-  ) external;
+  function initialize(address _owner, address _weth, address _premiumToken, uint256 _feeDiscountAmount) external;
 
   /// @notice Updates the referral settings
   /// @param _referralDestination The address to receive referrals
@@ -134,8 +123,7 @@ interface ITokenLaunchpad {
   /// @param _token The token to claim fees for
   function claimFees(IERC20 _token) external;
 
-  /// @notice Set the adapter for a specific type
-  /// @param _type The type of adapter
+  /// @notice Toggle an adapter
   /// @param _adapter The adapter address
-  function setAdapter(AdapterType _type, ICLMMAdapter _adapter) external;
+  function toggleAdapter(ICLMMAdapter _adapter) external;
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-
 import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
 
 import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
@@ -40,7 +39,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       address(_nftManager)
     );
     _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
-    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
+    _launchpad.toggleAdapter(_adapter);
   }
 
   function test_create_basic() public {
@@ -63,7 +62,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.prank(creator);
@@ -97,7 +96,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
@@ -143,7 +142,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.prank(owner);
@@ -172,7 +171,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.prank(owner);
@@ -199,7 +198,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.startPrank(owner);
@@ -228,7 +227,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.startPrank(owner);

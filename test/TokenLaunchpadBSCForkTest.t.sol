@@ -47,7 +47,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       tickSpacing: 20_000,
       graduationLiquidity: 800_000_000 ether
     });
-    _launchpad.setAdapter(ITokenLaunchpad.AdapterType.PancakeSwap, _adapter);
+    _launchpad.toggleAdapter(_adapter);
     _launchpad.setValueParams(_weth, params);
     vm.stopPrank();
   }
@@ -72,7 +72,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPools: new ILaunchpool[](0),
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
-      adapterType: ITokenLaunchpad.AdapterType.PancakeSwap
+      adapter: _adapter
     });
 
     vm.prank(creator);

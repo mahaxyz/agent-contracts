@@ -26,6 +26,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     proxyAdmin,
     "PancakeAdapter",
     "TokenLaunchpadBSC",
+    [],
     wbnbAddressOnBsc,
     odosAddressOnBsc,
     mahaAddress,
@@ -87,6 +88,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
       symbol,
       565, // price of token in USD
       tickSpacing,
+      1000n,
       metadata,
       5000, // 5,000$ starting market cap
       69000, // 69,000$ ending market cap

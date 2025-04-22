@@ -116,9 +116,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function addSingleSidedLiquidity(
-    AddLiquidityParams memory _params
-  ) external {
+  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external {
     require(msg.sender == launchpad, "!launchpad");
     require(launchParams[_params.tokenBase].pool == address(0), "!launched");
 
@@ -145,8 +143,18 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
 
     // calculate and add liquidity for the various tick ranges
     _params.tokenBase.safeTransferFrom(msg.sender, address(this), _params.totalAmount);
-    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0);
-    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, _params.totalAmount - _params.graduationAmount, 1);
+    _mintAndLock(
+      _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0
+    );
+    _mintAndLock(
+      _params.tokenBase,
+      _params.tokenQuote,
+      _params.tick1,
+      _params.tick2,
+      _params.fee,
+      _params.totalAmount - _params.graduationAmount,
+      1
+    );
   }
 
   /// @inheritdoc ICLMMAdapter
@@ -194,18 +202,6 @@ abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
   ) internal virtual returns (uint256 lockId);
 
   function _collectFees(uint256 _lockId) internal virtual returns (uint256 fee0, uint256 fee1);
-
-  /// @dev Mint a position
-  /// @param _token0 The token to mint the position for
-  /// @param _token1 The token to mint the position for
-  /// @param _tick0 The lower tick of the position
-  /// @param _tick1 The upper tick of the position
-  /// @param _amount0 The amount of tokens to mint the position for
-  /// @return tokenId The token id of the position
-  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
-    internal
-    virtual
-    returns (uint256 tokenId);
 
   /// @dev Create a pool
   /// @param _token0 The token to create the pool for

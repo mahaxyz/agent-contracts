@@ -11,7 +11,6 @@ export async function templateLaunchpad(
   proxyAdmin: string,
   adapterContract: string,
   launchpadContract: string,
-  launchpoolTokens: string[],
   wethAddress: string,
   odosAddress: string,
   mahaAddress: string,
@@ -30,15 +29,6 @@ export async function templateLaunchpad(
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
-    proxyAdmin,
-    launchpadContract,
-    deployer
-  );
-
-  const launchpoolD = await deployProxy(
-    hre,
-    "Launchpool",
     [adapterD.address, deployer, wethAddress, mahaAddress, feeDiscountAmount],
     proxyAdmin,
     launchpadContract,
@@ -77,6 +67,7 @@ export const deployToken = async (
   symbol: string,
   priceOfETHinUSD: number,
   tickSpacing: number,
+  fee: bigint,
   metadata: string,
   startingMarketCapInUSD: number,
   endingMarketCapInUSD: number,
@@ -115,18 +106,38 @@ export const deployToken = async (
   );
 
   const data = {
+    fee,
     fundingToken,
+    graduationLiquidity: 800000000n,
+    graduationTick,
+    isPremium: false,
+    launchTick,
+    launchPools: [],
+    launchPoolAmounts: [],
     metadata,
     name,
     salt,
     symbol,
-    launchTick: -171_000,
-    graduationTick: -170_800,
-    upperMaxTick: 887_200,
-    isFeeDiscounted: false,
+    tickSpacing,
+    upperMaxTick,
   };
 
-  const fee = await launchpad.creationFee();
+  // fee: BigNumberish;
+  // fundingToken: AddressLike;
+  // graduationLiquidity: BigNumberish;
+  // graduationTick: BigNumberish;
+  // isPremium: boolean;
+  // launchPoolAmounts: BigNumberish[];
+  // launchPools: AddressLike[];
+  // launchTick: BigNumberish;
+  // metadata: string;
+  // name: string;
+  // salt: BytesLike;
+  // symbol: string;
+  // tickSpacing: BigNumberish;
+  // upperMaxTick: BigNumberish;
+
+  const creationFee = await launchpad.creationFee();
   const dust = 10000000000000n;
 
   // create a launchpad token
@@ -138,13 +149,13 @@ export const deployToken = async (
       computedAddress,
       amountToBuy,
       {
-        value: fee + dust,
+        value: creationFee + dust,
       }
     )
   );
   await waitForTx(
     await launchpad.createAndBuy(data, computedAddress, amountToBuy, {
-      value: fee + dust,
+      value: creationFee + dust,
     })
   );
 
