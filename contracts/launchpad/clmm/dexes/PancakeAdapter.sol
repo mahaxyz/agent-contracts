@@ -70,7 +70,7 @@ contract PancakeAdapter is BaseV3Adapter {
     // lock the liquidity forever; allow this contract to collect fees
     lockId = IGoPlusLocker(locker).nextLockId();
     IGoPlusLocker(locker).lock(
-      address(nftPositionManager), tokenId, address(this), address(this), type(uint256).max, "LVP"
+      address(nftPositionManager), tokenId, address(this), address(this), type(uint256).max, "LLP"
     );
     tokenToLockId[IERC20(_token0)][_index] = lockId;
   }
