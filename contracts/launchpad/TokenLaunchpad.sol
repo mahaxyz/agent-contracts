@@ -122,6 +122,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     return defaultValueParams[_token][_adapter];
   }
 
+  function getLaunchParams(IERC20 _token) public view returns (CreateParams memory params) {
+    return launchParams[_token];
+  }
+
   /// @inheritdoc ITokenLaunchpad
   function getTokenAdapter(IERC20 _token) public view returns (ICLMMAdapter) {
     return launchParams[_token].adapter;
@@ -186,7 +190,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
       _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts, p.isPremium);
 
-      uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
+      uint256 pendingBalance = token.balanceOf(address(this));
       token.approve(address(p.adapter), type(uint256).max);
       address pool = p.adapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({
