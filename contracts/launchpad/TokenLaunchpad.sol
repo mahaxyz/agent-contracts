@@ -186,7 +186,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
       _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts, p.isPremium);
 
-      uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
+      uint256 pendingBalance = token.balanceOf(address(this));
       token.approve(address(p.adapter), type(uint256).max);
       address pool = p.adapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({

@@ -37,7 +37,7 @@ async function main() {
       {
         launchTick: computeTickPrice(5000, bnbPrice, 18, 60),
         graduationTick: computeTickPrice(69000, bnbPrice, 18, 60),
-        upperMaxTick: 887_000,
+        upperMaxTick: 88740,
         fee: 3000,
         tickSpacing: 60,
         graduationLiquidity: parseEther("800000000"),

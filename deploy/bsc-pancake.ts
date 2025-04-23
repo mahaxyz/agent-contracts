@@ -129,7 +129,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // setup parameters
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
 
-  const shouldMockPcs = true;
+  const shouldMockPcs = false;
   const shouldMockThena = true;
 
   if (shouldMockPcs) {
