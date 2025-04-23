@@ -1,6 +1,6 @@
 import {
   deployAdapter,
-  deployToken,
+  deployTokenSimple,
   templateLaunchpad,
 } from "./mainnet-template";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -8,6 +8,7 @@ import { PancakeAdapter, ThenaAdapter } from "../types";
 import { deployContract, waitForTx } from "../scripts/utils";
 import assert from "assert";
 import { parseEther } from "ethers";
+import { ethers } from "hardhat";
 
 async function main(hre: HardhatRuntimeEnvironment) {
   assert(hre.network.name === "bsc", "This script is only for BSC");
@@ -42,6 +43,13 @@ async function main(hre: HardhatRuntimeEnvironment) {
     feeDiscountAmount
   );
 
+  const thenaLockerD = await deployContract(
+    hre,
+    "ThenaLocker",
+    [nftPositionManagerThena],
+    "ThenaLocker"
+  );
+
   const adapterPCS = (await deployAdapter(hre, "PancakeAdapter", {
     launchpad,
     wethAddress: wbnbAddressOnBsc,
@@ -55,7 +63,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     launchpad,
     wethAddress: wbnbAddressOnBsc,
     swapRouter: swapRouterThena,
-    locker,
+    locker: thenaLockerD.address,
     nftPositionManager: nftPositionManagerThena,
     clPoolFactory: clPoolFactoryThena,
   })) as ThenaAdapter;
@@ -67,20 +75,48 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "FeeCollector"
   );
 
-  if ((await launchpad.getValueParams(wbnbAddressOnBsc)).fee !== 10000n) {
+  const defaultLaunchParamsPCS = await launchpad.getDefaultValueParams(
+    wbnbAddressOnBsc,
+    adapterPCS.target
+  );
+  const defaultLaunchParamsThena = await launchpad.getDefaultValueParams(
+    wbnbAddressOnBsc,
+    adapterThena.target
+  );
+
+  if (defaultLaunchParamsPCS.launchTick === 0n) {
     await waitForTx(
-      await launchpad.setValueParams(wbnbAddressOnBsc, {
-        launchTick: -171_000,
-        graduationTick: -170_800,
-        upperMaxTick: 887_000,
-        fee: 10000,
-        tickSpacing: 200,
-        graduationLiquidity: parseEther("800000000"),
-      })
+      await launchpad.setDefaultValueParams(
+        wbnbAddressOnBsc,
+        adapterPCS.target,
+        {
+          launchTick: -171_000,
+          graduationTick: -170_800,
+          upperMaxTick: 887_000,
+          fee: 10000,
+          tickSpacing: 200,
+          graduationLiquidity: parseEther("800000000"),
+        }
+      )
     );
   }
 
-  console.log("Value params", await launchpad.getValueParams(wbnbAddressOnBsc));
+  if (defaultLaunchParamsThena.launchTick === 0n) {
+    await waitForTx(
+      await launchpad.setDefaultValueParams(
+        wbnbAddressOnBsc,
+        adapterThena.target,
+        {
+          launchTick: -171_000,
+          graduationTick: -170_760,
+          upperMaxTick: 887_220,
+          fee: 3000,
+          tickSpacing: 60,
+          graduationLiquidity: parseEther("800000000"),
+        }
+      )
+    );
+  }
 
   if ((await launchpad.feeDestination()) != feeCollector.address) {
     await waitForTx(
@@ -91,54 +127,34 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // CONTRACTS ARE DEPLOYED; NOW WE CAN LAUNCH A NEW TOKEN
 
   // setup parameters
-  const name = "Test Token";
-  const symbol = "TEST";
-  const tickSpacing = 200; // tick spacing for 1% fee
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
 
-  // await waitForTx(await launchpad.setFeeSettings(mahaTreasury, 0, 1000n * e18));
+  const shouldMockPcs = true;
+  const shouldMockThena = true;
 
-  const shouldMock = true;
-  if (shouldMock) {
-    // const mahaD = await deployContract(
-    //   hre,
-    //   "MockERC20",
-    //   ["TEST MAHA", "TMAHA", 18],
-    //   "MAHA"
-    // );
-
-    // const maha = await hre.ethers.getContractAt("MockERC20", mahaD.address);
-
-    // await waitForTx(await maha.mint(deployer, 1000000000000000000000000n));
-    // await waitForTx(
-    //   await maha.approve(launchpad.target, 1000000000000000000000000n)
-    // );
-
-    const token2 = await deployToken(
+  if (shouldMockPcs) {
+    const name = "Test PCS Token";
+    const symbol = "TEST-PCS";
+    const tokenPcs = await deployTokenSimple(
       hre,
-      adapterThena,
+      adapterPCS,
       deployer,
       name,
       symbol,
-      565, // price of token in USD
-      tickSpacing,
-      10000n,
       metadata,
-      5000, // 5,000$ starting market cap
-      69000, // 69,000$ ending market cap
       wbnbAddressOnBsc,
       launchpad,
       0n
     );
 
-    console.log("Token deployed at", token2.target);
+    console.log("Pancake Token deployed at", tokenPcs.target);
 
     const value = 10000000n;
 
-    const swapTx = await swapper.buyWithExactInputWithOdos(
+    const buyTx = await swapper.buyWithExactInputWithOdos(
       wbnbAddressOnBsc,
       wbnbAddressOnBsc,
-      "0x9215380C8Bf8f56CeBd43508B72b77a4cA42afC4",
+      tokenPcs.target,
       value,
       0,
       0,
@@ -146,7 +162,69 @@ async function main(hre: HardhatRuntimeEnvironment) {
       { value }
     );
 
-    console.log("Swap tx", swapTx);
+    console.log("Buy tx", buyTx.hash);
+
+    const token = await ethers.getContractAt("WAGMIEToken", tokenPcs.target);
+    await waitForTx(await token.approve(swapper.target, value));
+    const sellTx = await swapper.sellWithExactInputWithOdos(
+      tokenPcs.target,
+      wbnbAddressOnBsc,
+      wbnbAddressOnBsc,
+      value,
+      0,
+      0,
+      "0x"
+    );
+
+    console.log("Sell tx", sellTx.hash);
+  }
+
+  if (shouldMockThena) {
+    const name = "Test Thena Token";
+    const symbol = "TEST-THENA";
+
+    const tokenThena = await deployTokenSimple(
+      hre,
+      adapterThena,
+      deployer,
+      name,
+      symbol,
+      metadata,
+      wbnbAddressOnBsc,
+      launchpad,
+      0n
+    );
+
+    console.log("Thena Token deployed at", tokenThena.target);
+
+    const value = 10000000n;
+
+    const buyTx = await swapper.buyWithExactInputWithOdos(
+      wbnbAddressOnBsc,
+      wbnbAddressOnBsc,
+      tokenThena.target,
+      value,
+      0,
+      0,
+      "0x",
+      { value }
+    );
+
+    console.log("Buy tx", buyTx.hash);
+
+    const token = await ethers.getContractAt("WAGMIEToken", tokenThena.target);
+    await waitForTx(await token.approve(swapper.target, value));
+    const sellTx = await swapper.sellWithExactInputWithOdos(
+      tokenThena.target,
+      wbnbAddressOnBsc,
+      wbnbAddressOnBsc,
+      value,
+      0,
+      0,
+      "0x"
+    );
+
+    console.log("Sell tx", sellTx.hash);
   }
 }
 

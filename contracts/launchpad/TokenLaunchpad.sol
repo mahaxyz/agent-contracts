@@ -39,6 +39,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   uint256 public creationFee;
   uint256 public feeDiscountAmount;
   uint256 public referralFee;
+  address public cron;
 
   mapping(IERC20 token => CreateParams) public launchParams;
   mapping(IERC20 token => uint256) public tokenToNftId;
@@ -62,6 +63,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     weth = IWETH9(_weth);
     premiumToken = IERC20(_premiumToken);
     feeDiscountAmount = _feeDiscountAmount;
+    cron = _owner;
     __Ownable_init(_owner);
     __ERC721_init("WAGMIE Launchpad", "WAGMIE");
   }
@@ -85,6 +87,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
+  function setCron(address _cron) external onlyOwner {
+    cron = _cron;
+    emit CronUpdated(_cron);
+  }
+
+  /// @inheritdoc ITokenLaunchpad
   function toggleWhitelist(address _address) external onlyOwner {
     whitelisted[_address] = !whitelisted[_address];
     emit WhitelistUpdated(_address, whitelisted[_address]);
@@ -104,7 +112,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function setDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter, ValueParams memory _params) external onlyOwner {
+  function setDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter, ValueParams memory _params) external {
+    require(msg.sender == cron, "!cron");
     defaultValueParams[_token][_adapter] = _params;
   }
 

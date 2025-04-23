@@ -60,11 +60,11 @@ export async function deployAdapter(
     adapterContract,
     [
       args.launchpad.target,
+      args.clPoolFactory,
+      args.swapRouter,
       args.wethAddress,
       args.locker,
-      args.swapRouter,
       args.nftPositionManager,
-      args.clPoolFactory,
     ],
     adapterContract
   );
@@ -82,7 +82,98 @@ export async function deployAdapter(
   return adapter;
 }
 
-export const deployToken = async (
+/**
+ * Deploy a simple token on the launchpad
+ * @param hre - HardhatRuntimeEnvironment
+ * @param adapter - ICLMMAdapter - The adapter to use for the token
+ * @param deployer - string - The deployer of the token
+ * @param name - string - The name of the token
+ * @param symbol - string - The symbol of the token
+ * @param metadata - string - The metadata of the token
+ * @param fundingToken - string - The funding token of the token
+ * @param launchpad - TokenLaunchpad - The launchpad to use for the token
+ * @param amountToBuy - bigint - The amount of tokens to buy
+ * @returns - WAGMIEToken - The deployed token
+ */
+export const deployTokenSimple = async (
+  hre: HardhatRuntimeEnvironment,
+  adapter: ICLMMAdapter,
+  deployer: string,
+  name: string,
+  symbol: string,
+  metadata: string,
+  fundingToken: string,
+  launchpad: TokenLaunchpad,
+  amountToBuy: bigint
+) => {
+  // get the bytecode for the WAGMIEToken
+  const wagmie = await hre.ethers.getContractFactory("WAGMIEToken");
+
+  // guess the salt and computed address for the given token
+  const { salt, computedAddress } = await guessTokenAddress(
+    launchpad.target,
+    wagmie.bytecode, // tokenImpl.target,
+    fundingToken,
+    deployer,
+    name,
+    symbol
+  );
+
+  const data: ITokenLaunchpad.CreateParamsStruct = {
+    adapter: adapter.target,
+    creatorAllocation: 0,
+    fundingToken,
+    isPremium: false,
+    launchPoolAmounts: [],
+    launchPools: [],
+    metadata,
+    name,
+    salt,
+    symbol,
+    valueParams: {
+      fee: 0,
+      graduationLiquidity: 0,
+      graduationTick: 0,
+      launchTick: 0,
+      tickSpacing: 0,
+      upperMaxTick: 0,
+    },
+  };
+
+  const creationFee = await launchpad.creationFee();
+  const dust = 10000000000000n;
+
+  // create a launchpad token
+  await waitForTx(
+    await launchpad.createAndBuy(data, computedAddress, amountToBuy, {
+      value: creationFee + dust,
+    })
+  );
+
+  console.log("Simple Token deployed at", computedAddress);
+
+  return hre.ethers.getContractAt("WAGMIEToken", computedAddress);
+};
+
+/**
+ * Deploy a premium token on the launchpad
+ * @param hre - HardhatRuntimeEnvironment
+ * @param adapter - ICLMMAdapter - The adapter to use for the token
+ * @param deployer - string - The deployer of the token
+ * @param name - string - The name of the token
+ * @param symbol - string - The symbol of the token
+ * @param priceOfETHinUSD - number - The price of ETH in USD
+ * @param tickSpacing - number - The tick spacing of the token
+ * @param fee - bigint - The fee of the token
+ * @param metadata - string - The metadata of the token
+ * @param startingMarketCapInUSD - number - The starting market cap of the token
+ * @param endingMarketCapInUSD - number - The ending market cap of the token
+ * @param fundingToken - string - The funding token of the token
+ * @param launchpad - TokenLaunchpad - The launchpad to use for the token
+ * @param amountToBuy - bigint - The amount of tokens to buy
+ * @returns - WAGMIEToken - The deployed token
+ */
+export const deployTokenPremium = async (
   hre: HardhatRuntimeEnvironment,
   adapter: ICLMMAdapter,
   deployer: string,
@@ -132,7 +223,7 @@ export const deployToken = async (
     adapter: adapter.target,
     creatorAllocation: 0,
     fundingToken,
-    isPremium: false,
+    isPremium: true,
     launchPoolAmounts: [],
     launchPools: [],
     metadata,

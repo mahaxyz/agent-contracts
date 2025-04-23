@@ -91,6 +91,10 @@ interface ITokenLaunchpad {
   /// @param _whitelisted Whether the address is whitelisted
   event WhitelistUpdated(address indexed _address, bool _whitelisted);
 
+  /// @notice Emitted when the cron is updated
+  /// @param newCron The new cron address
+  event CronUpdated(address indexed newCron);
+
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
@@ -107,6 +111,10 @@ interface ITokenLaunchpad {
   /// @param _adapter The adapter to set the value parameters for
   /// @param _params The value parameters to set
   function setDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter, ValueParams memory _params) external;
+
+  /// @notice Sets the cron address
+  /// @param _cron The new cron address
+  function setCron(address _cron) external;
 
   /// @notice Gets the quote token for a token
   /// @param _token The token to get the quote token for

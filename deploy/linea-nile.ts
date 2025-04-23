@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { RamsesAdapter } from "../types";
-import { deployToken, templateLaunchpad } from "./mainnet-template";
+import { deployTokenSimple, templateLaunchpad } from "./mainnet-template";
 import { deployContract, waitForTx } from "../scripts/utils";
 
 async function main(hre: HardhatRuntimeEnvironment) {
@@ -78,7 +78,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     //   await maha.approve(launchpad.target, 1000000000000000000000000n)
     // );
 
-    const token2 = await deployToken(
+    const token2 = await deployTokenSimple(
       hre,
       deployer,
       name,
