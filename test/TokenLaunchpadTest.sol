@@ -16,31 +16,31 @@ contract TokenLaunchpadTest is Test {
   MockERC20 _maha;
   TokenLaunchpad _launchpad;
 
-  address _owner = makeAddr("owner");
-  address _whale = makeAddr("whale");
-  address _creator = makeAddr("creator");
+  address owner = makeAddr("owner");
+  address whale = makeAddr("whale");
+  address creator = makeAddr("creator");
 
   function _setUpBase() internal {
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _maha = new MockERC20("Maha", "MAHA", 18);
-    _launchpad = new TokenLaunchpad();
+    // _launchpad = new TokenLaunchpad();
 
     vm.label(address(_weth), "weth");
     vm.label(address(_maha), "maha");
-    vm.deal(_owner, 1000 ether);
-    vm.deal(_whale, 1000 ether);
-    vm.deal(_creator, 1000 ether);
+    vm.deal(owner, 1000 ether);
+    vm.deal(whale, 1000 ether);
+    vm.deal(creator, 1000 ether);
 
     vm.deal(address(this), 100 ether);
   }
 
-  function _findValidTokenHash(string memory _name, string memory _symbol, address _creator, MockERC20 _quoteToken)
+  function findValidTokenHash(string memory _name, string memory _symbol, address _creator, MockERC20 _quoteToken)
     internal
     view
     returns (bytes32)
   {
     // Get the runtime bytecode of WAGMIEToken
-    bytes memory bytecode = type(WAGMIEToken).runtimeCode;
+    bytes memory bytecode = type(WAGMIEToken).creationCode;
 
     // Maximum number of attempts to find a valid address
     uint256 maxAttempts = 100;
@@ -51,9 +51,7 @@ contract TokenLaunchpadTest is Test {
 
       // Calculate CREATE2 address
       bytes memory creationCode = abi.encodePacked(bytecode, abi.encode(_name, _symbol));
-
       bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(_launchpad), saltUser, keccak256(creationCode)));
-
       address target = address(uint160(uint256(hash)));
 
       if (target < address(_quoteToken)) {
