@@ -1,5 +1,5 @@
 {
-  "address": "0x1e66B2fdF72F5B198f2cdD8c72fb28ec6a546536",
+  "address": "0x0e9eD7b5d69453B3260844354b32a0269d9f9f86",
   "abi": [
     {
       "inputs": [],
@@ -260,6 +260,19 @@
         }
       ],
       "name": "CreatorAllocation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newCron",
+          "type": "address"
+        }
+      ],
+      "name": "CronUpdated",
       "type": "event"
     },
     {
@@ -727,14 +740,32 @@
       "type": "function"
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "cron",
+      "outputs": [
         {
-          "internalType": "contract IERC20",
+          "internalType": "address",
           "name": "",
           "type": "address"
         }
       ],
-      "name": "defaultParams",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ICLMMAdapter",
+          "name": "adapter",
+          "type": "address"
+        }
+      ],
+      "name": "defaultValueParams",
       "outputs": [
         {
           "internalType": "int24",
@@ -821,6 +852,81 @@
           "internalType": "contract IERC20",
           "name": "_token",
           "type": "address"
+        },
+        {
+          "internalType": "contract ICLMMAdapter",
+          "name": "_adapter",
+          "type": "address"
+        }
+      ],
+      "name": "getDefaultValueParams",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "int24",
+              "name": "launchTick",
+              "type": "int24"
+            },
+            {
+              "internalType": "int24",
+              "name": "graduationTick",
+              "type": "int24"
+            },
+            {
+              "internalType": "int24",
+              "name": "upperMaxTick",
+              "type": "int24"
+            },
+            {
+              "internalType": "uint24",
+              "name": "fee",
+              "type": "uint24"
+            },
+            {
+              "internalType": "int24",
+              "name": "tickSpacing",
+              "type": "int24"
+            },
+            {
+              "internalType": "uint256",
+              "name": "graduationLiquidity",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ITokenLaunchpad.ValueParams",
+          "name": "params",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_token",
+          "type": "address"
+        }
+      ],
+      "name": "getQuoteToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "quoteToken",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "_token",
+          "type": "address"
         }
       ],
       "name": "getTokenAdapter",
@@ -861,57 +967,6 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "contract IERC20",
-          "name": "_token",
-          "type": "address"
-        }
-      ],
-      "name": "getValueParams",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "int24",
-              "name": "launchTick",
-              "type": "int24"
-            },
-            {
-              "internalType": "int24",
-              "name": "graduationTick",
-              "type": "int24"
-            },
-            {
-              "internalType": "int24",
-              "name": "upperMaxTick",
-              "type": "int24"
-            },
-            {
-              "internalType": "uint24",
-              "name": "fee",
-              "type": "uint24"
-            },
-            {
-              "internalType": "int24",
-              "name": "tickSpacing",
-              "type": "int24"
-            },
-            {
-              "internalType": "uint256",
-              "name": "graduationLiquidity",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ITokenLaunchpad.ValueParams",
-          "name": "params",
-          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -1224,39 +1279,11 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_feeDestination",
+          "name": "_cron",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_fee",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_feeDiscountAmount",
-          "type": "uint256"
         }
       ],
-      "name": "setFeeSettings",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_referralDestination",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_referralFee",
-          "type": "uint256"
-        }
-      ],
-      "name": "setReferralSettings",
+      "name": "setCron",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1266,6 +1293,11 @@
         {
           "internalType": "contract IERC20",
           "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ICLMMAdapter",
+          "name": "_adapter",
           "type": "address"
         },
         {
@@ -1306,7 +1338,48 @@
           "type": "tuple"
         }
       ],
-      "name": "setValueParams",
+      "name": "setDefaultValueParams",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_feeDestination",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_fee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feeDiscountAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "setFeeSettings",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_referralDestination",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_referralFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "setReferralSettings",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1561,5 +1634,5 @@
     "0x6a661312938d22a2a0e27f585073e4406903990a",
     "1000000000000000000000"
   ],
-  "numDeployments": 5
+  "numDeployments": 8
 }
