@@ -66,9 +66,10 @@ interface ITokenLaunchpad {
 
   /// @notice Emitted when a token is launched
   /// @param token The token that was launched
+  /// @param adapter The address of the adapter used to launch the token
   /// @param pool The address of the pool for the token
   /// @param params The parameters used to launch the token
-  event TokenLaunched(IERC20 indexed token, address indexed pool, CreateParams params);
+  event TokenLaunched(IERC20 indexed token, address indexed adapter, address indexed pool, CreateParams params);
 
   /// @notice Emitted when referral settings are updated
   /// @param referralDestination The address where referrals will be sent

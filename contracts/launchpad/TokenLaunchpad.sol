@@ -201,7 +201,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
           graduationAmount: p.valueParams.graduationLiquidity // uint256 _graduationAmount
         })
       );
-      emit TokenLaunched(token, pool, p);
+      emit TokenLaunched(token, address(p.adapter), pool, p);
     }
 
     _mint(msg.sender, tokenToNftId[token]);
