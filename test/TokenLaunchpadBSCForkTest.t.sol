@@ -10,8 +10,6 @@ import {PancakeAdapter} from "contracts/launchpad/clmm/adapters/PancakeAdapter.s
 import {ThenaAdapter} from "contracts/launchpad/clmm/adapters/ThenaAdapter.sol";
 import {ThenaLocker} from "contracts/launchpad/clmm/locker/ThenaLocker.sol";
 
-import "forge-std/console.sol";
-
 contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   // BSC Mainnet addresses
   address constant PANCAKE_FACTORY = 0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865;
