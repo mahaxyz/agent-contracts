@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {IFreeUniV3LPLocker, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
+import {IFreeUniV3LPLocker, TokenLaunchpadTest, MockERC20} from "./TokenLaunchpadTest.sol";
 import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
 import {TokenLaunchpadBSC} from "contracts/launchpad/TokenLaunchpadBSC.sol";
@@ -9,8 +9,7 @@ import {Swapper} from "contracts/launchpad/clmm/Swapper.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/adapters/PancakeAdapter.sol";
 import {ThenaAdapter} from "contracts/launchpad/clmm/adapters/ThenaAdapter.sol";
 import {ThenaLocker} from "contracts/launchpad/clmm/locker/ThenaLocker.sol";
-
-import "forge-std/console.sol";
+import {Launchpool} from "contracts/Launchpool.sol";
 
 contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   // BSC Mainnet addresses
@@ -68,7 +67,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     // Initialize launchpad
     _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
     vm.startPrank(owner);
-    _launchpad.setFeeSettings(address(0x123), 0, 1000e18);
+    _launchpad.setFeeSettings(feeDestination, 0, 1000e18);
     _launchpad.toggleAdapter(_adapterPCS);
     _launchpad.toggleAdapter(_adapterThena);
     _launchpad.setDefaultValueParams(
@@ -236,5 +235,443 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     IERC20(tokenAddr).approve(address(_swapper), 1 ether);
     _swapper.sellWithExactInputWithOdos(IERC20(tokenAddr), IERC20(_weth), IERC20(_weth), 1 ether, 0, 0, "0x");
     vm.stopPrank();
+  }
+
+  function test_premium_token_uses_custom_params_pcs() public {
+    // Mint MAHA tokens for creator to pay premium fee
+    _maha.mint(owner, 10_000e18);
+
+    // Deploy a real Launchpool contract for premium token
+    Launchpool launchpool = new Launchpool();
+    launchpool.initialize(
+        "Staking Pool",
+        "STKP",
+        address(_stakingToken),
+        owner,
+        address(_launchpad)
+    );
+    
+    // Capture initial historyIndex for launchpool verification
+    uint32 initialHistoryIndex = launchpool.historyIndex();
+
+    // Custom value parameters different from defaults
+    ITokenLaunchpad.ValueParams memory customParams = ITokenLaunchpad.ValueParams({
+      launchTick: -172_000,
+      graduationTick: -171_800,
+      upperMaxTick: 886_200,       
+      fee: 500,                   
+      tickSpacing: 10_000,         
+      graduationLiquidity: 500_000_000 ether 
+    });
+
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", owner, _weth);
+    
+    // Track fee destination's initial MAHA balance
+    uint256 initialMahaBalance = _maha.balanceOf(feeDestination);
+    
+    // Set up launchpool with allocations
+    ILaunchpool[] memory launchpools = new ILaunchpool[](1);
+    launchpools[0] = launchpool;
+    
+    uint256[] memory launchpoolAmounts = new uint256[](1);
+    launchpoolAmounts[0] = 100_000 ether;
+    
+    vm.startPrank(owner);
+    
+    // Approve MAHA tokens for premium fee
+    _maha.approve(address(_launchpad), 10_000e18);
+    
+    // Create token with premium flag and launchpool
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams,
+      isPremium: true,
+      launchPools: launchpools,
+      launchPoolAmounts: launchpoolAmounts,
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Buy with 10 WETH
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+    vm.stopPrank();
+    
+    // Verify premium fee was paid in MAHA
+    assertEq(_maha.balanceOf(feeDestination), initialMahaBalance + 1000e18, "Premium fee not paid correctly in MAHA");
+    
+    // Get the actual parameters used from storage
+    ITokenLaunchpad.CreateParams memory storedParams = _launchpad.getLaunchParams(IERC20(tokenAddr));
+    // Custom params should be used for premium tokens
+    assertEq(storedParams.valueParams.launchTick, customParams.launchTick, "Custom launchTick not used");
+    assertEq(storedParams.valueParams.graduationTick, customParams.graduationTick, "Custom graduationTick not used");
+    assertEq(storedParams.valueParams.upperMaxTick, customParams.upperMaxTick, "Custom upperMaxTick not used");
+    assertEq(storedParams.valueParams.fee, customParams.fee, "Custom fee not used");
+    assertEq(storedParams.valueParams.tickSpacing, customParams.tickSpacing, "Custom tickSpacing not used");
+    assertEq(storedParams.valueParams.graduationLiquidity, customParams.graduationLiquidity, "Custom graduationLiquidity not used");
+    
+    // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
+    // 1. Verify RewardDrop was created in the launchpool
+    (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
+    
+    // 2. Verify correct reward token was set
+    assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
+    
+    // 3. Verify reward amount
+    assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
+    
+    // 4. Verify snapshotIndex was captured
+    assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
+    
+    // 5. Verify that launch parameters include this launchpool
+    assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
+    assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
+  }
+
+  function test_premium_token_uses_custom_params_thena() public {
+    // Mint MAHA tokens for creator to pay premium fee
+    _maha.mint(owner, 10_000e18);
+
+    // Deploy a real Launchpool contract for premium token
+    Launchpool launchpool = new Launchpool();
+    launchpool.initialize(
+        "Staking Pool",
+        "STKP",
+        address(_stakingToken),
+        owner,
+        address(_launchpad)
+    );
+    
+    // Capture initial historyIndex for launchpool verification
+    uint32 initialHistoryIndex = launchpool.historyIndex();
+
+    // Custom value parameters - significantly different from defaults
+    ITokenLaunchpad.ValueParams memory customParams = ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_760,
+      upperMaxTick: 887_220,
+      fee: 500,
+      tickSpacing: 60,       
+      graduationLiquidity: 500_000_000 ether 
+    });
+
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", owner, _weth);
+    
+    // Track fee destination's initial MAHA balance
+    uint256 initialMahaBalance = _maha.balanceOf(feeDestination);
+    
+    // Set up launchpool with allocations
+    ILaunchpool[] memory launchpools = new ILaunchpool[](1);
+    launchpools[0] = launchpool;
+    
+    uint256[] memory launchpoolAmounts = new uint256[](1);
+    launchpoolAmounts[0] = 100_000 ether;
+    
+    vm.startPrank(owner);
+    
+    // Approve MAHA tokens for premium fee
+    _maha.approve(address(_launchpad), 10_000e18);
+    
+    // Create token with premium flag and launchpool
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams,
+      isPremium: true,
+      launchPools: launchpools,
+      launchPoolAmounts: launchpoolAmounts,
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Buy with 10 WETH
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+    vm.stopPrank();
+    
+    // Verify premium fee was paid in MAHA
+    assertEq(_maha.balanceOf(feeDestination), initialMahaBalance + 1000e18, "Premium fee not paid correctly in MAHA");
+    
+    // Get the actual parameters used from storage
+    ITokenLaunchpad.CreateParams memory storedParams = _launchpad.getLaunchParams(IERC20(tokenAddr));
+    // Custom params should be used for premium tokens
+    assertEq(storedParams.valueParams.launchTick, customParams.launchTick, "Custom launchTick not used");
+    assertEq(storedParams.valueParams.graduationTick, customParams.graduationTick, "Custom graduationTick not used");
+    assertEq(storedParams.valueParams.upperMaxTick, customParams.upperMaxTick, "Custom upperMaxTick not used");
+    assertEq(storedParams.valueParams.fee, customParams.fee, "Custom fee not used");
+    assertEq(storedParams.valueParams.tickSpacing, customParams.tickSpacing, "Custom tickSpacing not used");
+    assertEq(storedParams.valueParams.graduationLiquidity, customParams.graduationLiquidity, "Custom graduationLiquidity not used");
+    
+    // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
+    // 1. Verify RewardDrop was created in the launchpool
+    (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
+    
+    // 2. Verify correct reward token was set
+    assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
+    
+    // 3. Verify reward amount
+    assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
+    
+    // 4. Verify snapshotIndex was captured
+    assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
+    
+    // 5. Verify that launch parameters include this launchpool
+    assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
+    assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
+  }
+
+  function test_non_premium_token_uses_default_params_pcs() public {
+    // Create a Launchpool instance - will be used to verify non-premium tokens can't use it
+    Launchpool launchpool = new Launchpool();
+    launchpool.initialize(
+        "Staking Pool",
+        "STKP",
+        address(_stakingToken),
+        owner,
+        address(_launchpad)
+    );
+    
+    // Custom parameters that will be ignored
+    ITokenLaunchpad.ValueParams memory customParams = ITokenLaunchpad.ValueParams({
+      launchTick: -172_000,
+      graduationTick: -171_800,
+      upperMaxTick: 886_200,       
+      fee: 500,                   
+      tickSpacing: 10_000,         
+      graduationLiquidity: 500_000_000 ether 
+    });
+
+    bytes32 salt = findValidTokenHash("Non-Premium Token", "NORM", owner, _weth);
+    
+    vm.startPrank(owner);
+    
+    // First confirm that attempting to use launchpools with non-premium token will revert
+    ILaunchpool[] memory launchpools = new ILaunchpool[](1);
+    launchpools[0] = launchpool;
+    
+    uint256[] memory launchpoolAmounts = new uint256[](1);
+    launchpoolAmounts[0] = 1_000_000 ether;
+    
+    ITokenLaunchpad.CreateParams memory paramsWithLaunchpool = ITokenLaunchpad.CreateParams({
+      name: "Non-Premium Token",
+      symbol: "NORM",
+      metadata: "Non-premium token with launchpool - should fail",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams,
+      isPremium: false,
+      launchPools: launchpools,
+      launchPoolAmounts: launchpoolAmounts,
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Verify that non-premium tokens cannot have launchpools
+    vm.expectRevert("!premium-allocations");
+    _launchpad.createAndBuy{value: 100 ether}(paramsWithLaunchpool, address(0), 10 ether);
+    
+    // Now create a valid non-premium token with no launchpools
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Non-Premium Token",
+      symbol: "NORM",
+      metadata: "Non-premium token uses default params",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams, // These should be ignored/overridden
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Create token
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
+    vm.stopPrank();
+    
+    // Get the actual parameters used from storage
+    ITokenLaunchpad.CreateParams memory storedParams = _launchpad.getLaunchParams(IERC20(tokenAddr));
+    ITokenLaunchpad.ValueParams memory defaultValueParams = _launchpad.getDefaultValueParams(_weth, _adapterPCS);
+    
+    // Default params should be used for non-premium tokens
+    assertEq(storedParams.valueParams.launchTick, defaultValueParams.launchTick, "Default launchTick not used");
+    assertEq(storedParams.valueParams.graduationTick, defaultValueParams.graduationTick, "Default graduationTick not used");
+    assertEq(storedParams.valueParams.upperMaxTick, defaultValueParams.upperMaxTick, "Default upperMaxTick not used");
+    assertEq(storedParams.valueParams.fee, defaultValueParams.fee, "Default fee not used");
+    assertEq(storedParams.valueParams.tickSpacing, defaultValueParams.tickSpacing, "Default tickSpacing not used");
+    assertEq(storedParams.valueParams.graduationLiquidity, defaultValueParams.graduationLiquidity, "Default graduationLiquidity not used");
+  }
+
+  function test_non_premium_token_uses_default_params_thena() public {
+    // Create a Launchpool instance - will be used to verify non-premium tokens can't use it
+    Launchpool launchpool = new Launchpool();
+    launchpool.initialize(
+        "Staking Pool",
+        "STKP",
+        address(_stakingToken),
+        owner,
+        address(_launchpad)
+    );
+    
+    // Custom parameters that will be ignored
+    ITokenLaunchpad.ValueParams memory customParams = ITokenLaunchpad.ValueParams({
+      launchTick: -172_000,
+      graduationTick: -171_800,
+      upperMaxTick: 886_200,       
+      fee: 500,                   
+      tickSpacing: 10_000,         
+      graduationLiquidity: 500_000_000 ether 
+    });
+
+    bytes32 salt = findValidTokenHash("Non-Premium Token", "NORM", owner, _weth);
+    
+    vm.startPrank(owner);
+    
+    // First confirm that attempting to use launchpools with non-premium token will revert
+    ILaunchpool[] memory launchpools = new ILaunchpool[](1);
+    launchpools[0] = launchpool;
+    
+    uint256[] memory launchpoolAmounts = new uint256[](1);
+    launchpoolAmounts[0] = 1_000_000 ether;
+    
+    ITokenLaunchpad.CreateParams memory paramsWithLaunchpool = ITokenLaunchpad.CreateParams({
+      name: "Non-Premium Token",
+      symbol: "NORM",
+      metadata: "Non-premium token with launchpool - should fail",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams,
+      isPremium: false,
+      launchPools: launchpools,
+      launchPoolAmounts: launchpoolAmounts,
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Verify that non-premium tokens cannot have launchpools
+    vm.expectRevert("!premium-allocations");
+    _launchpad.createAndBuy{value: 100 ether}(paramsWithLaunchpool, address(0), 10 ether);
+    
+    // Now create a valid non-premium token with no launchpools
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Non-Premium Token",
+      symbol: "NORM",
+      metadata: "Non-premium token uses default params",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: customParams, // These should be ignored/overridden
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    
+    // Create token
+    (address tokenAddr,,) = _launchpad.createAndBuy{value: 100 ether}(params, address(0), 10 ether);
+    vm.stopPrank();
+    
+    // Get the actual parameters used from storage
+    ITokenLaunchpad.CreateParams memory storedParams = _launchpad.getLaunchParams(IERC20(tokenAddr));
+    ITokenLaunchpad.ValueParams memory defaultValueParams = _launchpad.getDefaultValueParams(_weth, _adapterThena);
+    
+    // Default params should be used for non-premium tokens
+    assertEq(storedParams.valueParams.launchTick, defaultValueParams.launchTick, "Default launchTick not used");
+    assertEq(storedParams.valueParams.graduationTick, defaultValueParams.graduationTick, "Default graduationTick not used");
+    assertEq(storedParams.valueParams.upperMaxTick, defaultValueParams.upperMaxTick, "Default upperMaxTick not used");
+    assertEq(storedParams.valueParams.fee, defaultValueParams.fee, "Default fee not used");
+    assertEq(storedParams.valueParams.tickSpacing, defaultValueParams.tickSpacing, "Default tickSpacing not used");
+    assertEq(storedParams.valueParams.graduationLiquidity, defaultValueParams.graduationLiquidity, "Default graduationLiquidity not used");
+  }
+
+  function test_create_not_eth_pcs() public {
+    MockERC20 _token = new MockERC20("Best Token", "BEST", 18);
+    _token.mint(creator, 1_000_000_000 ether);
+    vm.label(address(_token), "bestToken");
+
+    //set Default Value Params
+    vm.prank(owner);
+    _launchpad.setDefaultValueParams(_token, _adapterPCS, ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_800,
+      upperMaxTick: 887_200,
+      fee: 10_000,
+      tickSpacing: 200,
+      graduationLiquidity: 800_000_000 ether
+    }));
+
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", creator, _token);
+
+    vm.startPrank(creator);
+    _token.approve(address(_launchpad), 1_000_000_000 ether);
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_token)),
+      salt: salt,
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_000,
+        upperMaxTick: 887_000,
+        fee: 1000,
+        tickSpacing: 20_000,
+        graduationLiquidity: 800_000_000 ether
+      }),
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapterPCS  
+    });
+    _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
+  }
+
+  function test_create_not_eth_thena() public {
+    MockERC20 _token = new MockERC20("Best Token", "BEST", 18);
+    _token.mint(creator, 1_000_000_000 ether);
+    vm.label(address(_token), "bestToken");
+
+    //set Default Value Params
+    vm.prank(owner);
+    _launchpad.setDefaultValueParams(_token, _adapterThena, ITokenLaunchpad.ValueParams({
+      launchTick: -171_000,
+      graduationTick: -170_760,
+      upperMaxTick: 887_220,
+      fee: 10_000,
+      tickSpacing: 60,
+      graduationLiquidity: 800_000_000 ether
+    }));
+
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", creator, _token);
+
+    vm.startPrank(creator);
+    _token.approve(address(_launchpad), 1_000_000_000 ether);
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_token)),
+      salt: salt,
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_000,
+        upperMaxTick: 887_000,
+        fee: 1000,
+        tickSpacing: 20_000,
+        graduationLiquidity: 800_000_000 ether
+      }),
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapterThena
+    });
+    _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
 }
