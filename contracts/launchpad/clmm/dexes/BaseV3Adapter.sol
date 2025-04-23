@@ -13,7 +13,6 @@
 
 pragma solidity ^0.8.0;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
@@ -25,9 +24,7 @@ import {ICLMMAdapter, IClPool, PoolKey} from "contracts/interfaces/ICLMMAdapter.
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 
-import "forge-std/console.sol";
-
-abstract contract BaseV3Adapter is ICLMMAdapter, Initializable {
+abstract contract BaseV3Adapter is ICLMMAdapter {
   using SafeERC20 for IERC20;
 
   address internal _me;

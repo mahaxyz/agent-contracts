@@ -4,7 +4,7 @@ import {
   templateLaunchpad,
 } from "./mainnet-template";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { PancakeAdapter } from "../types";
+import { PancakeAdapter, ThenaAdapter } from "../types";
 import { deployContract, waitForTx } from "../scripts/utils";
 import assert from "assert";
 import { parseEther } from "ethers";
@@ -18,12 +18,18 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const proxyAdmin = mahaTreasury;
   const wbnbAddressOnBsc = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
   const odosAddressOnBsc = "0x89b8aa89fdd0507a99d334cbe3c808fafc7d850e";
-  const nftPositionManager = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
   const mahaAddress = "0x6a661312938d22a2a0e27f585073e4406903990a";
   const cakeAddress = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82";
   const locker = "0x25c9C4B56E820e0DEA438b145284F02D9Ca9Bd52";
   const e18 = 10n ** 18n;
   const feeDiscountAmount = 1000n * e18; // 100%
+
+  const nftPositionManagerPCS = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
+  const nftPositionManagerThena = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
+  const clPoolFactoryPCS = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865";
+  const clPoolFactoryThena = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865";
+  const swapRouterPCS = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
+  const swapRouterThena = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
 
   const { launchpad, swapper } = await templateLaunchpad(
     hre,
@@ -36,13 +42,23 @@ async function main(hre: HardhatRuntimeEnvironment) {
     feeDiscountAmount
   );
 
-  const adapterPCS = (await deployAdapter(
-    hre,
-    deployer,
-    proxyAdmin,
-    "PancakeAdapter",
-    launchpad
-  )) as PancakeAdapter;
+  const adapterPCS = (await deployAdapter(hre, "PancakeAdapter", {
+    launchpad,
+    wethAddress: wbnbAddressOnBsc,
+    swapRouter: swapRouterPCS,
+    locker,
+    nftPositionManager: nftPositionManagerPCS,
+    clPoolFactory: clPoolFactoryPCS,
+  })) as PancakeAdapter;
+
+  const adapterThena = (await deployAdapter(hre, "ThenaAdapter", {
+    launchpad,
+    wethAddress: wbnbAddressOnBsc,
+    swapRouter: swapRouterThena,
+    locker,
+    nftPositionManager: nftPositionManagerThena,
+    clPoolFactory: clPoolFactoryThena,
+  })) as ThenaAdapter;
 
   const feeCollector = await deployContract(
     hre,
@@ -76,6 +92,20 @@ async function main(hre: HardhatRuntimeEnvironment) {
   if ((await adapterPCS.launchpad()) !== launchpad.target) {
     await waitForTx(
       await adapterPCS.initialize(
+        launchpad.target,
+        "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+        "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+        wbnbAddressOnBsc,
+        locker,
+        nftPositionManager
+      )
+    );
+  }
+
+  // initialize the Thena contracts if they are not initialized
+  if ((await adapterThena.launchpad()) !== launchpad.target) {
+    await waitForTx(
+      await adapterThena.initialize(
         launchpad.target,
         "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
         "0x1b81D678ffb9C0263b24A97847620C99d213eB14",

@@ -23,14 +23,7 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
     address _locker = address(0x0000BF531058EE5eC27417F96eBb1D7Bb8ccF4db);
 
     _launchpad = new TokenLaunchpadLinea();
-    _adapter = new RamsesAdapter();
-
-    vm.label(address(_launchpad), "launchpad");
-    vm.label(address(_adapter), "nileAdapter");
-    vm.label(address(_locker), "locker");
-    vm.label(address(_nftManager), "nftManager");
-
-    _adapter.initialize(
+    _adapter = new RamsesAdapter(
       address(_launchpad),
       address(0xAAA32926fcE6bE95ea2c51cB4Fcb60836D320C42),
       address(0xAAAE99091Fbb28D400029052821653C1C752483B),
@@ -38,6 +31,12 @@ contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
       address(_locker),
       address(_nftManager)
     );
+
+    vm.label(address(_launchpad), "launchpad");
+    vm.label(address(_adapter), "nileAdapter");
+    vm.label(address(_locker), "locker");
+    vm.label(address(_nftManager), "nftManager");
+
     _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
     _launchpad.toggleAdapter(_adapter);
   }

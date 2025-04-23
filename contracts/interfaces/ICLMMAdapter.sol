@@ -44,22 +44,6 @@ interface ICLMMAdapter {
     uint256 graduationAmount;
   }
 
-  /// @notice Initializes the adapter
-  /// @param _launchpad The address of the launchpad
-  /// @param _clPoolFactory The address of the CL pool factory
-  /// @param _swapRouter The address of the swap router
-  /// @param _WETH9 The address of the WETH9 token
-  /// @param _locker The address of the locker
-  /// @param _nftPositionManager The address of the NFT position manager
-  function initialize(
-    address _launchpad,
-    address _clPoolFactory,
-    address _swapRouter,
-    address _WETH9,
-    address _locker,
-    address _nftPositionManager
-  ) external;
-
   /// @notice Returns the address of the pool for a given token
   /// @param _token The token address
   /// @return pool The address of the pool
@@ -67,9 +51,7 @@ interface ICLMMAdapter {
 
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
-  function addSingleSidedLiquidity(
-    AddLiquidityParams memory _params
-  ) external;
+  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external;
 
   /// @notice Swap a token with exact output
   /// @param _tokenIn The token to swap

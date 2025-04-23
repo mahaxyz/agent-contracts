@@ -47,14 +47,14 @@ interface IRamsesPoolFactory {
 contract RamsesAdapter is BaseV3Adapter {
   using SafeERC20 for IERC20;
 
-  function initialize(
+  constructor(
     address _launchpad,
     address _clPoolFactory,
     address _swapRouter,
     address _WETH9,
     address _locker,
     address _nftPositionManager
-  ) external initializer {
+  ) {
     __BaseV3Adapter_init(_launchpad, _WETH9, _locker, _swapRouter, _nftPositionManager, _clPoolFactory);
   }
 

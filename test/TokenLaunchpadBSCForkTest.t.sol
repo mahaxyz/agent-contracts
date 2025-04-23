@@ -30,7 +30,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
 
     // Deploy contracts
     _launchpad = new TokenLaunchpadBSC();
-    _adapter = new PancakeAdapter();
+    _adapter =
+      new PancakeAdapter(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
 
     // Label contracts for better trace output
     vm.label(address(_launchpad), "launchpad");
@@ -40,9 +41,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     vm.label(NFT_MANAGER, "nftManager");
     vm.label(PANCAKE_ROUTER, "pancakeRouter");
 
-    // Initialize adapter
-    _adapter.initialize(address(_launchpad), PANCAKE_FACTORY, PANCAKE_ROUTER, address(_weth), LOCKER, NFT_MANAGER);
-
+    // Initialize launchpad
     _swapper = new Swapper(address(_weth), address(0), address(_launchpad));
 
     // Initialize launchpad

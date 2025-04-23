@@ -45,19 +45,28 @@ export async function templateLaunchpad(
 
 export async function deployAdapter(
   hre: HardhatRuntimeEnvironment,
-  deployer: string,
-  proxyAdmin: string,
   adapterContract: string,
-  launchpad: TokenLaunchpad
+  args: {
+    launchpad: TokenLaunchpad;
+    wethAddress: string;
+    swapRouter: string;
+    locker: string;
+    nftPositionManager: string;
+    clPoolFactory: string;
+  }
 ) {
-  const adapterD = await deployProxy(
+  const adapterD = await deployContract(
     hre,
     adapterContract,
-    [],
-    proxyAdmin,
-    adapterContract,
-    deployer,
-    true
+    [
+      args.launchpad.target,
+      args.wethAddress,
+      args.locker,
+      args.swapRouter,
+      args.nftPositionManager,
+      args.clPoolFactory,
+    ],
+    adapterContract
   );
 
   const adapter = await hre.ethers.getContractAt(
@@ -65,9 +74,9 @@ export async function deployAdapter(
     adapterD.address
   );
 
-  if (!(await launchpad.adapters(adapter))) {
+  if (!(await args.launchpad.adapters(adapter))) {
     console.log("whitelisting adapter");
-    await waitForTx(await launchpad.toggleAdapter(adapter));
+    await waitForTx(await args.launchpad.toggleAdapter(adapter));
   }
 
   return adapter;
