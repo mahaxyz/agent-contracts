@@ -44,7 +44,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   mapping(IERC20 token => uint256) public tokenToNftId;
   mapping(address => bool whitelisted) public whitelisted;
 
-  mapping(IERC20 => ValueParams) public defaultParams;
+  mapping(IERC20 token => mapping(ICLMMAdapter adapter => ValueParams params)) public defaultValueParams;
 
   // Maximum allowed creator allocation percentage (5%)
   uint16 public constant MAX_CREATOR_ALLOCATION = 500;
@@ -69,6 +69,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   /// @inheritdoc ITokenLaunchpad
   function getTokenFee(IERC20 _token) external view returns (uint24 fee) {
     return launchParams[_token].valueParams.fee;
+  }
+
+  /// @inheritdoc ITokenLaunchpad
+  function getQuoteToken(IERC20 _token) external view returns (IERC20 quoteToken) {
+    return launchParams[_token].fundingToken;
   }
 
   /// @inheritdoc ITokenLaunchpad
@@ -99,13 +104,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function setValueParams(IERC20 _token, ValueParams memory _params) external onlyOwner {
-    defaultParams[_token] = _params;
+  function setDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter, ValueParams memory _params) external onlyOwner {
+    defaultValueParams[_token][_adapter] = _params;
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function getValueParams(IERC20 _token) public view returns (ValueParams memory params) {
-    return defaultParams[_token];
+  function getDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter) public view returns (ValueParams memory params) {
+    return defaultValueParams[_token][_adapter];
   }
 
   /// @inheritdoc ITokenLaunchpad
@@ -138,7 +143,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       require(p.launchPools.length == 0, "!premium-allocations");
 
       // Get default parameters for the funding token
-      p.valueParams = getValueParams(p.fundingToken);
+      p.valueParams = getDefaultValueParams(p.fundingToken, p.adapter);
     }
 
     // take any pending balance from the sender
@@ -169,11 +174,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       tokenToNftId[token] = tokens.length;
       tokens.push(token);
       launchParams[token] = p;
+
       _fundLaunchPools(token, p.launchPools, p.launchPoolAmounts, p.isPremium);
 
       uint256 pendingBalance = p.fundingToken.balanceOf(address(this));
       token.approve(address(p.adapter), type(uint256).max);
-      p.adapter.addSingleSidedLiquidity(
+      address pool = p.adapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({
           tokenBase: token, // IERC20 _tokenBase,
           tokenQuote: p.fundingToken, // IERC20 _tokenQuote,
@@ -186,7 +192,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
           graduationAmount: p.valueParams.graduationLiquidity // uint256 _graduationAmount
         })
       );
-      emit TokenLaunched(token, p.adapter.getPool(token), p);
+      emit TokenLaunched(token, pool, p);
     }
 
     _mint(msg.sender, tokenToNftId[token]);

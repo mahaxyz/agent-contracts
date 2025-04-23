@@ -2,13 +2,16 @@
 pragma solidity 0.8.26;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
-import {TokenLaunchpad} from "contracts/launchpad/clmm/TokenLaunchpad.sol";
+import {TokenLaunchpad} from "contracts/launchpad/TokenLaunchpad.sol";
 
 import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
+
+import "forge-std/console.sol";
 
 contract TokenLaunchpadTest is Test {
   MockERC20 _weth;
@@ -42,7 +45,12 @@ contract TokenLaunchpadTest is Test {
     for (uint256 i = 0; i < 100; i++) {
       bytes32 salt = keccak256(abi.encode(i));
       bytes32 saltUser = keccak256(abi.encode(salt, _creator, _name, _symbol));
-      address target = Clones.predictDeterministicAddress(address(_tokenImpl), saltUser, address(_launchpad));
+
+      // Calculate CREATE2 address
+      bytes memory creationCode = abi.encodePacked(type(WAGMIEToken).creationCode, abi.encode(_name, _symbol));
+      bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(_launchpad), saltUser, keccak256(creationCode)));
+      address target = address(uint160(uint256(hash)));
+
       if (target < address(_quoteToken)) return salt;
     }
 

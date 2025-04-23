@@ -25,11 +25,11 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const feeDiscountAmount = 1000n * e18; // 100%
 
   const nftPositionManagerPCS = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
-  const nftPositionManagerThena = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
+  const nftPositionManagerThena = "0xa51ADb08Cbe6Ae398046A23bec013979816B77Ab";
   const clPoolFactoryPCS = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865";
-  const clPoolFactoryThena = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865";
+  const clPoolFactoryThena = "0x306F06C147f064A010530292A1EB6737c3e378e4";
   const swapRouterPCS = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
-  const swapRouterThena = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
+  const swapRouterThena = "0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0";
 
   const { launchpad, swapper } = await templateLaunchpad(
     hre,
@@ -88,34 +88,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  // initialize the PCS contracts if they are not initialized
-  if ((await adapterPCS.launchpad()) !== launchpad.target) {
-    await waitForTx(
-      await adapterPCS.initialize(
-        launchpad.target,
-        "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
-        "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
-        wbnbAddressOnBsc,
-        locker,
-        nftPositionManager
-      )
-    );
-  }
-
-  // initialize the Thena contracts if they are not initialized
-  if ((await adapterThena.launchpad()) !== launchpad.target) {
-    await waitForTx(
-      await adapterThena.initialize(
-        launchpad.target,
-        "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
-        "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
-        wbnbAddressOnBsc,
-        locker,
-        nftPositionManager
-      )
-    );
-  }
-
   // CONTRACTS ARE DEPLOYED; NOW WE CAN LAUNCH A NEW TOKEN
 
   // setup parameters
@@ -144,7 +116,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
     const token2 = await deployToken(
       hre,
-      adapterPCS,
+      adapterThena,
       deployer,
       name,
       symbol,

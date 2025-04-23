@@ -21,6 +21,8 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter, IClPool, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
+
+import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
 import {IClPoolFactory} from "contracts/interfaces/thirdparty/IClPoolFactory.sol";
 
@@ -35,7 +37,6 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   IERC721 public nftPositionManager;
   IWETH9 public WETH9;
 
-  mapping(IERC20 token => LaunchTokenParams params) public launchParams;
   mapping(IERC20 token => mapping(uint256 index => uint256 lockId)) public tokenToLockId;
 
   function __BaseV3Adapter_init(
@@ -59,18 +60,9 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function launchedTokens(IERC20 _token) external view returns (bool launched) {
-    launched = launchParams[_token].pool != address(0);
-  }
-
-  /// @inheritdoc ICLMMAdapter
-  function getPool(IERC20 _token) external view returns (address pool) {
-    return address(launchParams[_token].pool);
-  }
-
-  /// @inheritdoc ICLMMAdapter
   function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn, uint24 _fee)
     external
+    virtual
     returns (uint256 amountIn)
   {
     _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
@@ -93,6 +85,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   /// @inheritdoc ICLMMAdapter
   function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut, uint24 _fee)
     external
+    virtual
     returns (uint256 amountOut)
   {
     _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
@@ -113,40 +106,23 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   }
 
   /// @inheritdoc ICLMMAdapter
-  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external {
+  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external returns (address) {
     require(msg.sender == launchpad, "!launchpad");
-    require(launchParams[_params.tokenBase].pool == address(0), "!launched");
 
     uint160 sqrtPriceX96Launch = TickMath.getSqrtPriceAtTick(_params.tick0 - 1);
 
     IClPool pool = _createPool(_params.tokenBase, _params.tokenQuote, _params.fee, sqrtPriceX96Launch);
 
-    PoolKey memory poolKey = PoolKey({
-      currency0: Currency.wrap(address(_params.tokenBase)),
-      currency1: Currency.wrap(address(_params.tokenQuote)),
-      fee: _params.fee,
-      tickSpacing: _params.tickSpacing,
-      hooks: IHooks(address(0))
-    });
-    launchParams[_params.tokenBase] = LaunchTokenParams({
-      pool: address(pool),
-      poolKey: poolKey,
-      tick0: _params.tick0,
-      tick1: _params.tick1,
-      tick2: _params.tick2,
-      tokenBase: _params.tokenBase,
-      tokenQuote: _params.tokenQuote
-    });
-
     // calculate and add liquidity for the various tick ranges
     _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, 800_000_000 ether, 0);
     _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, 200_000_000 ether, 1);
+
+    return address(pool);
   }
 
   /// @inheritdoc ICLMMAdapter
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1) {
     require(msg.sender == launchpad, "!launchpad");
-    LaunchTokenParams memory params = launchParams[IERC20(_token)];
 
     uint256 lockId0 = tokenToLockId[IERC20(_token)][0];
     uint256 lockId1 = tokenToLockId[IERC20(_token)][1];
@@ -157,8 +133,9 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
 
-    params.tokenBase.transfer(msg.sender, fee0);
-    params.tokenQuote.transfer(msg.sender, fee1);
+    IERC20 quoteToken = ITokenLaunchpad(launchpad).getQuoteToken(IERC20(_token));
+    IERC20(_token).transfer(msg.sender, fee0);
+    quoteToken.transfer(msg.sender, fee1);
   }
 
   /// @dev Refund tokens to the owner

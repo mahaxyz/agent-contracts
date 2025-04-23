@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IERC20, TokenLaunchpad} from "./TokenLaunchpad.sol";
+import {IERC20, TokenLaunchpad} from "contracts/launchpad/TokenLaunchpad.sol";
 
 contract TokenLaunchpadLinea is TokenLaunchpad {
   function _distributeFees(address _token0, address, address _token1, uint256 _amount0, uint256 _amount1)

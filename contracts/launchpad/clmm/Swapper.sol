@@ -19,6 +19,8 @@ import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
+import {console} from "forge-std/console.sol";
+
 contract Swapper {
   using SafeERC20 for IERC20;
 
@@ -58,7 +60,7 @@ contract Swapper {
     ICLMMAdapter adapter = launchpad.getTokenAdapter(_tokenOut);
 
     // call the odos contract to get the amount of tokens to buy
-    if (_odosData.length > 0) {
+    if (_odosData.length > 10) {
       _odosTokenIn.approve(address(ODOS), type(uint256).max);
       (bool success,) = ODOS.call(_odosData);
       require(success, "!odos");
@@ -107,7 +109,7 @@ contract Swapper {
 
     uint256 amountSwapOut = adapter.swapWithExactInput(_tokenIn, _odosTokenOut, _tokenInAmount, _minOdosTokenIn, fee);
 
-    if (_odosData.length > 0) {
+    if (_odosData.length > 10) {
       _odosTokenOut.approve(ODOS, type(uint256).max);
       (bool success,) = ODOS.call(_odosData);
       require(success, "!odos");

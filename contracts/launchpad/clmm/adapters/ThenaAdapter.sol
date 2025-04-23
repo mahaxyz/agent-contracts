@@ -41,6 +41,33 @@ interface INonfungiblePositionManagerThena {
     returns (address pool);
 }
 
+interface IThenaSwapRouter {
+  struct ExactInputSingleParams {
+    address tokenIn;
+    address tokenOut;
+    address recipient;
+    uint256 deadline;
+    uint256 amountIn;
+    uint256 amountOutMinimum;
+    uint160 limitSqrtPrice;
+  }
+
+  struct ExactOutputSingleParams {
+    address tokenIn;
+    address tokenOut;
+    uint24 fee;
+    address recipient;
+    uint256 deadline;
+    uint256 amountOut;
+    uint256 amountInMaximum;
+    uint160 limitSqrtPrice;
+  }
+
+  function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
+
+  function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+}
+
 contract ThenaAdapter is BaseV3Adapter {
   using SafeERC20 for IERC20;
 
@@ -113,5 +140,48 @@ contract ThenaAdapter is BaseV3Adapter {
       address(_token0), address(_token1), _sqrtPriceX96Launch
     );
     pool = IClPool(_pool);
+  }
+
+  function swapWithExactOutput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountOut, uint256 _maxAmountIn, uint24 _fee)
+    external
+    override
+    returns (uint256 amountIn)
+  {
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _maxAmountIn);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
+    amountIn = IThenaSwapRouter(address(swapRouter)).exactOutputSingle(
+      IThenaSwapRouter.ExactOutputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountOut: _amountOut,
+        fee: _fee,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        amountInMaximum: _maxAmountIn,
+        limitSqrtPrice: 0
+      })
+    );
+    _refundTokens(_tokenIn);
+  }
+
+  function swapWithExactInput(IERC20 _tokenIn, IERC20 _tokenOut, uint256 _amountIn, uint256 _minAmountOut, uint24)
+    external
+    override
+    returns (uint256 amountOut)
+  {
+    _tokenIn.safeTransferFrom(msg.sender, address(this), _amountIn);
+    _tokenIn.approve(address(swapRouter), type(uint256).max);
+
+    amountOut = IThenaSwapRouter(address(swapRouter)).exactInputSingle(
+      IThenaSwapRouter.ExactInputSingleParams({
+        tokenIn: address(_tokenIn),
+        tokenOut: address(_tokenOut),
+        amountIn: _amountIn,
+        recipient: msg.sender,
+        deadline: block.timestamp,
+        amountOutMinimum: _minAmountOut,
+        limitSqrtPrice: 0
+      })
+    );
   }
 }

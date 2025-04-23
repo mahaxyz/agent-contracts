@@ -21,16 +21,6 @@ import {IClPool} from "contracts/interfaces/thirdparty/IClPool.sol";
 /// @notice Interface for interacting with concentrated liquidity pools
 /// @dev Implements single-sided liquidity provision and fee claiming
 interface ICLMMAdapter {
-  struct LaunchTokenParams {
-    IERC20 tokenBase;
-    IERC20 tokenQuote;
-    address pool;
-    PoolKey poolKey;
-    int24 tick0;
-    int24 tick1;
-    int24 tick2;
-  }
-
   /// @notice Parameters for adding liquidity to a pool
   struct AddLiquidityParams {
     IERC20 tokenBase;
@@ -44,14 +34,10 @@ interface ICLMMAdapter {
     uint256 graduationAmount;
   }
 
-  /// @notice Returns the address of the pool for a given token
-  /// @param _token The token address
-  /// @return pool The address of the pool
-  function getPool(IERC20 _token) external view returns (address pool);
-
   /// @notice Add single-sided liquidity to a concentrated pool
   /// @dev Provides liquidity across three ticks with different amounts
-  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external;
+  /// @return pool The address of the pool
+  function addSingleSidedLiquidity(AddLiquidityParams memory _params) external returns (address pool);
 
   /// @notice Swap a token with exact output
   /// @param _tokenIn The token to swap
@@ -76,11 +62,6 @@ interface ICLMMAdapter {
   /// @notice Returns the address of the Launchpad contract
   /// @return launchpad The address of the Launchpad contract
   function launchpad() external view returns (address launchpad);
-
-  /// @notice Checks if a token has been launched
-  /// @param _token The token address to check
-  /// @return launched true if the token has been launched, false otherwise
-  function launchedTokens(IERC20 _token) external view returns (bool launched);
 
   /// @notice Claim accumulated fees from the pool
   /// @param _token The token address to claim fees for

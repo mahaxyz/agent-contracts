@@ -104,13 +104,22 @@ interface ITokenLaunchpad {
 
   /// @notice Sets the value parameters for a token
   /// @param _token The token to set the value parameters for
+  /// @param _adapter The adapter to set the value parameters for
   /// @param _params The value parameters to set
-  function setValueParams(IERC20 _token, ValueParams memory _params) external;
+  function setDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter, ValueParams memory _params) external;
+
+  /// @notice Gets the quote token for a token
+  /// @param _token The token to get the quote token for
+  /// @return quoteToken The quote token for the token
+  function getQuoteToken(IERC20 _token) external view returns (IERC20 quoteToken);
 
   /// @notice Gets the value parameters for a token
   /// @param _token The token to get the value parameters for
   /// @return params The value parameters for the token
-  function getValueParams(IERC20 _token) external view returns (ValueParams memory params);
+  function getDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter)
+    external
+    view
+    returns (ValueParams memory params);
 
   /// @notice Gets the adapter for a token
   /// @param _token The token to get the adapter for

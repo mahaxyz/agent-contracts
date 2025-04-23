@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.26;
 
-import {RamsesAdapter} from "contracts/launchpad/clmm/dexes/RamsesAdapter.sol";
+import {RamsesAdapter} from "contracts/launchpad/clmm/adapters/RamsesAdapter.sol";
 
 import {TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
-import {TokenLaunchpadLinea} from "contracts/launchpad/clmm/TokenLaunchpadLinea.sol";
+import {TokenLaunchpadLinea} from "contracts/launchpad/TokenLaunchpadLinea.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
 contract TokenLaunchpadLineaForkTest is TokenLaunchpadTest {
