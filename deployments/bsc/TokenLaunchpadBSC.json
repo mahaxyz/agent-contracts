@@ -1,5 +1,5 @@
 {
-  "address": "0x0e9eD7b5d69453B3260844354b32a0269d9f9f86",
+  "address": "0xDdCBb9a3A06E1235B27Ddc5BB7aA2D322DBe5587",
   "abi": [
     {
       "inputs": [],
@@ -352,6 +352,12 @@
           "indexed": true,
           "internalType": "contract IERC20",
           "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "adapter",
           "type": "address"
         },
         {
@@ -1634,5 +1640,5 @@
     "0x6a661312938d22a2a0e27f585073e4406903990a",
     "1000000000000000000000"
   ],
-  "numDeployments": 8
+  "numDeployments": 2
 }
