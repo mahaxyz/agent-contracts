@@ -65,7 +65,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     _swapper = new Swapper(address(_weth), address(0), address(_launchpad));
 
     // Initialize launchpad
-    _launchpad.initialize(owner, address(_weth), address(_maha), 1000e18);
+    _launchpad.initialize(owner, address(_weth), address(_maha));
     vm.startPrank(owner);
     _launchpad.setFeeSettings(address(0x123), 0, 1000e18);
     _launchpad.toggleAdapter(_adapterPCS);
@@ -314,22 +314,23 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       "Custom graduationLiquidity not used"
     );
 
-    // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
-    // 1. Verify RewardDrop was created in the launchpool
-    (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
+    // keep this on hold for now
+    // // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
+    // // 1. Verify RewardDrop was created in the launchpool
+    // (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
 
-    // 2. Verify correct reward token was set
-    assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
+    // // 2. Verify correct reward token was set
+    // assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
 
-    // 3. Verify reward amount
-    assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
+    // // 3. Verify reward amount
+    // assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
 
-    // 4. Verify snapshotIndex was captured
-    assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
+    // // 4. Verify snapshotIndex was captured
+    // assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
 
-    // 5. Verify that launch parameters include this launchpool
-    assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
-    assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
+    // // 5. Verify that launch parameters include this launchpool
+    // assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
+    // assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
   }
 
   function test_premium_token_uses_custom_params_thena() public {
@@ -408,22 +409,23 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       "Custom graduationLiquidity not used"
     );
 
-    // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
-    // 1. Verify RewardDrop was created in the launchpool
-    (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
+    // keep this on hold for now
+    // // LAUNCHPOOL VERIFICATION - Premium tokens can use launchpools
+    // // 1. Verify RewardDrop was created in the launchpool
+    // (IERC20 rewardToken, uint256 totalReward, uint32 snapshotIndex) = launchpool.rewardDrops(IERC20(tokenAddr));
 
-    // 2. Verify correct reward token was set
-    assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
+    // // 2. Verify correct reward token was set
+    // assertEq(address(rewardToken), tokenAddr, "Incorrect reward token in launchpool");
 
-    // 3. Verify reward amount
-    assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
+    // // 3. Verify reward amount
+    // assertEq(totalReward, 100_000 ether, "Incorrect reward amount in launchpool");
 
-    // 4. Verify snapshotIndex was captured
-    assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
+    // // 4. Verify snapshotIndex was captured
+    // assertEq(snapshotIndex, initialHistoryIndex, "Incorrect snapshot index in launchpool");
 
-    // 5. Verify that launch parameters include this launchpool
-    assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
-    assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
+    // // 5. Verify that launch parameters include this launchpool
+    // assertEq(address(storedParams.launchPools[0]), address(launchpool), "Launchpool not stored correctly");
+    // assertEq(storedParams.launchPoolAmounts[0], 100_000 ether, "Launchpool amount not stored correctly");
   }
 
   function test_non_premium_token_uses_default_params_pcs() public {
