@@ -35,6 +35,8 @@ contract FeeCollector is AccessControlEnumerable, ReentrancyGuard {
   IERC20 public immutable CAKE;
   /// @notice MAHA token contract
   IERC20 public immutable MAHA;
+  /// @notice THENA token contract
+  IERC20 public immutable THENA;
   /// @notice WETH token contract
   IWETH9 public immutable WETH;
 
@@ -42,7 +44,8 @@ contract FeeCollector is AccessControlEnumerable, ReentrancyGuard {
   uint256 public cakeBurnt;
   /// @notice Total amount of MAHA tokens that have been burned
   uint256 public mahaBurnt;
-
+  /// @notice Total amount of THENA tokens that have been burned
+  uint256 public thenaBurnt;
   /// @notice Flag indicating if swapping is currently paused
   bool public swapPaused;
 
@@ -73,9 +76,11 @@ contract FeeCollector is AccessControlEnumerable, ReentrancyGuard {
   /// @param _maha Address of MAHA token
   /// @param _odos Address of ODOS router
   /// @param _weth Address of WETH token
-  constructor(address _cake, address _maha, address _odos, address _weth) {
+  /// @param _thena Address of THENA token
+  constructor(address _cake, address _maha, address _odos, address _weth, address _thena) {
     CAKE = IERC20(_cake);
     MAHA = IERC20(_maha);
+    THENA = IERC20(_thena);
     WETH = IWETH9(_weth);
     ODOS = _odos;
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -118,7 +123,7 @@ contract FeeCollector is AccessControlEnumerable, ReentrancyGuard {
     // Get balances of CAKE and MAHA after swap
     uint256 cakeBalance = CAKE.balanceOf(address(this));
     uint256 mahaBalance = MAHA.balanceOf(address(this));
-
+    uint256 thenaBalance = THENA.balanceOf(address(this));
     // Burn by sending to dead address
     if (cakeBalance > 0) {
       CAKE.safeTransfer(DEAD, cakeBalance);
@@ -127,6 +132,10 @@ contract FeeCollector is AccessControlEnumerable, ReentrancyGuard {
     if (mahaBalance > 0) {
       MAHA.safeTransfer(DEAD, mahaBalance);
       mahaBurnt += mahaBalance;
+    }
+    if (thenaBalance > 0) {
+      THENA.safeTransfer(DEAD, thenaBalance);
+      thenaBurnt += thenaBalance;
     }
 
     emit FeesSwapped(cakeBalance, mahaBalance);

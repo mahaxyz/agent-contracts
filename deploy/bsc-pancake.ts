@@ -21,9 +21,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const odosAddressOnBsc = "0x89b8aa89fdd0507a99d334cbe3c808fafc7d850e";
   const mahaAddress = "0x6a661312938d22a2a0e27f585073e4406903990a";
   const cakeAddress = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82";
+  const thenaAddress = "0xf4c8e32eadec4bfe97e0f595add0f4450a863a11";
   const locker = "0x25c9C4B56E820e0DEA438b145284F02D9Ca9Bd52";
   const e18 = 10n ** 18n;
-  const feeDiscountAmount = 1000n * e18; // 100%
+  const feeDiscountAmount = 1n * e18; // 100%
 
   const nftPositionManagerPCS = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
   const nftPositionManagerThena = "0xa51ADb08Cbe6Ae398046A23bec013979816B77Ab";
@@ -39,8 +40,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
     "TokenLaunchpadBSC",
     wbnbAddressOnBsc,
     odosAddressOnBsc,
-    mahaAddress,
-    feeDiscountAmount
+    mahaAddress
   );
 
   const thenaLockerD = await deployContract(
@@ -71,54 +71,65 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const feeCollector = await deployContract(
     hre,
     "FeeCollector",
-    [cakeAddress, mahaAddress, odosAddressOnBsc, wbnbAddressOnBsc],
+    [
+      cakeAddress,
+      mahaAddress,
+      odosAddressOnBsc,
+      wbnbAddressOnBsc,
+      thenaAddress,
+    ],
     "FeeCollector"
   );
 
-  const defaultLaunchParamsPCS = await launchpad.getDefaultValueParams(
-    wbnbAddressOnBsc,
-    adapterPCS.target
-  );
-  const defaultLaunchParamsThena = await launchpad.getDefaultValueParams(
-    wbnbAddressOnBsc,
-    adapterThena.target
-  );
+  // console.log("Getting default launch params for PCS");
+  // const defaultLaunchParamsPCS = await launchpad.getDefaultValueParams(
+  //   wbnbAddressOnBsc,
+  //   adapterPCS.target
+  // );
+  // console.log("Getting default launch params for Thena");
+  // const defaultLaunchParamsThena = await launchpad.getDefaultValueParams(
+  //   wbnbAddressOnBsc,
+  //   adapterThena.target
+  // );
 
-  if (defaultLaunchParamsPCS.launchTick === 0n) {
-    await waitForTx(
-      await launchpad.setDefaultValueParams(
-        wbnbAddressOnBsc,
-        adapterPCS.target,
-        {
-          launchTick: -171_000,
-          graduationTick: -170_800,
-          upperMaxTick: 887_000,
-          fee: 10000,
-          tickSpacing: 200,
-          graduationLiquidity: parseEther("800000000"),
-        }
-      )
-    );
-  }
+  // if (defaultLaunchParamsPCS.launchTick === 0n) {
+  //   console.log("Setting default launch params for PCS");
+  //   await waitForTx(
+  //     await launchpad.setDefaultValueParams(
+  //       wbnbAddressOnBsc,
+  //       adapterPCS.target,
+  //       {
+  //         launchTick: -171_000,
+  //         graduationTick: -170_800,
+  //         upperMaxTick: 887_000,
+  //         fee: 10000,
+  //         tickSpacing: 200,
+  //         graduationLiquidity: parseEther("800000000"),
+  //       }
+  //     )
+  //   );
+  // }
 
-  if (defaultLaunchParamsThena.launchTick === 0n) {
-    await waitForTx(
-      await launchpad.setDefaultValueParams(
-        wbnbAddressOnBsc,
-        adapterThena.target,
-        {
-          launchTick: -171_000,
-          graduationTick: -170_760,
-          upperMaxTick: 887_220,
-          fee: 3000,
-          tickSpacing: 60,
-          graduationLiquidity: parseEther("800000000"),
-        }
-      )
-    );
-  }
+  // if (defaultLaunchParamsThena.launchTick === 0n) {
+  //   console.log("Setting default launch params for Thena");
+  //   await waitForTx(
+  //     await launchpad.setDefaultValueParams(
+  //       wbnbAddressOnBsc,
+  //       adapterThena.target,
+  //       {
+  //         launchTick: -171_000,
+  //         graduationTick: -170_760,
+  //         upperMaxTick: 887_220,
+  //         fee: 3000,
+  //         tickSpacing: 60,
+  //         graduationLiquidity: parseEther("800000000"),
+  //       }
+  //     )
+  //   );
+  // }
 
   if ((await launchpad.feeDestination()) != feeCollector.address) {
+    console.log("Setting fee destination");
     await waitForTx(
       await launchpad.setFeeSettings(feeCollector.address, 0, 1000n * e18)
     );
@@ -130,7 +141,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const metadata = JSON.stringify({ image: "https://i.imgur.com/56aQaCV.png" });
 
   const shouldMockPcs = false;
-  const shouldMockThena = true;
+  const shouldMockThena = false;
 
   if (shouldMockPcs) {
     const name = "Test PCS Token";

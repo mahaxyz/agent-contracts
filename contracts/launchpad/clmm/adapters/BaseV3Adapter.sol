@@ -114,8 +114,18 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
     IClPool pool = _createPool(_params.tokenBase, _params.tokenQuote, _params.fee, sqrtPriceX96Launch);
 
     // calculate and add liquidity for the various tick ranges
-    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, 800_000_000 ether, 0);
-    _mintAndLock(_params.tokenBase, _params.tokenQuote, _params.tick1, _params.tick2, _params.fee, 200_000_000 ether, 1);
+    _mintAndLock(
+      _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0
+    );
+    _mintAndLock(
+      _params.tokenBase,
+      _params.tokenQuote,
+      _params.tick1,
+      _params.tick2,
+      _params.fee,
+      _params.totalAmount - _params.graduationAmount,
+      1
+    );
 
     return address(pool);
   }

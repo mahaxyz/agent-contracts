@@ -31,7 +31,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 2000,
       },
     },
   },
@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true,
+      // allowUnlimitedContractSize: true,
       forking: {
         url: `https://linea-rpc.publicnode.com`,
         // blockNumber: 17380608,

@@ -96,12 +96,15 @@ interface ITokenLaunchpad {
   /// @param newCron The new cron address
   event CronUpdated(address indexed newCron);
 
+  /// @notice Emitted when the metadata URL is updated
+  /// @param metadataUrl The new metadata URL
+  event MetadataUrlUpdated(string metadataUrl);
+
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
   /// @param _premiumToken The token used for fee discount
-  /// @param _feeDiscountAmount The amount of fee discount
-  function initialize(address _owner, address _weth, address _premiumToken, uint256 _feeDiscountAmount) external;
+  function initialize(address _owner, address _weth, address _premiumToken) external;
 
   /// @notice Toggles the whitelist for an address
   /// @param _address The address to toggle the whitelist for
@@ -173,4 +176,9 @@ interface ITokenLaunchpad {
   /// @notice Toggle an adapter
   /// @param _adapter The adapter address
   function toggleAdapter(ICLMMAdapter _adapter) external;
+
+  /// @notice Gets the launch parameters for a token
+  /// @param _token The token to get the launch parameters for
+  /// @return params The launch parameters for the token
+  function getTokenLaunchParams(IERC20 _token) external view returns (CreateParams memory params);
 }

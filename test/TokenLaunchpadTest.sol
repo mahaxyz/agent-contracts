@@ -14,15 +14,20 @@ import "forge-std/console.sol";
 contract TokenLaunchpadTest is Test {
   MockERC20 _weth;
   MockERC20 _maha;
+  MockERC20 _stakingToken;
+
   TokenLaunchpad _launchpad;
 
   address owner = makeAddr("owner");
   address whale = makeAddr("whale");
   address creator = makeAddr("creator");
+  address feeDestination = makeAddr("feeDestination");
 
   function _setUpBase() internal {
     _weth = new MockERC20("Wrapped Ether", "WETH", 18);
     _maha = new MockERC20("Maha", "MAHA", 18);
+    _stakingToken = new MockERC20("Staking Token", "STK", 18);
+
     // _launchpad = new TokenLaunchpad();
 
     vm.label(address(_weth), "weth");

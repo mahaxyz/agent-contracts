@@ -12,13 +12,12 @@ export async function templateLaunchpad(
   launchpadContract: string,
   wethAddress: string,
   odosAddress: string,
-  mahaAddress: string,
-  feeDiscountAmount: bigint
+  mahaAddress: string
 ) {
   const launchpadD = await deployProxy(
     hre,
     launchpadContract,
-    [deployer, wethAddress, mahaAddress, feeDiscountAmount],
+    [deployer, wethAddress, mahaAddress],
     proxyAdmin,
     launchpadContract,
     deployer
