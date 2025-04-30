@@ -7,8 +7,9 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { PancakeAdapter, ThenaAdapter } from "../types";
 import { deployContract, waitForTx } from "../scripts/utils";
 import assert from "assert";
-import { parseEther } from "ethers";
 import { ethers } from "hardhat";
+import { computeTickPrice } from "./utils";
+import { parseEther } from "ethers";
 
 async function main(hre: HardhatRuntimeEnvironment) {
   assert(hre.network.name === "bsc", "This script is only for BSC");
@@ -92,41 +93,42 @@ async function main(hre: HardhatRuntimeEnvironment) {
   //   adapterThena.target
   // );
 
+  // calculate ticks
+  const launchTick = computeTickPrice(5000, 650, 18, 200);
+  const graduationTick = computeTickPrice(69000, 650, 18, 200);
+
   // if (defaultLaunchParamsPCS.launchTick === 0n) {
-  //   console.log("Setting default launch params for PCS");
-  //   await waitForTx(
-  //     await launchpad.setDefaultValueParams(
-  //       wbnbAddressOnBsc,
-  //       adapterPCS.target,
-  //       {
-  //         launchTick: -171_000,
-  //         graduationTick: -170_800,
-  //         upperMaxTick: 887_000,
-  //         fee: 10000,
-  //         tickSpacing: 200,
-  //         graduationLiquidity: parseEther("800000000"),
-  //       }
-  //     )
-  //   );
+  console.log("Setting default launch params for PCS");
+  await waitForTx(
+    await launchpad.setDefaultValueParams(wbnbAddressOnBsc, adapterPCS.target, {
+      launchTick: launchTick,
+      graduationTick: graduationTick,
+      upperMaxTick: 887_000,
+      fee: 10000,
+      tickSpacing: 200,
+      graduationLiquidity: parseEther("800000000"),
+    })
+  );
   // }
 
   // if (defaultLaunchParamsThena.launchTick === 0n) {
-  //   console.log("Setting default launch params for Thena");
-  //   await waitForTx(
-  //     await launchpad.setDefaultValueParams(
-  //       wbnbAddressOnBsc,
-  //       adapterThena.target,
-  //       {
-  //         launchTick: -171_000,
-  //         graduationTick: -170_760,
-  //         upperMaxTick: 887_220,
-  //         fee: 3000,
-  //         tickSpacing: 60,
-  //         graduationLiquidity: parseEther("800000000"),
-  //       }
-  //     )
-  //   );
-  // }
+
+  // console.log("Setting default launch params for Thena");
+  // await waitForTx(
+  //   await launchpad.setDefaultValueParams(
+  //     wbnbAddressOnBsc,
+  //     adapterThena.target,
+  //     {
+  //       launchTick: launchTick,
+  //       graduationTick: _graduationTick,
+  //       upperMaxTick: 887_220,
+  //       fee: 3000,
+  //       tickSpacing: 60,
+  //       graduationLiquidity: parseEther("800000000"),
+  //     }
+  //   )
+  // );
+  // // }
 
   if ((await launchpad.feeDestination()) != feeCollector.address) {
     console.log("Setting fee destination");
