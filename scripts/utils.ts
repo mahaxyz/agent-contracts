@@ -110,15 +110,15 @@ export async function deployContract(
     log: true,
   });
 
-  if (hre.network.name !== "hardhat") {
-    console.log("verifying contracts");
+  // if (hre.network.name !== "hardhat") {
+  //   console.log("verifying contracts");
 
-    await hre.run("verify:verify", {
-      address: contract.address,
-      constructorArguments: args,
-      // contract: implementation,
-    });
-  }
+  //   await hre.run("verify:verify", {
+  //     address: contract.address,
+  //     constructorArguments: args,
+  //     // contract: implementation,
+  //   });
+  // }
 
   return contract;
 }
