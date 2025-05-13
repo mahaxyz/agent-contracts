@@ -22,6 +22,7 @@ import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+import {IAirdropRewarder} from "contracts/interfaces/IAirdropRewarder.sol";
 
 import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
@@ -52,6 +53,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
   // Mapping to track adapter addresses by type
   mapping(ICLMMAdapter => bool) public adapters;
+
+  // Airdrop Rewarder contract
+  IAirdropRewarder public airdropRewarder;
+
+  
+  
 
   receive() external payable {}
 
@@ -273,4 +280,40 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       _token.safeTransfer(msg.sender, remaining);
     }
   }
+
+  /**
+   * @notice Set the airdrop rewarder contract
+   * @param _airdropRewarder Address of the airdrop rewarder
+   */
+  function setAirdropRewarder(address _airdropRewarder) external onlyOwner {
+    require(_airdropRewarder != address(0), "Invalid address");
+    airdropRewarder = IAirdropRewarder(_airdropRewarder);
+    emit AirdropRewarderSet(_airdropRewarder);
+  }
+  
+  /**
+   * @notice Add a token as premium with custom reward value
+   * @param _token Address of the token
+   * @param _customRewardValue Custom reward value
+   */
+  function addPremiumToken(address _token, uint256 _customRewardValue) external onlyOwner {
+    require(_token != address(0), "Invalid token address");
+    require(_customRewardValue > 0, "Invalid reward value");
+    
+    airdropRewarder.addPremiumToken(_token, _customRewardValue);
+    emit TokenAddedAsPremium(_token, _customRewardValue);
+  }
+  
+  /**
+   * @notice Add a token as regular
+   * @param _token Address of the token
+   */
+  function addRegularToken(address _token) external onlyOwner {
+    require(_token != address(0), "Invalid token address");
+    
+    airdropRewarder.addRegularToken(_token);
+    emit TokenAddedAsRegular(_token);
+  }
+  
+  
 }
