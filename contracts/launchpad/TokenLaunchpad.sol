@@ -21,8 +21,9 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
 
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
-import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
+
 import {IAirdropRewarder} from "contracts/interfaces/IAirdropRewarder.sol";
+import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
 import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
@@ -57,8 +58,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Airdrop Rewarder contract
   IAirdropRewarder public airdropRewarder;
 
-  
-  
+  // Default creator allocation percentage (2%)
+  uint16 public DEFAULT_CREATOR_ALLOCATION = 200;
 
   receive() external payable {}
 
@@ -121,6 +122,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
+  function setDefaultCreatorAllocation(uint16 _creatorAllocation) external onlyOwner {
+    DEFAULT_CREATOR_ALLOCATION = _creatorAllocation;
+    emit DefaultCreatorAllocationSet(_creatorAllocation);
+  }
+
+  /// @inheritdoc ITokenLaunchpad
   function getDefaultValueParams(IERC20 _token, ICLMMAdapter _adapter) public view returns (ValueParams memory params) {
     require(adapters[_adapter]);
     params = defaultValueParams[_token][_adapter];
@@ -164,6 +171,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
 
       // Get default parameters for the funding token
       p.valueParams = getDefaultValueParams(p.fundingToken, p.adapter);
+      p.creatorAllocation = DEFAULT_CREATOR_ALLOCATION;
     }
 
     // take any pending balance from the sender
@@ -184,6 +192,12 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       launchParams[token] = p;
 
       uint256 pendingBalance = token.balanceOf(address(this));
+
+      if (p.creatorAllocation > 0) {
+        airdropRewarder.setMerkleRoot(address(token), p.merkleRoot);
+        token.transfer(address(airdropRewarder), pendingBalance * p.creatorAllocation / 10_000);
+      }
+
       token.approve(address(p.adapter), type(uint256).max);
       address pool = p.adapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({
@@ -290,30 +304,4 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     airdropRewarder = IAirdropRewarder(_airdropRewarder);
     emit AirdropRewarderSet(_airdropRewarder);
   }
-  
-  /**
-   * @notice Add a token as premium with custom reward value
-   * @param _token Address of the token
-   * @param _customRewardValue Custom reward value
-   */
-  function addPremiumToken(address _token, uint256 _customRewardValue) external onlyOwner {
-    require(_token != address(0), "Invalid token address");
-    require(_customRewardValue > 0, "Invalid reward value");
-    
-    airdropRewarder.addPremiumToken(_token, _customRewardValue);
-    emit TokenAddedAsPremium(_token, _customRewardValue);
-  }
-  
-  /**
-   * @notice Add a token as regular
-   * @param _token Address of the token
-   */
-  function addRegularToken(address _token) external onlyOwner {
-    require(_token != address(0), "Invalid token address");
-    
-    airdropRewarder.addRegularToken(_token);
-    emit TokenAddedAsRegular(_token);
-  }
-  
-  
 }
