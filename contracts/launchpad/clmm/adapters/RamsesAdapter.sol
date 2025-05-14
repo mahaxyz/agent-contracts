@@ -60,6 +60,7 @@ contract RamsesAdapter is BaseV3Adapter {
 
   function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
     internal
+    override
     returns (uint256 tokenId)
   {
     _token0.safeTransferFrom(msg.sender, address(this), _amount0);

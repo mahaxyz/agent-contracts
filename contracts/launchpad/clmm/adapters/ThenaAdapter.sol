@@ -92,7 +92,7 @@ contract ThenaAdapter is BaseV3Adapter {
     uint256 _index
   ) internal override returns (uint256 lockId) {
     // mint the position
-    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, 300, _amount0);
 
     // lock the liquidity forever; allow this contract to collect fees
     lockId = IGoPlusLocker(locker).nextLockId();
@@ -106,8 +106,9 @@ contract ThenaAdapter is BaseV3Adapter {
     (fee0, fee1,,) = IGoPlusLocker(locker).collect(_lockId, address(this), type(uint128).max, type(uint128).max);
   }
 
-  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint256 _amount0)
+  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24, uint256 _amount0)
     internal
+    override
     returns (uint256 tokenId)
   {
     _token0.safeTransferFrom(msg.sender, address(this), _amount0);

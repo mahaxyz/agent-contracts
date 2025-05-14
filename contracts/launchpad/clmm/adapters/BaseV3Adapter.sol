@@ -114,7 +114,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
     IClPool pool = _createPool(_params.tokenBase, _params.tokenQuote, _params.fee, sqrtPriceX96Launch);
 
     // calculate and add liquidity for the various tick ranges
-    _mintAndLock(
+    _mintAndBurn(
       _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0
     );
     _mintAndLock(
@@ -174,6 +174,35 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
     uint256 _amount0,
     uint256 _index
   ) internal virtual returns (uint256 lockId);
+
+  /// @dev Mint a position and burn it
+  /// @param _token0 The token to mint the position for
+  /// @param _token1 The token to mint the position for
+  /// @param _tick0 The lower tick of the position
+  /// @param _tick1 The upper tick of the position
+  /// @param _fee The fee of the pool
+  /// @param _amount0 The amount of tokens to mint the position for
+  /// @param _amount1 The amount of tokens to mint the position for
+  function _mintAndBurn(
+    IERC20 _token0,
+    IERC20 _token1,
+    int24 _tick0,
+    int24 _tick1,
+    uint24 _fee,
+    uint256 _amount0,
+    uint256
+  ) internal {
+    // mint the position
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _fee, _amount0);
+
+    // burn the position
+    nftPositionManager.transferFrom(address(this), address(0), tokenId);
+  }
+
+  function _mint(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
+    internal
+    virtual
+    returns (uint256 tokenId);
 
   function _collectFees(uint256 _lockId) internal virtual returns (uint256 fee0, uint256 fee1);
 
