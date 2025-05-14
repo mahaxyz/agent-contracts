@@ -47,6 +47,7 @@ interface ITokenLaunchpad {
     uint16 creatorAllocation;
     uint256[] launchPoolAmounts;
     ValueParams valueParams;
+    bytes32 merkleRoot;
   }
 
   // Contains numeric launch parameters
@@ -100,6 +101,14 @@ interface ITokenLaunchpad {
   /// @param metadataUrl The new metadata URL
   event MetadataUrlUpdated(string metadataUrl);
 
+  /// @notice Emitted when the default creator allocation is updated
+  /// @param _creatorAllocation The new default creator allocation percentage
+  event DefaultCreatorAllocationSet(uint256 _creatorAllocation);
+
+  /// @notice Emitted when the airdrop rewarder is set
+  /// @param _airdropRewarder The address of the airdrop rewarder
+  event AirdropRewarderSet(address indexed _airdropRewarder);
+
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address
@@ -119,6 +128,10 @@ interface ITokenLaunchpad {
   /// @notice Sets the cron address
   /// @param _cron The new cron address
   function setCron(address _cron) external;
+
+  /// @notice Sets the default creator allocation
+  /// @param _creatorAllocation The new default creator allocation percentage
+  function setDefaultCreatorAllocation(uint16 _creatorAllocation) external;
 
   /// @notice Gets the quote token for a token
   /// @param _token The token to get the quote token for
