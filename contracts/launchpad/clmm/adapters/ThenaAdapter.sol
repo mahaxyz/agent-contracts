@@ -102,6 +102,21 @@ contract ThenaAdapter is BaseV3Adapter {
     tokenToLockId[IERC20(_token0)][_index] = lockId;
   }
 
+  function _mintAndBurn(
+    IERC20 _token0,
+    IERC20 _token1,
+    int24 _tick0,
+    int24 _tick1,
+    uint24, // fee not required
+    uint256 _amount0
+  ) internal override{
+    // mint the position
+    uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
+
+    // burn the position
+    nftPositionManager.transferFrom(address(this), address(0), tokenId);
+  }
+
   function _collectFees(uint256 _lockId) internal override returns (uint256 fee0, uint256 fee1) {
     (fee0, fee1,,) = IGoPlusLocker(locker).collect(_lockId, address(this), type(uint128).max, type(uint128).max);
   }

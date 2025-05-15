@@ -209,7 +209,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
           fee: p.valueParams.fee,
           tickSpacing: p.valueParams.tickSpacing,
           totalAmount: pendingBalance,
-          graduationAmount: p.valueParams.graduationLiquidity
+          graduationAmount: p.valueParams.graduationLiquidity,
+          burnPosition: p.burnPosition
         })
       );
       emit TokenLaunched(token, address(p.adapter), pool, p);

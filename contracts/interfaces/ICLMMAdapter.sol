@@ -32,6 +32,7 @@ interface ICLMMAdapter {
     int24 tickSpacing;
     uint256 totalAmount;
     uint256 graduationAmount;
+    bool burnPosition;
   }
 
   /// @notice Add single-sided liquidity to a concentrated pool

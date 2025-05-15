@@ -48,6 +48,7 @@ interface ITokenLaunchpad {
     uint256[] launchPoolAmounts;
     ValueParams valueParams;
     bytes32 merkleRoot;
+    bool burnPosition;
   }
 
   // Contains numeric launch parameters

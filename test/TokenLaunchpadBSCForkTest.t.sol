@@ -118,7 +118,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     vm.prank(creator);
@@ -148,7 +149,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     vm.prank(creator);
@@ -178,7 +180,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     vm.prank(creator);
@@ -220,7 +223,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     vm.prank(creator);
@@ -295,7 +299,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     // Buy with 10 WETH
@@ -391,7 +396,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     // Buy with 10 WETH
@@ -472,7 +478,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     _launchpad.setDefaultValueParams(_weth, _adapterPCS, customParams);
@@ -494,7 +501,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     // Create token
@@ -558,7 +566,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     // Verify that non-premium tokens cannot have launchpools
@@ -578,7 +587,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
 
     // Create token
@@ -647,7 +657,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
@@ -695,7 +706,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0)
+      merkleRoot: bytes32(0),
+      burnPosition: false
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
   }
