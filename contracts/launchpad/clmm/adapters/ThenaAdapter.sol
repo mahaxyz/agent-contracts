@@ -109,7 +109,7 @@ contract ThenaAdapter is BaseV3Adapter {
     int24 _tick1,
     uint24, // fee not required
     uint256 _amount0
-  ) internal override{
+  ) internal override {
     // mint the position
     uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _amount0);
 
