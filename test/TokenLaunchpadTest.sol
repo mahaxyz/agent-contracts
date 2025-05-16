@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.26;
+pragma solidity ^0.8.0;
 
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 import {IERC20, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
@@ -8,6 +8,7 @@ import {TokenLaunchpad} from "contracts/launchpad/TokenLaunchpad.sol";
 import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
+import {AirdropRewarder} from "contracts/airdrop/AirdropReward.sol";
 
 import "forge-std/console.sol";
 
@@ -17,7 +18,7 @@ contract TokenLaunchpadTest is Test {
   MockERC20 _stakingToken;
 
   TokenLaunchpad _launchpad;
-
+  AirdropRewarder _airdropRewarder;
   address owner = makeAddr("owner");
   address whale = makeAddr("whale");
   address creator = makeAddr("creator");
