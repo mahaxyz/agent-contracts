@@ -8,7 +8,7 @@ import {TokenLaunchpad} from "contracts/launchpad/TokenLaunchpad.sol";
 import {IFreeUniV3LPLocker} from "contracts/interfaces/IFreeUniV3LPLocker.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {Test} from "lib/forge-std/src/Test.sol";
-import {AirdropRewarder} from "contracts/airdrop/AirdropReward.sol";
+import {AirdropRewarder} from "contracts/airdrop/AirdropRewarder.sol";
 
 import "forge-std/console.sol";
 
