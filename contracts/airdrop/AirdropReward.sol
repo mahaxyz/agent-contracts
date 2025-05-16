@@ -24,20 +24,14 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
   mapping(address => mapping(address => bool)) public rewardsClaimed;
   address public launchpad;
   IVesting public vesting;
-
-  constructor() {
-    _disableInitializers();
-  }
-
   /// @inheritdoc IAirdropRewarder
-  function initialize(address _launchpad, address _vesting) external initializer {
+  function initialize(address _launchpad) external initializer {
     __Ownable_init(msg.sender);
     __ReentrancyGuard_init();
 
-    if (_launchpad == address(0) || _vesting == address(0)) revert InvalidAddress();
+    if (_launchpad == address(0)) revert InvalidAddress();
 
     launchpad = _launchpad;
-    vesting = IVesting(_vesting);
   }
 
   modifier onlyLaunchpad() {
@@ -52,7 +46,6 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
     if (tokenMerkleRoots[_token] != bytes32(0)) revert MerkleRootAlreadySet();
 
     tokenMerkleRoots[_token] = _merkleRoot;
-    IERC20(_token).approve(address(vesting), type(uint256).max);
 
     emit MerkleRootSet(_token, _merkleRoot);
   }
@@ -70,8 +63,7 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
     if (!MerkleProof.verify(_merkleProofs, tokenMerkleRoots[_token], node)) revert InvalidMerkleProof(_merkleProofs);
     rewardsClaimed[_token][_user] = true;
 
-    //vesting
-    vesting.createVest(_token, _user, _claimAmount);
+    IERC20(_token).safeTransfer(_user, _claimAmount);
 
     emit RewardsClaimed(_token, _user, _claimAmount);
   }
