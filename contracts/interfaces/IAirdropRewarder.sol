@@ -8,8 +8,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice Interface for the AirdropRewarder contract that handles token airdrops using Merkle proofs
  */
 interface IAirdropRewarder {
-
-
   // Events
   event MerkleRootSet(address indexed token, bytes32 merkleRoot);
   event RewardsClaimed(address indexed token, address indexed account, uint256 amount);

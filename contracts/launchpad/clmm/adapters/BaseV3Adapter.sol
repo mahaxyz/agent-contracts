@@ -115,7 +115,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
 
     IClPool pool = _createPool(_params.tokenBase, _params.tokenQuote, _params.fee, sqrtPriceX96Launch);
 
-    if(!_params.burnPosition) {
+    if (!_params.burnPosition) {
       // calculate and add liquidity for the various tick ranges
       _mintAndLock(
         _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount, 0
@@ -131,8 +131,11 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
         1
       );
     } else {
-      _mintAndBurn(_params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount);
-      _mintAndBurn(_params.tokenBase,
+      _mintAndBurn(
+        _params.tokenBase, _params.tokenQuote, _params.tick0, _params.tick1, _params.fee, _params.graduationAmount
+      );
+      _mintAndBurn(
+        _params.tokenBase,
         _params.tokenQuote,
         _params.tick1,
         _params.tick2,
@@ -196,14 +199,9 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   /// @param _tick1 The upper tick of the position
   /// @param _fee The fee of the pool
   /// @param _amount0 The amount of tokens to mint the position for
-  function _mintAndBurn(
-    IERC20 _token0,
-    IERC20 _token1,
-    int24 _tick0,
-    int24 _tick1,
-    uint24 _fee,
-    uint256 _amount0
-  ) internal virtual;
+  function _mintAndBurn(IERC20 _token0, IERC20 _token1, int24 _tick0, int24 _tick1, uint24 _fee, uint256 _amount0)
+    internal
+    virtual;
 
   function _collectFees(uint256 _lockId) internal virtual returns (uint256 fee0, uint256 fee1);
 

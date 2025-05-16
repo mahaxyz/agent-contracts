@@ -25,6 +25,7 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
   address public launchpad;
   IVesting public vesting;
   /// @inheritdoc IAirdropRewarder
+
   function initialize(address _launchpad) external initializer {
     __Ownable_init(msg.sender);
     __ReentrancyGuard_init();

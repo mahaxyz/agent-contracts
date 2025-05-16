@@ -4,16 +4,15 @@ pragma solidity 0.8.26;
 import {IFreeUniV3LPLocker, MockERC20, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 
 import {Launchpool} from "contracts/Launchpool.sol";
+
+import {AirdropRewarder} from "contracts/airdrop/AirdropRewarder.sol";
 import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/TokenLaunchpadBSC.sol";
 import {Swapper} from "contracts/launchpad/clmm/Swapper.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/adapters/PancakeAdapter.sol";
 import {ThenaAdapter} from "contracts/launchpad/clmm/adapters/ThenaAdapter.sol";
 import {ThenaLocker} from "contracts/launchpad/clmm/locker/ThenaLocker.sol";
-import {AirdropRewarder} from "contracts/airdrop/AirdropRewarder.sol";
-
 import {IERC721} from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
-import "forge-std/console.sol";
 
 contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   // BSC Mainnet addresses
