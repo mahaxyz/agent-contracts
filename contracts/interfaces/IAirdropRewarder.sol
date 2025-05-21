@@ -26,9 +26,14 @@ interface IAirdropRewarder {
   /**
    * @notice Initialize the contract
    * @param _launchpad Address of the launchpad contract
-   * @param _vesting Address of the vesting contract
    */
-  function initialize(address _launchpad, address _vesting) external;
+  function initialize(address _launchpad) external;
+
+  /**
+   * @notice Set the launchpad address
+   * @param _launchpad Address of the launchpad contract
+   */
+  function setLaunchpad(address _launchpad) external;
 
   /**
    * @notice Set the Merkle root for a token

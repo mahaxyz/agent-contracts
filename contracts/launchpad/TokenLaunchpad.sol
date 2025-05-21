@@ -198,6 +198,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
         token.transfer(address(airdropRewarder), pendingBalance * p.creatorAllocation / 10_000);
       }
 
+      pendingBalance = token.balanceOf(address(this));
+
       token.approve(address(p.adapter), type(uint256).max);
       address pool = p.adapter.addSingleSidedLiquidity(
         ICLMMAdapter.AddLiquidityParams({
