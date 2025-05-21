@@ -58,8 +58,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Airdrop Rewarder contract
   IAirdropRewarder public airdropRewarder;
 
-  // Default creator allocation percentage (2%)
-  uint16 public DEFAULT_CREATOR_ALLOCATION = 200;
+  // Default creator allocation percentage (1%)
+  uint16 public DEFAULT_CREATOR_ALLOCATION = 100;
 
   receive() external payable {}
 
