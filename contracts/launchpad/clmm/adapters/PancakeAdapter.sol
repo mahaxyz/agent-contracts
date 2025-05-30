@@ -83,7 +83,7 @@ contract PancakeAdapter is BaseV3Adapter {
     uint256 tokenId = _mint(_token0, _token1, _tick0, _tick1, _fee, _amount0);
 
     // burn the position
-    nftPositionManager.transferFrom(address(this), address(0), tokenId);
+    nftPositionManager.transferFrom(address(this), DEAD_ADDRESS, tokenId);
   }
 
   function _collectFees(uint256 _lockId) internal override returns (uint256 fee0, uint256 fee1) {

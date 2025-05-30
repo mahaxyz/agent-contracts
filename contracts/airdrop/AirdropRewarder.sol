@@ -29,6 +29,7 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
   }
 
   /// @inheritdoc IAirdropRewarder
+
   function initialize(address _launchpad) external initializer {
     __Ownable_init(msg.sender);
     __ReentrancyGuard_init();
@@ -72,6 +73,8 @@ contract AirdropRewarder is IAirdropRewarder, Initializable, OwnableUpgradeable,
 
     if (!MerkleProof.verify(_merkleProofs, tokenMerkleRoots[_token], node)) revert InvalidMerkleProof(_merkleProofs);
     rewardsClaimed[_token][_user] = true;
+
+    IERC20(_token).safeTransfer(_user, _claimAmount);
 
     emit RewardsClaimed(_token, _user, _claimAmount);
   }

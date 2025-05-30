@@ -4,12 +4,15 @@ pragma solidity 0.8.26;
 import {IFreeUniV3LPLocker, MockERC20, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 
 import {Launchpool} from "contracts/Launchpool.sol";
+
+import {AirdropRewarder} from "contracts/airdrop/AirdropRewarder.sol";
 import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/TokenLaunchpadBSC.sol";
 import {Swapper} from "contracts/launchpad/clmm/Swapper.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/adapters/PancakeAdapter.sol";
 import {ThenaAdapter} from "contracts/launchpad/clmm/adapters/ThenaAdapter.sol";
 import {ThenaLocker} from "contracts/launchpad/clmm/locker/ThenaLocker.sol";
+import {IERC721} from "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 
 contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   // BSC Mainnet addresses
@@ -50,6 +53,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       THE_NFT_POSITION_MANAGER
     );
 
+    _airdropRewarder = new AirdropRewarder();
+
     // Label contracts for better trace output
     vm.label(address(_launchpad), "launchpad");
     vm.label(address(_adapterPCS), "adapterPCS");
@@ -61,8 +66,10 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     vm.label(PANCAKE_ROUTER, "routerPCS");
     vm.label(THE_SWAP_ROUTER, "routerThena");
 
-    // Initialize launchpad
     _swapper = new Swapper(address(_weth), address(0), address(_launchpad));
+
+    // Initialize airdrop rewarder
+    _airdropRewarder.initialize(address(_launchpad));
 
     // Initialize launchpad
     _launchpad.initialize(owner, address(_weth), address(_maha));
@@ -94,6 +101,8 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
         graduationLiquidity: 800_000_000 ether
       })
     );
+
+    _launchpad.setAirdropRewarder(address(_airdropRewarder));
     vm.stopPrank();
   }
 
@@ -118,7 +127,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -149,7 +158,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -180,7 +189,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -223,7 +232,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -299,7 +308,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -396,7 +405,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -478,7 +487,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -501,7 +510,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -566,7 +575,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: launchpoolAmounts,
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -587,7 +596,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
 
@@ -657,7 +666,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterPCS,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
@@ -706,9 +715,43 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       launchPoolAmounts: new uint256[](0),
       creatorAllocation: 0,
       adapter: _adapterThena,
-      merkleRoot: bytes32(0),
+      merkleRoot: bytes32("0x1"),
       burnPosition: false
     });
     _launchpad.createAndBuy{value: 0.1 ether}(params, address(0), 10 ether);
+  }
+
+  function test_mintAndBurn_pcs() public {
+    address deadAddress = 0x000000000000000000000000000000000000dEaD;
+    uint256 balanceBefore = IERC721(NFT_MANAGER).balanceOf(deadAddress);
+    bytes32 salt = findValidTokenHash("Test Token", "TEST", creator, _weth);
+    ITokenLaunchpad.CreateParams memory params = ITokenLaunchpad.CreateParams({
+      name: "Test Token",
+      symbol: "TEST",
+      metadata: "Test metadata",
+      fundingToken: IERC20(address(_weth)),
+      salt: salt,
+      valueParams: ITokenLaunchpad.ValueParams({
+        launchTick: -171_000,
+        graduationTick: -170_800,
+        upperMaxTick: 887_200,
+        fee: 10_000,
+        tickSpacing: 200,
+        graduationLiquidity: 800_000_000 ether
+      }),
+      isPremium: false,
+      launchPools: new ILaunchpool[](0),
+      launchPoolAmounts: new uint256[](0),
+      creatorAllocation: 0,
+      adapter: _adapterPCS,
+      merkleRoot: bytes32("0x1"),
+      burnPosition: true
+    });
+
+    vm.prank(creator);
+    _launchpad.createAndBuy{value: 100 ether}(params, address(0), 0);
+
+    uint256 balanceAfter = IERC721(NFT_MANAGER).balanceOf(deadAddress);
+    assertEq(balanceAfter, balanceBefore + 2, "NFT should be transferred to dead address");
   }
 }
