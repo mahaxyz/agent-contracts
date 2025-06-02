@@ -24,6 +24,8 @@ contract TokenLaunchpadBSC is TokenLaunchpad {
       // 100% to the owner if the fee is discounted
       IERC20(_token0).transfer(_owner, _amount0);
       IERC20(_token1).transfer(_owner, _amount1);
+      creatorToClaimedFees[_owner][IERC20(_token0)][0] += _amount0;
+      creatorToClaimedFees[_owner][IERC20(_token0)][1] += _amount1;
     } else {
       // 40% to MAHA treasury
       // 60% to the owner
@@ -31,6 +33,8 @@ contract TokenLaunchpadBSC is TokenLaunchpad {
       IERC20(_token1).transfer(feeDestination, _amount1 * 40 / 100);
       IERC20(_token0).transfer(_owner, _amount0 * 60 / 100);
       IERC20(_token1).transfer(_owner, _amount1 * 60 / 100);
+      creatorToClaimedFees[_owner][IERC20(_token0)][0] += _amount0 * 60 / 100;
+      creatorToClaimedFees[_owner][IERC20(_token0)][1] += _amount1 * 60 / 100;
     }
   }
 }

@@ -196,4 +196,17 @@ interface ITokenLaunchpad {
   /// @param _token The token to get the launch parameters for
   /// @return params The launch parameters for the token
   function getTokenLaunchParams(IERC20 _token) external view returns (CreateParams memory params);
+
+  /// @notice Gets the claimed fees for a token
+  /// @param _token The token to get the claimed fees for
+  /// @return claimedFees0 The claimed fees for the token
+  /// @return claimedFees1 The claimed fees for the token
+  function claimedFees(IERC20 _token) external view returns (uint256 claimedFees0, uint256 claimedFees1);
+
+  /// @notice Gets the claimed fees by creator for a token
+  /// @param _creator The creator to get the claimed fees for
+  /// @param _token The token to get the claimed fees for
+  /// @return claimedFees0 The claimed fees for the token
+  /// @return claimedFees1 The claimed fees for the token
+  function claimedFeesByCreator(address _creator, IERC20 _token) external view returns (uint256 claimedFees0, uint256 claimedFees1);
 }

@@ -19,13 +19,11 @@ import {ERC721EnumerableUpgradeable} from
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 
 import {IAirdropRewarder} from "contracts/interfaces/IAirdropRewarder.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
-import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
@@ -58,8 +56,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Airdrop Rewarder contract
   IAirdropRewarder public airdropRewarder;
 
-  // Default creator allocation percentage (2%)
-  uint16 public DEFAULT_CREATOR_ALLOCATION = 200;
+  // Default creator allocation percentage
+  uint16 public DEFAULT_CREATOR_ALLOCATION;
+
+  // Fees claimed by creators
+  mapping(address => mapping(IERC20 => mapping(uint8 tokenIndex => uint256 claimedFees))) public creatorToClaimedFees;
 
   receive() external payable {}
 
@@ -269,6 +270,14 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     } else {
       _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
     }
+  }
+
+  function claimedFees(IERC20 _token) external view returns (uint256 fee0, uint256 fee1) {
+    (fee0, fee1) = launchParams[_token].adapter.claimedFees(address(_token));
+  }
+
+  function claimedFeesByCreator(address _creator, IERC20 _token) external view returns (uint256 fee0, uint256 fee1) {
+    return (creatorToClaimedFees[_creator][_token][0], creatorToClaimedFees[_creator][_token][1]);
   }
 
   /// @dev Distribute fees to the owner

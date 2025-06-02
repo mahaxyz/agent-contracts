@@ -15,12 +15,10 @@ pragma solidity ^0.8.0;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
-import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-import {ICLMMAdapter, IClPool, PoolKey} from "contracts/interfaces/ICLMMAdapter.sol";
+import {ICLMMAdapter, IClPool} from "contracts/interfaces/ICLMMAdapter.sol";
 
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {ICLSwapRouter} from "contracts/interfaces/thirdparty/ICLSwapRouter.sol";
@@ -38,6 +36,7 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
   IWETH9 public WETH9;
 
   mapping(IERC20 token => mapping(uint256 index => uint256 lockId)) public tokenToLockId;
+  mapping(IERC20 token => mapping(uint256 index => uint256 claimedFees)) public tokenToClaimedFees;
 
   function __BaseV3Adapter_init(
     address _launchpad,
@@ -158,9 +157,17 @@ abstract contract BaseV3Adapter is ICLMMAdapter {
     fee0 = fee00 + fee10;
     fee1 = fee01 + fee11;
 
+    tokenToClaimedFees[IERC20(_token)][0] += fee0;
+    tokenToClaimedFees[IERC20(_token)][1] += fee1;
+
     IERC20 quoteToken = ITokenLaunchpad(launchpad).getQuoteToken(IERC20(_token));
     IERC20(_token).transfer(msg.sender, fee0);
     quoteToken.transfer(msg.sender, fee1);
+  }
+
+  function claimedFees(address _token) external view returns (uint256 fee0, uint256 fee1) {
+    fee0 = tokenToClaimedFees[IERC20(_token)][0];
+    fee1 = tokenToClaimedFees[IERC20(_token)][1];
   }
 
   /// @dev Refund tokens to the owner

@@ -4,9 +4,9 @@ pragma solidity 0.8.26;
 import {IFreeUniV3LPLocker, MockERC20, TokenLaunchpadTest} from "./TokenLaunchpadTest.sol";
 
 import {Launchpool} from "contracts/Launchpool.sol";
-
-import {AirdropRewarder} from "contracts/airdrop/AirdropRewarder.sol";
-import {IERC20, ILaunchpool, ITokenLaunchpad, ICLMMAdapter} from "contracts/interfaces/ITokenLaunchpad.sol";
+import { AirdropRewarder } from "contracts/airdrop/AirdropReward.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20, ILaunchpool, ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 import {TokenLaunchpadBSC} from "contracts/launchpad/TokenLaunchpadBSC.sol";
 import {Swapper} from "contracts/launchpad/clmm/Swapper.sol";
 import {PancakeAdapter} from "contracts/launchpad/clmm/adapters/PancakeAdapter.sol";
@@ -28,6 +28,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
   ThenaAdapter _adapterThena;
   ThenaLocker _lockerThena;
   Swapper _swapper;
+  AirdropRewarder _airdropRewarder;
 
   string BSC_RPC_URL = vm.envString("BSC_RPC_URL");
 
@@ -52,6 +53,9 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
       address(_lockerThena),
       THE_NFT_POSITION_MANAGER
     );
+
+    _airdropRewarder = new AirdropRewarder();
+    _airdropRewarder.initialize(address(_launchpad));
 
     // Label contracts for better trace output
     vm.label(address(_launchpad), "launchpad");
@@ -97,6 +101,7 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
         graduationLiquidity: 800_000_000 ether
       })
     );
+    _launchpad.setAirdropRewarder(address(_airdropRewarder));
     vm.stopPrank();
   }
 
@@ -194,9 +199,22 @@ contract TokenLaunchpadBscForkTest is TokenLaunchpadTest {
     );
 
     // // Swap 1 token for the weth
-    // IERC20(tokenAddr).approve(address(_swapper), 1 ether);
-    // _swapper.sellWithExactInputWithOdos(IERC20(tokenAddr), IERC20(_weth), IERC20(_weth), 1 ether, 0, 0, "0x");
+    IERC20(tokenAddr).approve(address(_swapper), 1 ether);
+    _swapper.sellWithExactInputWithOdos(IERC20(tokenAddr), IERC20(_weth), IERC20(_weth), 1 ether, 0, 0, "0x");
     vm.stopPrank();
+
+    // check for claimed fees
+    (uint256 claimedFees0, uint256 claimedFees1) = _launchpad.claimedFees(IERC20(tokenAddr));
+    assertNotEq(claimedFees0, 0, "Claimed fees should not be 0");
+    assertNotEq(claimedFees1, 0, "Claimed fees should not be 0"); 
+
+    // check for claimed fees by creator
+    (claimedFees0, claimedFees1) = _launchpad.claimedFeesByCreator(creator, IERC20(tokenAddr));
+    assertNotEq(claimedFees0, 0, "Claimed fees should not be 0");
+    assertNotEq(claimedFees1, 0, "Claimed fees should not be 0");
+
+    // claim fees
+    _launchpad.claimFees(IERC20(tokenAddr));
   }
 
   function test_swap_thena() public {

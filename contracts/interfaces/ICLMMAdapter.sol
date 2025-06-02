@@ -69,4 +69,10 @@ interface ICLMMAdapter {
   /// @return fee0 The amount of token0 fees to claim
   /// @return fee1 The amount of token1 fees to claim
   function claimFees(address _token) external returns (uint256 fee0, uint256 fee1);
+
+  /// @notice claimed fees from the pool
+  /// @param _token The token address to claim fees for
+  /// @return fee0 The amount of token0 fees to claim
+  /// @return fee1 The amount of token1 fees to claim
+  function claimedFees(address _token) external view returns (uint256 fee0, uint256 fee1);
 }
