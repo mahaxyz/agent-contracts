@@ -108,6 +108,12 @@ interface ITokenLaunchpad {
   /// @param _airdropRewarder The address of the airdrop rewarder
   event AirdropRewarderSet(address indexed _airdropRewarder);
 
+  /// @notice Emitted when a fee is claimed for a token
+  /// @param _token The token that the fee was claimed for
+  /// @param _fee0 The amount of fee claimed for token0
+  /// @param _fee1 The amount of fee claimed for token1
+  event FeeClaimed(IERC20 indexed _token, uint256 _fee0, uint256 _fee1);
+
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
   /// @param _weth The WETH9 contract address

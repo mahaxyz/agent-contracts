@@ -59,8 +59,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Default creator allocation percentage
   uint16 public DEFAULT_CREATOR_ALLOCATION;
 
-  // Fees claimed by creators
-  mapping(address => mapping(IERC20 => mapping(uint8 tokenIndex => uint256 claimedFees))) public creatorToClaimedFees;
+  // Fees claimed by creators for a token
+  mapping(address creator => mapping(IERC20 token => mapping(uint8 tokenIndex => uint256 claimedFees))) public creatorToClaimedFees;
 
   receive() external payable {}
 
@@ -270,6 +270,8 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     } else {
       _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
     }
+
+    emit FeeClaimed(_token, fee0, fee1);
   }
 
   function claimedFees(IERC20 _token) external view returns (uint256 fee0, uint256 fee1) {
