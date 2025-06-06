@@ -19,13 +19,11 @@ import {ERC721EnumerableUpgradeable} from
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH9} from "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol";
-
 import {WAGMIEToken} from "contracts/WAGMIEToken.sol";
 
 import {IAirdropRewarder} from "contracts/interfaces/IAirdropRewarder.sol";
 import {ICLMMAdapter} from "contracts/interfaces/ICLMMAdapter.sol";
 
-import {ILaunchpool} from "contracts/interfaces/ILaunchpool.sol";
 import {IReferralDistributor} from "contracts/interfaces/IReferralDistributor.sol";
 import {ITokenLaunchpad} from "contracts/interfaces/ITokenLaunchpad.sol";
 
@@ -58,8 +56,11 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   // Airdrop Rewarder contract
   IAirdropRewarder public airdropRewarder;
 
-  // Default creator allocation percentage (2%)
-  uint16 public DEFAULT_CREATOR_ALLOCATION = 200;
+  // Default creator allocation percentage
+  uint16 public DEFAULT_CREATOR_ALLOCATION;
+
+  // Fees claimed by creators for a token
+  mapping(address creator => mapping(IERC20 token => mapping(uint8 tokenIndex => uint256 claimedFees))) public creatorToClaimedFees;
 
   receive() external payable {}
 
@@ -146,7 +147,13 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
   }
 
   /// @inheritdoc ITokenLaunchpad
-  function createAndBuy(CreateParams memory p, address expected, uint256 amount)
+  function createAndBuy(
+    CreateParams memory p,
+    address expected,
+    uint256 amount,
+    bytes32 merkleRoot,
+    bool burnPosition
+  )
     external
     payable
     returns (address, uint256, uint256)
@@ -194,8 +201,10 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
       uint256 pendingBalance = token.balanceOf(address(this));
 
       if (p.creatorAllocation > 0) {
-        airdropRewarder.setMerkleRoot(address(token), p.merkleRoot);
-        token.transfer(address(airdropRewarder), pendingBalance * p.creatorAllocation / 10_000);
+        uint256 airdropAmount = pendingBalance * p.creatorAllocation / 10_000;
+        airdropRewarder.setAirdropAmount(address(token), airdropAmount);
+        airdropRewarder.setMerkleRoot(address(token), merkleRoot);
+        token.transfer(address(airdropRewarder), airdropAmount);
       }
 
       pendingBalance = token.balanceOf(address(this));
@@ -212,7 +221,7 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
           tickSpacing: p.valueParams.tickSpacing,
           totalAmount: pendingBalance,
           graduationAmount: p.valueParams.graduationLiquidity,
-          burnPosition: p.burnPosition
+          burnPosition: burnPosition
         })
       );
       emit TokenLaunched(token, address(p.adapter), pool, p);
@@ -261,6 +270,16 @@ abstract contract TokenLaunchpad is ITokenLaunchpad, OwnableUpgradeable, ERC721E
     } else {
       _distributeFees(address(_token), ownerOf(tokenToNftId[_token]), token1, fee0, fee1);
     }
+
+    emit FeeClaimed(_token, fee0, fee1);
+  }
+
+  function claimedFees(IERC20 _token) external view returns (uint256 fee0, uint256 fee1) {
+    (fee0, fee1) = launchParams[_token].adapter.claimedFees(address(_token));
+  }
+
+  function claimedFeesByCreator(address _creator, IERC20 _token) external view returns (uint256 fee0, uint256 fee1) {
+    return (creatorToClaimedFees[_creator][_token][0], creatorToClaimedFees[_creator][_token][1]);
   }
 
   /// @dev Distribute fees to the owner

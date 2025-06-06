@@ -47,8 +47,6 @@ interface ITokenLaunchpad {
     uint16 creatorAllocation;
     uint256[] launchPoolAmounts;
     ValueParams valueParams;
-    bytes32 merkleRoot;
-    bool burnPosition;
   }
 
   // Contains numeric launch parameters
@@ -109,6 +107,12 @@ interface ITokenLaunchpad {
   /// @notice Emitted when the airdrop rewarder is set
   /// @param _airdropRewarder The address of the airdrop rewarder
   event AirdropRewarderSet(address indexed _airdropRewarder);
+
+  /// @notice Emitted when a fee is claimed for a token
+  /// @param _token The token that the fee was claimed for
+  /// @param _fee0 The amount of fee claimed for token0
+  /// @param _fee1 The amount of fee claimed for token1
+  event FeeClaimed(IERC20 indexed _token, uint256 _fee0, uint256 _fee1);
 
   /// @notice Initializes the launchpad contract
   /// @param _owner The owner address
@@ -171,10 +175,13 @@ interface ITokenLaunchpad {
   /// @notice Creates a new token launch
   /// @param p The parameters for the token launch
   /// @param expected The expected address where token will be deployed
+  /// @param amount The amount of tokens to buy
+  /// @param merkleRoot The merkle root for the airdrop
+  /// @param burnPosition Whether to burn the position
   /// @return token The address of the newly created token
   /// @return received The amount of tokens received if the user chooses to buy at launch
   /// @return swapped The amount of tokens swapped if the user chooses to swap at launch
-  function createAndBuy(CreateParams memory p, address expected, uint256 amount)
+  function createAndBuy(CreateParams memory p, address expected, uint256 amount, bytes32 merkleRoot, bool burnPosition)
     external
     payable
     returns (address token, uint256 received, uint256 swapped);
@@ -195,4 +202,17 @@ interface ITokenLaunchpad {
   /// @param _token The token to get the launch parameters for
   /// @return params The launch parameters for the token
   function getTokenLaunchParams(IERC20 _token) external view returns (CreateParams memory params);
+
+  /// @notice Gets the claimed fees for a token
+  /// @param _token The token to get the claimed fees for
+  /// @return claimedFees0 The claimed fees for the token
+  /// @return claimedFees1 The claimed fees for the token
+  function claimedFees(IERC20 _token) external view returns (uint256 claimedFees0, uint256 claimedFees1);
+
+  /// @notice Gets the claimed fees by creator for a token
+  /// @param _creator The creator to get the claimed fees for
+  /// @param _token The token to get the claimed fees for
+  /// @return claimedFees0 The claimed fees for the token
+  /// @return claimedFees1 The claimed fees for the token
+  function claimedFeesByCreator(address _creator, IERC20 _token) external view returns (uint256 claimedFees0, uint256 claimedFees1);
 }
